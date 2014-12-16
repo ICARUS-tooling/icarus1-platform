@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 
 /**
  * A helper class that wraps a value and provides additional textual information

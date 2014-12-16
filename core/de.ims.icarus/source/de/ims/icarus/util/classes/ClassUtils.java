@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -154,6 +155,41 @@ public final class ClassUtils {
 			typeArgumentsAsClasses.add(getClass(baseType));
 		}
 		return typeArgumentsAsClasses;
+	}
+
+	private static final Map<Class<?>, Class<?>> primitiveWrapperLookup = new IdentityHashMap<>(9);
+	static {
+		primitiveWrapperLookup.put(Boolean.class, boolean.class);
+		primitiveWrapperLookup.put(Character.class, char.class);
+		primitiveWrapperLookup.put(Byte.class, byte.class);
+		primitiveWrapperLookup.put(Short.class, short.class);
+		primitiveWrapperLookup.put(Integer.class, int.class);
+		primitiveWrapperLookup.put(Long.class, long.class);
+		primitiveWrapperLookup.put(Float.class, float.class);
+		primitiveWrapperLookup.put(Double.class, double.class);
+		primitiveWrapperLookup.put(Void.class, void.class);
+	}
+
+	public static Class<?> unwrap(Class<?> clazz) {
+		Class<?> primitiveClass = primitiveWrapperLookup.get(clazz);
+		return primitiveClass==null ? clazz : primitiveClass;
+	}
+
+	private static final Map<Class<?>, Class<?>> primitiveWrappers = new IdentityHashMap<>(9);
+	static {
+		primitiveWrapperLookup.put(boolean.class, Boolean.class);
+		primitiveWrapperLookup.put(char.class, Character.class);
+		primitiveWrapperLookup.put(byte.class, Byte.class);
+		primitiveWrapperLookup.put(short.class, Short.class);
+		primitiveWrapperLookup.put(int.class, Integer.class);
+		primitiveWrapperLookup.put(long.class, Long.class);
+		primitiveWrapperLookup.put(float.class, Float.class);
+		primitiveWrapperLookup.put(double.class, Double.class);
+		primitiveWrapperLookup.put(void.class, Void.class);
+	}
+
+	public static Class<?> wrap(Class<?> clazz) {
+		return clazz.isPrimitive() ? primitiveWrappers.get(clazz) : clazz;
 	}
 
 	public static int cast(Integer value) {

@@ -23,55 +23,43 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.meta;
-
-import java.util.Set;
-
-import de.ims.icarus.model.api.meta.AnnotationValueSet;
-import de.ims.icarus.model.types.ValueType;
-import de.ims.icarus.model.util.ProxyIdentity;
+package de.ims.icarus.model.types;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class FixedValueSet extends ProxyIdentity implements AnnotationValueSet {
+public class UnsupportedValueTypeException extends RuntimeException {
 
-	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getValues()
-	 */
-	@Override
-	public Set<String> getValues() {
-		// TODO Auto-generated method stub
-		return null;
+	private static final long serialVersionUID = 3427046321201797935L;
+
+	private final ValueType valueType;
+
+	private static final String DEFAULT_MESSAGE = "Value type not supported: "; //$NON-NLS-1$
+
+	public UnsupportedValueTypeException(ValueType valueType) {
+		this(DEFAULT_MESSAGE+valueType, valueType, null);
+	}
+
+	public UnsupportedValueTypeException(String message, ValueType valueType, Throwable cause) {
+		super(message, cause);
+
+		this.valueType = valueType;
+	}
+
+	public UnsupportedValueTypeException(String message, ValueType valueType) {
+		this(message, valueType, null);
+	}
+
+	public UnsupportedValueTypeException(ValueType valueType, Throwable cause) {
+		this(DEFAULT_MESSAGE+valueType, valueType, cause);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getName(java.lang.String)
+	 * @return the valueType
 	 */
-	@Override
-	public String getName(String value) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getDescription(java.lang.String)
-	 */
-	@Override
-	public String getDescription(String value) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getValueType()
-	 */
-	@Override
 	public ValueType getValueType() {
-		// TODO Auto-generated method stub
-		return null;
+		return valueType;
 	}
-
 }

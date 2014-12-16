@@ -23,19 +23,27 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.util.types;
-
+package de.ims.icarus.model.types;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Link {
+public class VectorType extends ValueType {
 
-	Url getUrl();
+	public static final char DIMENSION_SEPARATOR = '@';
 
-	String getTitle();
+	public VectorType(ValueType componentType, int dimensions) {
+		super
+	}
 
-	String getDescription();
+	/**
+	 * @see de.ims.icarus.model.types.ValueType#parse(java.lang.String, java.lang.ClassLoader)
+	 */
+	@Override
+	public Object parse(String s, ClassLoader classLoader) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -40,8 +40,8 @@ import org.junit.rules.ExpectedException;
 import de.ims.icarus.model.api.manifest.Documentation.Resource;
 import de.ims.icarus.model.standard.manifest.DocumentationImpl;
 import de.ims.icarus.model.standard.manifest.DocumentationImpl.ResourceImpl;
-import de.ims.icarus.model.util.types.Url;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.Url;
+import de.ims.icarus.model.types.ValueType;
 
 /**
  * @author Markus Gärtner

@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.util.types;
+package de.ims.icarus.model.types;
 
 
 /**
@@ -56,7 +56,7 @@ public class DefaultLink implements Link {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.util.types.Link#getUrl()
+	 * @see de.ims.icarus.model.types.Link#getUrl()
 	 */
 	@Override
 	public Url getUrl() {
@@ -64,7 +64,7 @@ public class DefaultLink implements Link {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.util.types.Link#getTitle()
+	 * @see de.ims.icarus.model.types.Link#getTitle()
 	 */
 	@Override
 	public String getTitle() {
@@ -72,7 +72,7 @@ public class DefaultLink implements Link {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.util.types.Link#getDescription()
+	 * @see de.ims.icarus.model.types.Link#getDescription()
 	 */
 	@Override
 	public String getDescription() {

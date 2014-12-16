@@ -356,9 +356,12 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		// Relink all entry lists
 		int[] tmp = new int[getDimension()];
 		for(Entry<Key, List<ResultEntry>> entry : entries.entrySet()) {
+			// Clone key info
 			entry.getKey().copyTo(tmp);
+			// Apply permutation
 			CollectionUtils.permutate(tmp, permutation);
 
+			// Store new mapping
 			buffer.put(new Key(tmp), entry.getValue());
 		}
 

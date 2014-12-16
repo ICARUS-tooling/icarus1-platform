@@ -50,7 +50,7 @@ import de.ims.icarus.model.api.manifest.ValueManifest;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.api.manifest.VersionManifest;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.model.xml.sax.IconWrapper;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.util.date.DateUtils;

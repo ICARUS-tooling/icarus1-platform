@@ -23,55 +23,63 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.standard.meta;
+package de.ims.icarus.model.types;
 
-import java.util.Set;
-
-import de.ims.icarus.model.api.meta.AnnotationValueSet;
-import de.ims.icarus.model.types.ValueType;
-import de.ims.icarus.model.util.ProxyIdentity;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class FixedValueSet extends ProxyIdentity implements AnnotationValueSet {
+public class Url {
 
-	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getValues()
-	 */
-	@Override
-	public Set<String> getValues() {
-		// TODO Auto-generated method stub
-		return null;
+	private final URL url;
+
+	public Url(URL url) {
+		if (url == null)
+			throw new NullPointerException("Invalid url"); //$NON-NLS-1$
+
+		this.url = url;
+	}
+
+	public Url(String spec) throws MalformedURLException {
+		this.url = new URL(spec);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getName(java.lang.String)
+	 * @return the url
 	 */
-	@Override
-	public String getName(String value) {
-		// TODO Auto-generated method stub
-		return null;
+	public URL getURL() {
+		return url;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getDescription(java.lang.String)
+	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
-	public String getDescription(String value) {
-		// TODO Auto-generated method stub
-		return null;
+	public int hashCode() {
+		return url.toExternalForm().hashCode();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.meta.ValueSet#getValueType()
+	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public ValueType getValueType() {
-		// TODO Auto-generated method stub
-		return null;
+	public boolean equals(Object obj) {
+		if(obj instanceof Url) {
+			Url other = (Url) obj;
+			return toString().equals(other.toString());
+		}
+		return false;
 	}
 
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return url.toExternalForm();
+	}
 }

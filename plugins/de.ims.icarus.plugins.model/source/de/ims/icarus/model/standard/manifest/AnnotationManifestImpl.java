@@ -39,7 +39,7 @@ import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.ValueRange;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.registry.CorpusRegistry;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;

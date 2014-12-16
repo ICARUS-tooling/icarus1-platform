@@ -44,10 +44,10 @@ import java.util.Set;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.model.api.manifest.Manifest;
-import de.ims.icarus.model.util.types.DefaultIconLink;
-import de.ims.icarus.model.util.types.DefaultLink;
-import de.ims.icarus.model.util.types.Url;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.DefaultIconLink;
+import de.ims.icarus.model.types.DefaultLink;
+import de.ims.icarus.model.types.Url;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.model.xml.sax.IconWrapper;
 import de.ims.icarus.util.id.Identity;
 

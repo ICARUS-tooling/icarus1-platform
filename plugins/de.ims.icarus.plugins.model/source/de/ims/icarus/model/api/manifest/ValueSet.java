@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.manifest;
 
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 
 /**
  * A discrete collection of values.
@@ -39,6 +39,12 @@ public interface ValueSet {
 	int valueCount();
 
 	Object getValueAt(int index);
+
+//	int getIntegerValueAt(int index);
+//	long getLongValueAt(int index);
+//	float getFloatValueAt(int index);
+//	double getDoubleValueAt(int index);
+//	boolean getBooleanValueAt(int index);
 
 	/**
 	 * Returns the type of this set

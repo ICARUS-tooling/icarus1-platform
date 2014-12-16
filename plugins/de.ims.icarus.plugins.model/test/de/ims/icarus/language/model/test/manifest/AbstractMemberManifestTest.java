@@ -40,7 +40,7 @@ import de.ims.icarus.model.standard.manifest.AbstractMemberManifest;
 import de.ims.icarus.model.standard.manifest.DocumentationImpl;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl.OptionImpl;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**

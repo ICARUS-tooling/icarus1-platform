@@ -23,43 +23,22 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.util.types;
+package de.ims.icarus.model.api.path;
+
+import de.ims.icarus.model.api.SubCorpus;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class UnsupportedValueTypeException extends RuntimeException {
+public interface CorpusPath {
 
-	private static final long serialVersionUID = 3427046321201797935L;
+	SubCorpus getCorpus();
 
-	private final ValueType valueType;
+	int getElementCount();
 
-	private static final String DEFAULT_MESSAGE = "Value type not supported: "; //$NON-NLS-1$
+	CorpusPathElement getElementAt(int index);
 
-	public UnsupportedValueTypeException(ValueType valueType) {
-		this(DEFAULT_MESSAGE+valueType, valueType, null);
-	}
-
-	public UnsupportedValueTypeException(String message, ValueType valueType, Throwable cause) {
-		super(message, cause);
-
-		this.valueType = valueType;
-	}
-
-	public UnsupportedValueTypeException(String message, ValueType valueType) {
-		this(message, valueType, null);
-	}
-
-	public UnsupportedValueTypeException(ValueType valueType, Throwable cause) {
-		this(DEFAULT_MESSAGE+valueType, valueType, cause);
-	}
-
-	/**
-	 * @return the valueType
-	 */
-	public ValueType getValueType() {
-		return valueType;
-	}
+	//TODO
 }

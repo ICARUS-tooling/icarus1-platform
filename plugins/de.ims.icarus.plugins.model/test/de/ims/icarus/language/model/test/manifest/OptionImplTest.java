@@ -48,8 +48,8 @@ import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl.OptionImpl;
 import de.ims.icarus.model.standard.manifest.ValueRangeImpl;
 import de.ims.icarus.model.standard.manifest.ValueSetImpl;
-import de.ims.icarus.model.util.types.UnsupportedValueTypeException;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.UnsupportedValueTypeException;
+import de.ims.icarus.model.types.ValueType;
 
 /**
  * @author Markus Gärtner

@@ -34,8 +34,8 @@ import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ValueRange;
-import de.ims.icarus.model.util.types.UnsupportedValueTypeException;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.UnsupportedValueTypeException;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
@@ -46,8 +46,8 @@ public class ValueRangeImpl implements ValueRange, ModelXmlHandler, ModelXmlElem
 
 	private final ValueType valueType;
 	private Object lower, upper, stepSize;
-	private boolean lowerIncluded = DEFAULT_LOWER_INCLUSIVE_VALUE,
-			upperIncluded = DEFAULT_UPPER_INCLUSIVE_VALUE;
+	private boolean lowerIncluded = DEFAULT_LOWER_INCLUSIVE_VALUE;
+	private boolean upperIncluded = DEFAULT_UPPER_INCLUSIVE_VALUE;
 
 	// Stuff used for parsing
 	private transient short currentField = 0;

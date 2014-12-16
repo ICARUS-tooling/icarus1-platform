@@ -39,7 +39,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 public class Counter {
 
-	private TObjectIntMap<Object> counts = new TObjectIntHashMap<>();
+	private final TObjectIntMap<Object> counts = new TObjectIntHashMap<>();
 
 	public Counter() {
 		// no-op
@@ -47,7 +47,7 @@ public class Counter {
 
 	public int increment(Object data) {
 		int c = counts.get(data);
-		if(c==-1) {
+		if(c==counts.getNoEntryValue()) {
 			c = 0;
 		}
 
@@ -80,7 +80,7 @@ public class Counter {
 
 	public int getCount(Object data) {
 		int c = counts.get(data);
-		return c==-1 ? 0 : c;
+		return c==counts.getNoEntryValue() ? 0 : c;
 	}
 
 	public boolean hasCount(Object data) {

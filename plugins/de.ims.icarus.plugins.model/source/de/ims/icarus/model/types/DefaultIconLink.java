@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.util.types;
+package de.ims.icarus.model.types;
 
 import javax.swing.Icon;
 
@@ -58,7 +58,7 @@ public class DefaultIconLink implements IconLink {
 
 
 	/**
-	 * @see de.ims.icarus.model.util.types.IconLink#getIcon()
+	 * @see de.ims.icarus.model.types.IconLink#getIcon()
 	 */
 	@Override
 	public Icon getIcon() {
@@ -66,7 +66,7 @@ public class DefaultIconLink implements IconLink {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.util.types.IconLink#getTitle()
+	 * @see de.ims.icarus.model.types.IconLink#getTitle()
 	 */
 	@Override
 	public String getTitle() {
@@ -74,7 +74,7 @@ public class DefaultIconLink implements IconLink {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.util.types.IconLink#getDescription()
+	 * @see de.ims.icarus.model.types.IconLink#getDescription()
 	 */
 	@Override
 	public String getDescription() {

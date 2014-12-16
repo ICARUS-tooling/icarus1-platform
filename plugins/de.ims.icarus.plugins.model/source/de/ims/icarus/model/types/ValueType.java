@@ -23,8 +23,9 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.util.types;
+package de.ims.icarus.model.types;
 
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -42,6 +43,7 @@ import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.xml.XmlResource;
 import de.ims.icarus.model.xml.sax.IconWrapper;
 import de.ims.icarus.util.CorruptedStateException;
+import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.collections.CollectionUtils;
 
 /**
@@ -57,10 +59,16 @@ public abstract class ValueType implements XmlResource {
 	private static Map<String, ValueType> xmlLookup = new HashMap<>();
 
 	public static ValueType parseValueType(String s) {
-		return xmlLookup.get(s);
+		ValueType result = xmlLookup.get(s);
+
+		if(result==null) {
+			int sepIdx = s.indexOf('@');
+		}
+
+		return result;
 	}
 
-	private ValueType(String xmlForm, Class<?> baseClass) {
+	protected ValueType(String xmlForm, Class<?> baseClass) {
 		this.baseClass = baseClass;
 		this.xmlForm = xmlForm;
 
@@ -81,6 +89,10 @@ public abstract class ValueType implements XmlResource {
 	@Override
 	public String getXmlValue() {
 		return xmlForm;
+	}
+
+	public Class<?> getBaseClass() {
+		return baseClass;
 	}
 
 	public static final ValueType UNKNOWN = new ValueType("unknown", Object.class) { //$NON-NLS-1$
@@ -109,7 +121,7 @@ public abstract class ValueType implements XmlResource {
 
 //		/**
 //		 *
-//		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+//		 * @see de.ims.icarus.model.types.ValueType#toString(java.lang.Object)
 //		 */
 //		@Override
 //		public String toString(Object value) {
@@ -134,7 +146,7 @@ public abstract class ValueType implements XmlResource {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+		 * @see de.ims.icarus.model.types.ValueType#toString(java.lang.Object)
 		 */
 		@Override
 		public String toString(Object value) {
@@ -200,7 +212,7 @@ public abstract class ValueType implements XmlResource {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+		 * @see de.ims.icarus.model.types.ValueType#toString(java.lang.Object)
 		 */
 		@Override
 		public String toString(Object value) {
@@ -218,7 +230,7 @@ public abstract class ValueType implements XmlResource {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+		 * @see de.ims.icarus.model.types.ValueType#toString(java.lang.Object)
 		 */
 		@Override
 		public String toString(Object value) {
@@ -235,7 +247,7 @@ public abstract class ValueType implements XmlResource {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+		 * @see de.ims.icarus.model.types.ValueType#toString(java.lang.Object)
 		 */
 		@Override
 		public String toString(Object value) {
@@ -252,7 +264,7 @@ public abstract class ValueType implements XmlResource {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+		 * @see de.ims.icarus.model.types.ValueType#toString(java.lang.Object)
 		 */
 		@Override
 		public String toString(Object value) {
@@ -271,7 +283,7 @@ public abstract class ValueType implements XmlResource {
 
 		/**
 		 *
-		 * @see de.ims.icarus.model.util.types.ValueType#toString(java.lang.Object)
+		 * @see de.ims.icarus.model.types.ValueType#toString(java.lang.Object)
 		 */
 		@Override
 		public String toString(Object value) {
@@ -279,8 +291,21 @@ public abstract class ValueType implements XmlResource {
 		}
 	};
 
+	protected static Class<?> extractClass(Object value) {
+		Class<?> type = value.getClass();
+		if(Expression.class.isAssignableFrom(type)) {
+			type = ((Expression)value).getReturnType();
+
+			// We need the (possible) wrapper type since expressions are allowed to
+			// declare primitive return types and we deal with wrappers here!
+			type = ClassUtils.wrap(type);
+		}
+
+		return type;
+	}
+
 	public boolean isValidValue(Object value) {
-		return value!=null && baseClass.isAssignableFrom(value.getClass());
+		return value!=null && isValidType(extractClass(value));
 	}
 
 	public boolean isValidType(Class<?> type) {
@@ -331,12 +356,9 @@ public abstract class ValueType implements XmlResource {
 	}
 
 	public Class<?> checkValue(Object value) {
-		Class<?> type = value.getClass();
-		if(Expression.class.isAssignableFrom(type)) {
-			type = ((Expression)value).getReturnType();
-		}
+		Class<?> type = extractClass(value);
 
-		if(!baseClass.isAssignableFrom(type))
+		if(!isValidType(type))
 			throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
 					"Incompatible value type "+type.getName()+" for value-type "+xmlForm+" - expected "+baseClass.getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -368,5 +390,95 @@ public abstract class ValueType implements XmlResource {
 	@Override
 	public String toString() {
 		return "ValueType@"+xmlForm; //$NON-NLS-1$
+	}
+
+	public static class VectorType extends ValueType {
+
+		public static final char DIMENSION_SEPARATOR = '[';
+
+		private final int dimensions;
+		private final ValueType componentType;
+
+		public VectorType(ValueType componentType, int dimensions) {
+			super(componentType.getXmlValue()+DIMENSION_SEPARATOR+dimensions, Object.class);
+
+			if(dimensions<1)
+				throw new IllegalArgumentException("Dimensionality has to be at least 1: "+dimensions); //$NON-NLS-1$
+
+			this.dimensions = dimensions;
+			this.componentType = componentType;
+		}
+
+		public int getDimensions() {
+			return dimensions;
+		}
+
+		@Override
+		public String toString(Object value) {
+			// TODO Auto-generated method stub
+			return super.toString(value);
+		}
+
+		/**
+		 * Returns {@code true} iff the given {@code value} is an array with the correct
+		 * length and a compatible component type.
+		 *
+		 * @see de.ims.icarus.model.types.ValueType#isValidValue(java.lang.Object)
+		 * @see #isValidType(Class)
+		 */
+		@Override
+		public boolean isValidValue(Object value) {
+			return super.isValidValue(value) && Array.getLength(value)==dimensions;
+		}
+
+		/**
+		 * Returns {@code true} iff the given {@code type} is an array type
+		 * and its component type is compatible with this vector's declared component
+		 * type.
+		 * <p>
+		 * Note that primitive arrays will get their component type wrapped accordingly!
+		 *
+		 * @see de.ims.icarus.model.types.ValueType#isValidType(java.lang.Class)
+		 */
+		@Override
+		public boolean isValidType(Class<?> type) {
+			return type.isArray() && componentType.isValidType(ClassUtils.wrap(type.getComponentType()));
+		}
+
+		@Override
+		public Class<?> checkValue(Object value) {
+			Class<?> type = value.getClass();
+			if(Expression.class.isAssignableFrom(type)) {
+				type = ((Expression)value).getReturnType();
+			}
+
+			if(!type.isArray())
+				throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
+						"Incompatible value type "+type.getName()+" for value-type "+getXmlValue()+" - expected an array type"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+			if(Array.getLength(value)!=dimensions)
+				throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
+						"Mismatching component count "+Array.getLength(value)+" for value-type "+getXmlValue()+" - expected "+dimensions); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+			Class<?> componentClass = type.getComponentType();
+
+			// Again we need wrapping of primitive types
+			componentClass = ClassUtils.wrap(componentClass);
+
+			if(!componentType.isValidType(componentClass))
+				throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
+						"Incompatible array component type "+componentClass.getName()+" for vector-type "+getXmlValue()+" - expected "+componentType.getBaseClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+			return type;
+		}
+
+		/**
+		 * @see de.ims.icarus.model.types.ValueType#parse(java.lang.String, java.lang.ClassLoader)
+		 */
+		@Override
+		public Object parse(String s, ClassLoader classLoader) {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 }

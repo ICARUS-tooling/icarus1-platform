@@ -23,16 +23,19 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.xml;
+package de.ims.icarus.model.types;
+
 
 /**
- * Models a resource that can be identified by a xml attribute conform string value.
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface XmlResource {
+public interface Link {
 
-	String getXmlValue();
+	Url getUrl();
+
+	String getTitle();
+
+	String getDescription();
 }

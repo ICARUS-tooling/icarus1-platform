@@ -34,7 +34,7 @@ import org.xml.sax.SAXException;
 
 import de.ims.icarus.model.api.manifest.Documentation;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
-import de.ims.icarus.model.util.types.Url;
+import de.ims.icarus.model.types.Url;
 import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;

@@ -47,7 +47,7 @@ import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.standard.manifest.AnnotationLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.AnnotationManifestImpl;
 import de.ims.icarus.model.standard.manifest.ValueRangeImpl;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 
 /**
  * @author Markus Gärtner

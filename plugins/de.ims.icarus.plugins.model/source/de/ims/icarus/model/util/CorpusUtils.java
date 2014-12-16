@@ -72,7 +72,7 @@ import de.ims.icarus.model.api.raster.PositionOutOfBoundsException;
 import de.ims.icarus.model.api.raster.Rasterizer;
 import de.ims.icarus.model.io.LocationType;
 import de.ims.icarus.model.io.ResourcePath;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 

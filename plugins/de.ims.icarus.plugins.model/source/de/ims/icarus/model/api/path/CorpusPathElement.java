@@ -23,63 +23,18 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.util.types;
+package de.ims.icarus.model.api.path;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import de.ims.icarus.model.api.layer.Layer;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class Url {
+public interface CorpusPathElement {
 
-	private final URL url;
+	Layer getLayer();
 
-	public Url(URL url) {
-		if (url == null)
-			throw new NullPointerException("Invalid url"); //$NON-NLS-1$
-
-		this.url = url;
-	}
-
-	public Url(String spec) throws MalformedURLException {
-		this.url = new URL(spec);
-	}
-
-	/**
-	 * @return the url
-	 */
-	public URL getURL() {
-		return url;
-	}
-
-	/**
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return url.toExternalForm().hashCode();
-	}
-
-	/**
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Url) {
-			Url other = (Url) obj;
-			return toString().equals(other.toString());
-		}
-		return false;
-	}
-
-	/**
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return url.toExternalForm();
-	}
+	//TODO
 }

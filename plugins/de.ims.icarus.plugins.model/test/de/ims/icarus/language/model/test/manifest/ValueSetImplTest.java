@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import de.ims.icarus.model.standard.manifest.ValueSetImpl;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 
 /**
  * @author Markus Gärtner

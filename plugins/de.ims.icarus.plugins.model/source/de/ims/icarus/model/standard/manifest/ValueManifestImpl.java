@@ -32,8 +32,8 @@ import org.xml.sax.SAXException;
 
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ValueManifest;
-import de.ims.icarus.model.util.types.UnsupportedValueTypeException;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.UnsupportedValueTypeException;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;

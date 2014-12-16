@@ -44,7 +44,7 @@ import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
 import de.ims.icarus.model.api.manifest.PathResolverManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
-import de.ims.icarus.model.util.types.ValueType;
+import de.ims.icarus.model.types.ValueType;
 
 /**
  * @author Markus Gärtner
