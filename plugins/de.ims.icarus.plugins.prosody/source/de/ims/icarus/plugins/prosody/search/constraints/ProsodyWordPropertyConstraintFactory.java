@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
 
- * $Revision: 270 $
- * $Date: 2014-07-08 13:44:07 +0200 (Di, 08 Jul 2014) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.coref/source/de/ims/icarus/plugins/coref/search/constraints/CoreferenceWordPropertyConstraintFactory.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2014-07-08 13:44:07 +0200 (Di, 08 Jul 2014) $
- * $LastChangedRevision: 270 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.prosody.search.constraints;
 
@@ -37,7 +37,7 @@ import de.ims.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
- * @version $Id: CoreferenceWordPropertyConstraintFactory.java 270 2014-07-08 11:44:07Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {

@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 135 $
- * $Date: 2013-09-04 07:35:22 +0200 (Mi, 04 Sep 2013) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.dependency/source/de/ims/icarus/language/dependency/annotation/DependencyResultAnnotator.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2013-09-04 07:35:22 +0200 (Mi, 04 Sep 2013) $
- * $LastChangedRevision: 135 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.prosody.annotation;
 
@@ -54,7 +54,7 @@ import de.ims.icarus.util.data.ContentType;
 
 /**
  * @author Markus Gärtner
- * @version $Id: DependencyResultAnnotator.java 135 2013-09-04 05:35:22Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ProsodyResultAnnotator extends AbstractTreeResultAnnotator {

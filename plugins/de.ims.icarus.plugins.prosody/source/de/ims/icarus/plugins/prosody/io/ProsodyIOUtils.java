@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 263 $
- * $Date: 2014-06-16 15:43:09 +0200 (Mo, 16 Jun 2014) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.coref/source/de/ims/icarus/plugins/coref/io/ProsodyIOUtils.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2014-06-16 15:43:09 +0200 (Mo, 16 Jun 2014) $
- * $LastChangedRevision: 263 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.prosody.io;
 
@@ -123,7 +123,7 @@ import de.ims.icarus.util.strings.StringPrimitives;
  *
  *
  * @author Markus Gärtner
- * @version $Id: ProsodyIOUtils.java 263 2014-06-16 13:43:09Z mcgaerty $
+ * @version $Id$
  *
  */
 public final class ProsodyIOUtils implements ProsodyConstants {

@@ -15,13 +15,13 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision: 244 $
- * $Date: 2014-04-10 14:09:12 +0200 (Do, 10 Apr 2014) $
- * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.coref/source/de/ims/icarus/plugins/coref/io/ProsodyDocumentReader.java $
+ * $Revision$
+ * $Date$
+ * $URL$
  *
- * $LastChangedDate: 2014-04-10 14:09:12 +0200 (Do, 10 Apr 2014) $
- * $LastChangedRevision: 244 $
- * $LastChangedBy: mcgaerty $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  */
 package de.ims.icarus.plugins.prosody.io;
 
@@ -45,7 +45,7 @@ import de.ims.icarus.util.strings.CharTableBuffer;
 
 /**
  * @author Markus Gärtner
- * @version $Id: ProsodyDocumentReader.java 244 2014-04-10 12:09:12Z mcgaerty $
+ * @version $Id$
  *
  */
 public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, DataCreater {

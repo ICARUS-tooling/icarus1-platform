@@ -62,13 +62,23 @@ public abstract class ValueType implements XmlResource {
 		ValueType result = xmlLookup.get(s);
 
 		if(result==null) {
-			int sepIdx = s.indexOf('@');
+			int sepIdx = s.indexOf(VectorType.SIZE_SEPARATOR);
+			if(sepIdx!=-1) {
+				String typeName = s.substring(0, sepIdx);
+
+				ValueType componentType = parseValueType(typeName);
+				int size = Integer.parseInt(s.substring(sepIdx+1));
+
+				result = new VectorType(componentType, size);
+			} else
+				throw new ModelException(ModelError.MANIFEST_UNKNOWN_TYPE,
+						"Not a known value type definition: "+s); //$NON-NLS-1$
 		}
 
 		return result;
 	}
 
-	protected ValueType(String xmlForm, Class<?> baseClass) {
+	private ValueType(String xmlForm, Class<?> baseClass) {
 		this.baseClass = baseClass;
 		this.xmlForm = xmlForm;
 
@@ -394,29 +404,103 @@ public abstract class ValueType implements XmlResource {
 
 	public static class VectorType extends ValueType {
 
-		public static final char DIMENSION_SEPARATOR = '[';
+		public static final char SIZE_SEPARATOR = '[';
+		public static final char ELEMENT_SEPARATOR = '|';
+		public static final char ESCAPE_CHARACTER = '\\';
 
-		private final int dimensions;
+		private final int size;
 		private final ValueType componentType;
 
-		public VectorType(ValueType componentType, int dimensions) {
-			super(componentType.getXmlValue()+DIMENSION_SEPARATOR+dimensions, Object.class);
+		public VectorType(ValueType componentType, int size) {
+			super(componentType.getXmlValue()+SIZE_SEPARATOR+size, Object.class);
 
-			if(dimensions<1)
-				throw new IllegalArgumentException("Dimensionality has to be at least 1: "+dimensions); //$NON-NLS-1$
+			if(size<1)
+				throw new IllegalArgumentException("Size has to be at least 1: "+size); //$NON-NLS-1$
 
-			this.dimensions = dimensions;
+			this.size = size;
 			this.componentType = componentType;
 		}
 
-		public int getDimensions() {
-			return dimensions;
+		public int getSize() {
+			return size;
 		}
 
 		@Override
 		public String toString(Object value) {
-			// TODO Auto-generated method stub
-			return super.toString(value);
+			StringBuilder sb = new StringBuilder();
+
+			int length = Array.getLength(value);
+			for(int i=0; i<length; i++) {
+				if(i>0) {
+					sb.append(ELEMENT_SEPARATOR);
+				}
+
+				Object element = Array.get(value, i);
+				String s = componentType.toString(element);
+
+				for(int idx=0; idx <s.length(); idx++) {
+					char c = s.charAt(idx);
+					if(c==ELEMENT_SEPARATOR) {
+						sb.append(ESCAPE_CHARACTER);
+					}
+					sb.append(ELEMENT_SEPARATOR);
+				}
+			}
+
+			return sb.toString();
+		}
+
+		/**
+		 * @see de.ims.icarus.model.types.ValueType#parse(java.lang.String, java.lang.ClassLoader)
+		 */
+		@Override
+		public Object parse(String s, ClassLoader classLoader) {
+
+			// Create array with unwrapped types
+			Object array = Array.newInstance(ClassUtils.unwrap(componentType.getBaseClass()), size);
+
+			// Traverse input string and load elements
+			boolean escaped = false;
+			StringBuilder buffer = new StringBuilder();
+			int elementIndex = -1;
+			for(int i=0; i<s.length(); i++) {
+				char c = s.charAt(i);
+
+				if(escaped) {
+					escaped = false;
+					buffer.append(c);
+				} else {
+					switch (c) {
+					case ESCAPE_CHARACTER:
+						escaped = true;
+						break;
+
+					case ELEMENT_SEPARATOR:
+						Object element = componentType.parse(buffer.toString(), classLoader);
+						buffer.setLength(0);
+						elementIndex++;
+						Array.set(array, elementIndex, element);
+						break;
+
+					default:
+						buffer.append(c);
+						break;
+					}
+				}
+
+			}
+
+			// Handle last element
+			if(buffer.length()>0) {
+				Object element = componentType.parse(buffer.toString(), classLoader);
+				elementIndex++;
+				Array.set(array, elementIndex, element);
+			}
+
+			if(elementIndex!=size)
+				throw new ModelException(ModelError.DATA_ARRAY_SIZE, "Insufficient elements declared in input string: "+elementIndex+" - expected "+size); //$NON-NLS-1$ //$NON-NLS-2$
+
+			return array;
 		}
 
 		/**
@@ -428,7 +512,7 @@ public abstract class ValueType implements XmlResource {
 		 */
 		@Override
 		public boolean isValidValue(Object value) {
-			return super.isValidValue(value) && Array.getLength(value)==dimensions;
+			return super.isValidValue(value) && Array.getLength(value)==size;
 		}
 
 		/**
@@ -456,9 +540,9 @@ public abstract class ValueType implements XmlResource {
 				throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
 						"Incompatible value type "+type.getName()+" for value-type "+getXmlValue()+" - expected an array type"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-			if(Array.getLength(value)!=dimensions)
+			if(Array.getLength(value)!=size)
 				throw new ModelException(ModelError.MANIFEST_TYPE_CAST,
-						"Mismatching component count "+Array.getLength(value)+" for value-type "+getXmlValue()+" - expected "+dimensions); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						"Mismatching component count "+Array.getLength(value)+" for value-type "+getXmlValue()+" - expected "+size); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 			Class<?> componentClass = type.getComponentType();
 
@@ -470,15 +554,6 @@ public abstract class ValueType implements XmlResource {
 						"Incompatible array component type "+componentClass.getName()+" for vector-type "+getXmlValue()+" - expected "+componentType.getBaseClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 			return type;
-		}
-
-		/**
-		 * @see de.ims.icarus.model.types.ValueType#parse(java.lang.String, java.lang.ClassLoader)
-		 */
-		@Override
-		public Object parse(String s, ClassLoader classLoader) {
-			// TODO Auto-generated method stub
-			return null;
 		}
 	}
 }

@@ -36,6 +36,7 @@ import de.ims.icarus.model.api.manifest.ImplementationManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
+import de.ims.icarus.model.types.ValueType;
 import de.ims.icarus.util.CorruptedStateException;
 
 /**
@@ -234,7 +235,21 @@ public enum ModelError {
 	 * with the respective value type specified in the context of that value.
 	 */
 	MANIFEST_TYPE_CAST(620),
+
+	/**
+	 * A value type definition in a manifest cannot be resolved to an actual {@link ValueType} implementation.
+	 */
+	MANIFEST_UNKNOWN_TYPE(621),
 	//FIXME add errors for missing content etc...
+
+	//**************************************************
+	//       7xx  DATA ERRORS
+	//**************************************************
+
+	/**
+	 * Mismatch between expected size of an array object and its actual length.
+	 */
+	DATA_ARRAY_SIZE(701),
 
 	;
 
