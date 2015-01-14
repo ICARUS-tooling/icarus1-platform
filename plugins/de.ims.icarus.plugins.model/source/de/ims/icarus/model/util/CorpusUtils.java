@@ -57,6 +57,7 @@ import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.ContextManifest.PrerequisiteManifest;
 import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
+import de.ims.icarus.model.api.manifest.ManifestOwner;
 import de.ims.icarus.model.api.manifest.ManifestType;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.MemberManifest;
@@ -294,6 +295,10 @@ public final class CorpusUtils {
 
 	public static String getName(LayerGroup layerGroup) {
 		return layerGroup.getManifest().getName();
+	}
+
+	public static <M extends MemberManifest> String getName(ManifestOwner<M> owner) {
+		return owner.getManifest().getName();
 	}
 
 	public static Set<MarkableLayer> getMarkableLayers(Corpus corpus) {

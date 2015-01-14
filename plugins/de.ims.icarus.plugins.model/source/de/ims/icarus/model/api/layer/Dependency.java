@@ -62,6 +62,12 @@ public final class Dependency<E extends Object> {
 	}
 
 	/**
+	 * Since a {@code Dependency} instance can only be created for live
+	 * objects of a corpus, this method performs identity checks on both the
+	 * {@code target} and {@code type} between this dependency and the
+	 * given {@code obj} parameter (only in case the parameter actually is
+	 * another {@code Dependency}).
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override

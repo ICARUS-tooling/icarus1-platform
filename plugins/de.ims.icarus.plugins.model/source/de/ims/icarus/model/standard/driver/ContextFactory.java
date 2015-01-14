@@ -45,21 +45,22 @@ import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.FragmentLayerManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
+import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
 import de.ims.icarus.model.api.manifest.RasterizerManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
-import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
 import de.ims.icarus.model.api.raster.Rasterizer;
 import de.ims.icarus.model.standard.corpus.DefaultContext;
 import de.ims.icarus.model.standard.elements.MemberSets;
 import de.ims.icarus.model.standard.layer.AbstractLayer;
 import de.ims.icarus.model.standard.layer.ComplexAnnotationLayer;
-import de.ims.icarus.model.standard.layer.SimpleAnnotationLayer;
 import de.ims.icarus.model.standard.layer.DefaultFragmentLayer;
 import de.ims.icarus.model.standard.layer.DefaultLayerGroup;
 import de.ims.icarus.model.standard.layer.DefaultMarkableLayer;
 import de.ims.icarus.model.standard.layer.DefaultStructureLayer;
+import de.ims.icarus.model.standard.layer.SimpleAnnotationLayer;
 import de.ims.icarus.model.util.CorpusUtils;
+import de.ims.icarus.model.util.ImplementationLoader;
 
 /**
  * @author Markus Gärtner
@@ -330,7 +331,8 @@ public class ContextFactory {
 
 			try {
 				// Instantiate rasterizer and assign to layer
-				Rasterizer rasterizer = rasterizerManifest.instantiate(Rasterizer.class);
+				Rasterizer rasterizer = new ImplementationLoader().instantiate(
+						rasterizerManifest.getImplementationManifest(), Rasterizer.class);
 				layer.setRasterizer(rasterizer);
 			} catch (ClassNotFoundException e) {
 				throw new ModelException(layer.getCorpus(), ModelError.IMPLEMENTATION_NOT_FOUND,

@@ -73,10 +73,19 @@ public class IndexUtils {
 		return true;
 	}
 
+	/**
+	 * Wraps a single index value into an array of {@link IndexSet} instances.
+	 * The result will be an empty array iff the given {@code index} is {@code -1}
+	 * or an array of exactly size {@code 1} containing a single {@link SingletonIndexSet}.
+	 */
 	public static IndexSet[] wrap(long index) {
 		return index==-1L ? EMPTY : new IndexSet[]{new SingletonIndexSet(index)};
 	}
 
+	/**
+	 * If the given collection of indices contains exactly {@code 1} index value, returns that
+	 * value, otherwise the result will be {@code -1}.
+	 */
 	public static long unwrap(IndexSet[] indices) {
 		return indices.length==1 && indices[0].size()==1 ? firstIndex(indices) : -1L;
 	}
@@ -89,6 +98,7 @@ public class IndexUtils {
 			if(result==0L) {
 				result = o1.lastIndex()-o2.lastIndex();
 			}
+			// Prevent integer overflow
 			if(result>Integer.MAX_VALUE || result<=Integer.MIN_VALUE) {
 				result >>= 32;
 			}
@@ -146,11 +156,12 @@ public class IndexUtils {
 		}
 
 		long count = to-from+1;
+		//FIXME allow for a flexible definition of the upper bound for chunk size
 		int chunks = (int) Math.ceil(count/(double)Integer.MAX_VALUE);
 
 		IndexSet[] result = new IndexSet[chunks];
 
-		for(int i=0; i<count; i++) {
+		for(int i=0; i<chunks; i++) {
 			long begin = from;
 			long end = Math.min(begin+Integer.MAX_VALUE, to);
 

@@ -209,6 +209,7 @@ public class Core {
 	private final Path cacheFolder;
 	private final Path dataFolder;
 	private final Path tempFolder;
+	private final Path externalFolder;
 
 	public static final String IGNORE_STREAM_REDIRECT_PROPERTY =
 			"de.ims.icarus.ignoreStreamRedirect"; //$NON-NLS-1$
@@ -267,6 +268,10 @@ public class Core {
 		// init cache folder
 		cacheFolder = rootFolder.resolve("cache"); //$NON-NLS-1$
 		ensureDir(cacheFolder, "cache"); //$NON-NLS-1$
+
+		// init cache folder
+		externalFolder = rootFolder.resolve("external"); //$NON-NLS-1$
+		ensureDir(externalFolder, "external"); //$NON-NLS-1$
 
 		// Redirect default output
 		if(!ignoreRedirect()) {
@@ -663,6 +668,13 @@ public class Core {
 	 */
 	public Path getCacheFolder() {
 		return cacheFolder;
+	}
+
+	/**
+	 * @return the externalFolder
+	 */
+	public Path getExternalFolder() {
+		return externalFolder;
 	}
 
 	public Path createTempFile(String baseName) throws IOException {

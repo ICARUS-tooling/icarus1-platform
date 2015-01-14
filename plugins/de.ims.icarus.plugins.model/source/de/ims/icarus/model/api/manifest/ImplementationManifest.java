@@ -142,7 +142,7 @@ public interface ImplementationManifest extends MemberManifest {
 		/**
 		 * Since for simple additions creation of an entire plugin could easily
 		 * be considered overkill, there is the option to provide the class file
-		 * of an implementation in the {@code extern} folder. The source would then
+		 * of an implementation in the {@code external} folder. The source would then
 		 * be the file name. Per convention, if the referenced file is a mere class
 		 * file, its name must equal the fully qualified name of the class contained.
 		 * If the file is a jar archive, an additional class name must be specified,

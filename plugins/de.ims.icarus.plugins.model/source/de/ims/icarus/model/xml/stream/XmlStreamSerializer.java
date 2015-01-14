@@ -168,6 +168,15 @@ public class XmlStreamSerializer implements XmlSerializer {
 	}
 
 	/**
+	 * @see de.ims.icarus.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, float)
+	 */
+	@Override
+	public void writeAttribute(String name, float value) throws XMLStreamException {
+//		pushAttribute(name, String.valueOf(value));
+		writer.writeAttribute(name, String.valueOf(value));
+	}
+
+	/**
 	 * @see de.ims.icarus.model.api.xml.XmlSerializer#writeAttribute(java.lang.String, boolean)
 	 */
 	@Override
@@ -222,7 +231,7 @@ public class XmlStreamSerializer implements XmlSerializer {
 
 	@Override
 	public void writeLineBreak() throws XMLStreamException {
-		//TODO maybe reduce linebreak to a single newline character?
+		//TODO maybe reduce linebreak to a single newline character and/or do it platform dependent?
 		writer.writeCharacters("\r\n"); //$NON-NLS-1$
 	}
 

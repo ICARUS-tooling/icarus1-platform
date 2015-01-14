@@ -58,15 +58,25 @@ public enum ModelError {
 	UNKNOWN_ERROR(100),
 
 	/**
-	 * A general I/O error occurred.
-	 */
-	IO_ERROR(101),
-
-	/**
 	 * Wraps an {@link OutOfMemoryError} object that was thrown when
 	 * the Java VM ran out of memory to allocate objects.
 	 */
-	INSUFFICIENT_MEMORY(102),
+	INSUFFICIENT_MEMORY(101),
+
+	/**
+	 * A general I/O error occurred.
+	 */
+	IO_ERROR(110),
+
+	/**
+	 * Reading from a resource is not possible.
+	 */
+	NO_READ_ACCESS(111),
+
+	/**
+	 * Writing to a resource is not possible.
+	 */
+	NO_WRITE_ACCESS(112),
 
 	//**************************************************
 	//       2xx  IMPLEMENTATION ERRORS

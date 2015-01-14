@@ -27,6 +27,8 @@ package de.ims.icarus.model.standard.layer;
 
 import java.util.Set;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.layer.Dependency;
 import de.ims.icarus.model.api.layer.Layer;
@@ -110,7 +112,7 @@ public class DefaultLayerGroup implements LayerGroup {
 		if (primaryLayer == null)
 			throw new NullPointerException("Invalid primaryLayer"); //$NON-NLS-1$
 		if(!layers.contains(primaryLayer))
-			throw new IllegalArgumentException("Layer is unknown to this group: "+CorpusUtils.getName(primaryLayer)); //$NON-NLS-1$
+			throw new ModelException(ModelError.MANIFEST_UNKNOWN_ID, "Layer is unknown to this group: "+CorpusUtils.getName(primaryLayer)); //$NON-NLS-1$
 
 		this.primaryLayer = primaryLayer;
 	}

@@ -78,8 +78,9 @@ public interface Context extends ManifestOwner<ContextManifest> {
 	/**
 	 * Called by a corpus to signal a context that it has been removed.
 	 * <p>
-	 * Note that this method will <b>not</b> be called when a context is
-	 * assigned default context for a corpus!
+	 * Note that this method will <b>not</b> be called for default contexts
+	 * since they cannot be removed without completely invalidating their
+	 * respective host corpus!
 	 *
 	 * @param corpus The corpus this context has been removed from
 	 */

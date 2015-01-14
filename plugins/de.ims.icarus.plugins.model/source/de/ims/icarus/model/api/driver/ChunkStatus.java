@@ -32,6 +32,9 @@ package de.ims.icarus.model.api.driver;
  */
 public enum ChunkStatus {
 
+	VALID(1),
+	MODIFIED(2),
+	CORRUPTED(3),
 	;
 
 	private final int errorCode;

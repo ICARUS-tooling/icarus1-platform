@@ -41,6 +41,9 @@ import java.nio.file.StandardOpenOption;
 import de.ims.icarus.logging.LoggerFactory;
 
 /**
+ * Models information about the physical location of a manifest resource
+ * and defines whether the source is read-only and/or template-only.
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -65,7 +68,22 @@ public abstract class ManifestLocation {
 		return null;
 	}
 
+	/**
+	 * Open the underlying resource for read access.
+	 *
+	 * @return
+	 * @throws IOException
+	 * @throws UnsupportedOperationException in case the location is write-only
+	 */
 	public abstract InputStream getInputStream() throws IOException;
+
+	/**
+	 * Open the underlying resource for write access.
+	 *
+	 * @return
+	 * @throws IOException
+	 * @throws UnsupportedOperationException in case the location is read-only
+	 */
 	public abstract OutputStream getOutputStream() throws IOException;
 
 	/**
@@ -83,6 +101,9 @@ public abstract class ManifestLocation {
 	}
 
 	/**
+	 * Returns the {@code ClassLoader} instance that is associated with the
+	 * physical location this {@code ManifestLocation} wraps.
+	 *
 	 * @return the classLoader
 	 */
 	public ClassLoader getClassLoader() {

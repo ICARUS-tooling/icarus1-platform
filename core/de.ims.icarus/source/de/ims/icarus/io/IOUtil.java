@@ -83,6 +83,14 @@ public final class IOUtil {
 		}
 	};
 
+	public static final Filter<Path> jarFilter = new Filter<Path>() {
+
+		@Override
+		public boolean accept(Path entry) throws IOException {
+			return fileFilter.accept(entry) && entry.endsWith(".jar"); //$NON-NLS-1$
+		}
+	};
+
 	public static final Filter<Path> directoryFilter = new Filter<Path>() {
 
 		@Override
