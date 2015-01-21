@@ -27,12 +27,14 @@ package de.ims.icarus.model.standard.driver.file.indexing;
 
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.driver.IndexSet;
+import de.ims.icarus.model.api.driver.IndexUtils;
 import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.driver.indexing.IndexCollector;
 import de.ims.icarus.model.api.driver.indexing.IndexReader;
 import de.ims.icarus.model.iql.expr.ExpressionUtils;
 import de.ims.icarus.model.iql.expr.func.Function;
 import de.ims.icarus.model.iql.expr.func.FunctionUtils;
+import de.ims.icarus.model.util.CorpusUtils;
 
 /**
  * @author Markus Gärtner
@@ -81,6 +83,7 @@ public class IndexImplFunction extends AbstractIndex {
 	public class Reader implements IndexReader {
 
 		private Function func = (Function) function.clone();
+		private Function batchFunc = batchFunction==null ? null : (Function) batchFunction.clone();
 
 		/**
 		 * @see de.ims.icarus.model.io.SynchronizedAccessor#getSource()
@@ -173,7 +176,7 @@ public class IndexImplFunction extends AbstractIndex {
 		public IndexSet[] lookup(IndexSet[] sourceIndices)
 				throws ModelException, InterruptedException {
 			// TODO Auto-generated method stub
-			return null;
+			return IndexUtils.wrap(lo)
 		}
 
 		/**

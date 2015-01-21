@@ -34,6 +34,9 @@ import java.nio.ByteBuffer;
  */
 public class SpanArrays {
 
+	private static final int INT_BYTES = 4;
+	private static final int LONG_BYTES = 8;
+
 	public interface SpanAdapter {
 
 		Object createBuffer(int byteCount);
@@ -78,7 +81,7 @@ public class SpanArrays {
 	private static class IntSpanAdapter implements SpanAdapter {
 
 		// from | to
-		private static final int BYTES_PER_ENTRY = 4 + 4;
+		private static final int BYTES_PER_ENTRY = INT_BYTES + INT_BYTES;
 
 		/**
 		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#createBuffer(int)
@@ -210,7 +213,7 @@ public class SpanArrays {
 	private static class LongSpanAdapter implements SpanAdapter {
 
 		// from | to
-		private static final int BYTES_PER_ENTRY = 8 + 8;
+		private static final int BYTES_PER_ENTRY = LONG_BYTES + LONG_BYTES;
 
 		/**
 		 * @see de.ims.icarus.model.standard.driver.file.indexing.SpanArrays.SpanAdapter#createBuffer(int)
@@ -316,7 +319,7 @@ public class SpanArrays {
 		public int find(Object source, int from, int to, long value) {
 			long[] array = (long[]) source;
 
-			long index = (int) value;
+			long index = value;
 
 	        int low = from<<1;
 	        int high = to<<1;

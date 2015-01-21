@@ -78,6 +78,11 @@ public enum ModelError {
 	 */
 	NO_WRITE_ACCESS(112),
 
+	/**
+	 * A given long index exceeds the {@value Integer#MAX_VALUE} limit.
+	 */
+	INDEX_OVERFLOW(120),
+
 	//**************************************************
 	//       2xx  IMPLEMENTATION ERRORS
 	//**************************************************

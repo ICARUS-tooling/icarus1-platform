@@ -89,4 +89,12 @@ public class SingletonIndexSet implements IndexSet {
 		return index;
 	}
 
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#externalize()
+	 */
+	@Override
+	public IndexSet externalize() {
+		return this;
+	}
+
 }

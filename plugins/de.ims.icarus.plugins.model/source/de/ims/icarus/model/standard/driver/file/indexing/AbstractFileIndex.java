@@ -134,7 +134,7 @@ public abstract class AbstractFileIndex extends ManagedFileResource implements I
 
 	/**
 	 * Allows subclasses to perform compression or other means of
-	 * storage optimization. This method should only called once
+	 * storage optimization. This method should only be called once
 	 * an index has been completely filled with mapping data!
 	 *
 	 * @throws IOException

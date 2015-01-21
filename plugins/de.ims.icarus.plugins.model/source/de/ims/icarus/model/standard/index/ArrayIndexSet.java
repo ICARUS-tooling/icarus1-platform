@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.model.standard.index;
 
+import de.ims.icarus.model.ModelError;
+import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.driver.IndexSet;
 
 /**
@@ -84,9 +86,12 @@ public class ArrayIndexSet implements IndexSet {
 	 */
 	@Override
 	public IndexSet[] split(int chunkSize) {
-		int chunks = (int)Math.ceil((double)size()/chunkSize);
+		long chunks = (long)Math.ceil((double)size()/chunkSize);
 
-		IndexSet[] result = new IndexSet[chunks];
+		if(chunks>Integer.MAX_VALUE)
+			throw new ModelException(ModelError.INDEX_OVERFLOW, "Cannot create array of size: "+chunks); //$NON-NLS-1$
+
+		IndexSet[] result = new IndexSet[(int) chunks];
 
 		int fromIndex = this.fromIndex;
 		int toIndex;
@@ -113,5 +118,21 @@ public class ArrayIndexSet implements IndexSet {
 	@Override
 	public long lastIndex() {
 		return indices[toIndex];
+	}
+
+	/**
+	 * @see de.ims.icarus.model.api.driver.IndexSet#externalize()
+	 */
+	@Override
+	public IndexSet externalize() {
+		if(fromIndex==0 && toIndex==indices.length-1) {
+			return this;
+		}
+
+		int length = size();
+		long[] newIndices = new long[length];
+		System.arraycopy(indices, fromIndex, newIndices, 0, length);
+
+		return new ArrayIndexSet(newIndices);
 	}
 }

@@ -32,8 +32,8 @@ package de.ims.icarus.model.api.driver;
  * condition is mandatory to enable an easy check for continuous collections
  * of indices:<br>
  * <i>Let i_0 be the first index in the set and i_n the last, with the set holding
- * n indices, then the collection of indices is continuous, if and only if the
- * difference i_n-i_0 is exactly n-1</i>
+ * n+1 indices, then the collection of indices is continuous, if and only if the
+ * difference i_n-i_0 is exactly n</i>
  *
  * @author Markus Gärtner
  * @version $Id$
@@ -42,8 +42,6 @@ package de.ims.icarus.model.api.driver;
 public interface IndexSet {
 
 	int size();
-
-//	LongIterator getIterator();
 
 	long indexAt(int index);
 
@@ -61,4 +59,12 @@ public interface IndexSet {
 	 * @return
 	 */
 	IndexSet[] split(int chunkSize);
+
+	/**
+	 * Return an {@code IndexSet} object that describes the exact same set of index values
+	 * as this one, but is disconnected from any implementation specific shared storage.
+	 * If an implementation is not relying on shared storage, this method should just return
+	 * the current {@code IndexSet} itself.
+	 */
+	IndexSet externalize();
 }
