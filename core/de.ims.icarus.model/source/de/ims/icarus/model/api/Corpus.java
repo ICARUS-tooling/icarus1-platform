@@ -144,7 +144,7 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * @return
 	 * @throws ModelException
 	 *
-	 * @see {@link ModelError#SUBCORPUS_ALREADY_OPENED}
+	 * @see {@link ModelError#VIEW_ALREADY_OPENED}
 	 */
 	CorpusView createCorpusView(Query query, CorpusAccessMode mode) throws ModelException;
 

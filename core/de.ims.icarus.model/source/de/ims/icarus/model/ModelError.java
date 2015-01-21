@@ -174,27 +174,27 @@ public enum ModelError {
 	DRIVER_CHECKSUM_FAIL(403),
 
 	//**************************************************
-	//       5xx  SUBCORPUS ERRORS
+	//       5xx  CORPUS VIEW ERRORS
 	//**************************************************
 
 	/**
 	 * Closing a sub corpus failed due to some owner not being able to release its lock when asked.
 	 */
-	SUBCORPUS_UNCLOASABLE(501),
+	VIEW_UNCLOSABLE(501),
 
 	/**
-	 * Creating a new sub corpus in an access mode that would grant write access failed due to some other
-	 * sub corpus instance already working on the corpus in question.
-	 * Note that there can only be one sub corpus instance for a particular corpus with write access, but
-	 * an unlimited number of reading sub corpora!
+	 * Creating a new corpus view in an access mode that would grant write access failed due to some other
+	 * corpus view instance already working on the corpus in question.
+	 * Note that there can only be one corpus view instance for a particular corpus with write access, but
+	 * an unlimited number of reading views!
 	 */
-	SUBCORPUS_ALREADY_OPENED(502),
+	VIEW_ALREADY_OPENED(502),
 
 	/**
-	 * An attempt to fetch the model for a sub corpus failed because the data for the current
+	 * An attempt to fetch the model for a corpus view failed because the data for the current
 	 * page has not yet been loaded.
 	 */
-	SUBCORPUS_EMPTY(503),
+	VIEW_EMPTY(503),
 
 	//**************************************************
 	//       6xx  MANIFEST ERRORS

@@ -219,7 +219,7 @@ abstract class AbstractSegment implements CorpusView {
 				if(owner.release()) {
 					it.remove();
 				} else
-					throw new ModelException(ModelError.SUBCORPUS_UNCLOASABLE,
+					throw new ModelException(ModelError.VIEW_UNCLOSABLE,
 							"Unable to close segment - could not release ownership of "+owner.getName()); //$NON-NLS-1$
 			}
 
