@@ -38,7 +38,7 @@ import de.ims.icarus.model.ModelError;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.Scope;
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 import de.ims.icarus.model.api.CorpusOwner;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
@@ -49,7 +49,7 @@ import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.ContainerType;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.iql.Query;
@@ -63,7 +63,7 @@ import de.ims.icarus.util.collections.LookupList;
  * @version $Id$
  *
  */
-abstract class AbstractSegment implements SubCorpus {
+abstract class AbstractSegment implements CorpusView {
 
 	private final DefaultCorpus corpus;
 	private final Query query;
@@ -146,7 +146,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#getCorpus()
+	 * @see de.ims.icarus.model.api.CorpusView#getCorpus()
 	 */
 	@Override
 	public Corpus getCorpus() {
@@ -154,7 +154,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#getScope()
+	 * @see de.ims.icarus.model.api.CorpusView#getScope()
 	 */
 	@Override
 	public Scope getScope() {
@@ -162,7 +162,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#getQuery()
+	 * @see de.ims.icarus.model.api.CorpusView#getQuery()
 	 */
 	@Override
 	public Query getQuery() {
@@ -174,7 +174,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#getContainer(de.ims.icarus.model.api.layer.MarkableLayer)
+	 * @see de.ims.icarus.model.api.CorpusView#getContainer(de.ims.icarus.model.api.layer.MarkableLayer)
 	 */
 	@Override
 	public Container getContainer(MarkableLayer layer) {
@@ -193,7 +193,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#closable()
+	 * @see de.ims.icarus.model.api.CorpusView#closable()
 	 */
 	@Override
 	public boolean closable() {
@@ -206,7 +206,7 @@ abstract class AbstractSegment implements SubCorpus {
 
 	/**
 	 * @throws InterruptedException
-	 * @see de.ims.icarus.model.api.SubCorpus#close()
+	 * @see de.ims.icarus.model.api.CorpusView#close()
 	 */
 	@Override
 	public void close() throws ModelException, InterruptedException {
@@ -287,7 +287,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#getOwners()
+	 * @see de.ims.icarus.model.api.CorpusView#getOwners()
 	 */
 	@Override
 	public Set<CorpusOwner> getOwners() {
@@ -297,7 +297,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#acquire(de.ims.icarus.model.api.CorpusOwner)
+	 * @see de.ims.icarus.model.api.CorpusView#acquire(de.ims.icarus.model.api.CorpusOwner)
 	 */
 	@Override
 	public void acquire(CorpusOwner owner) throws ModelException {
@@ -316,7 +316,7 @@ abstract class AbstractSegment implements SubCorpus {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SubCorpus#release(de.ims.icarus.model.api.CorpusOwner)
+	 * @see de.ims.icarus.model.api.CorpusView#release(de.ims.icarus.model.api.CorpusOwner)
 	 */
 	@Override
 	public void release(CorpusOwner owner) throws ModelException {
@@ -333,10 +333,10 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 	}
 
-	private static final Comparator<Markable> idSorter = new Comparator<Markable>() {
+	private static final Comparator<Item> idSorter = new Comparator<Item>() {
 
 		@Override
-		public int compare(Markable o1, Markable o2) {
+		public int compare(Item o1, Item o2) {
 			return (int)(o1.getIndex()-o2.getIndex());
 		}
 	};
@@ -344,10 +344,10 @@ abstract class AbstractSegment implements SubCorpus {
 	private class ChunkDelegate implements ChunkStorage {
 
 		/**
-		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.members.Markable, long)
+		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.members.Item, long)
 		 */
 		@Override
-		public void add(Markable member, long index) {
+		public void add(Item member, long index) {
 			ProxyContainer container = getProxyContainer(member.getLayer());
 			if(container!=null) {
 				container.add(member, index);
@@ -361,7 +361,7 @@ abstract class AbstractSegment implements SubCorpus {
 		private long maxId = -1;
 		private boolean sorted = true;
 
-		private final LookupList<Markable> items;
+		private final LookupList<Item> items;
 		private final MarkableLayer layer;
 
 		private ProxyContainer(MarkableLayer layer, int capacity) {
@@ -375,10 +375,10 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.members.Markable,long)
+		 * @see de.ims.icarus.model.api.driver.ChunkStorage#add(de.ims.icarus.model.api.members.Item,long)
 		 */
 		@Override
-		public void add(Markable member, long index) {
+		public void add(Item member, long index) {
 
 			items.add(member);
 
@@ -440,7 +440,7 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+		 * @see de.ims.icarus.model.api.members.Item#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
@@ -448,7 +448,7 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+		 * @see de.ims.icarus.model.api.members.Item#getLayer()
 		 */
 		@Override
 		public MarkableLayer getLayer() {
@@ -456,7 +456,7 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getIndex()
+		 * @see de.ims.icarus.model.api.members.Item#getIndex()
 		 */
 		@Override
 		public long getIndex() {
@@ -464,7 +464,7 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
+		 * @see de.ims.icarus.model.api.members.Item#setIndex(long)
 		 */
 		@Override
 		public void setIndex(long newIndex) {
@@ -472,7 +472,7 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+		 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 		 */
 		@Override
 		public long getBeginOffset() {
@@ -480,7 +480,7 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+		 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 		 */
 		@Override
 		public long getEndOffset() {
@@ -488,10 +488,10 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#compareTo(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Item#compareTo(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public int compareTo(Markable o) {
+		public int compareTo(Item o) {
 			return CorpusUtils.compare(this, o);
 		}
 
@@ -515,7 +515,7 @@ abstract class AbstractSegment implements SubCorpus {
 		 * @see java.lang.Iterable#iterator()
 		 */
 		@Override
-		public Iterator<Markable> iterator() {
+		public Iterator<Item> iterator() {
 			return items.iterator();
 		}
 
@@ -560,27 +560,27 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
+		 * @see de.ims.icarus.model.api.members.Container#getItemAt(int)
 		 */
 		@Override
-		public Markable getMarkableAt(int index) {
+		public Item getItemAt(int index) {
 			return items.get(index);
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#indexOfItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public int indexOfMarkable(Markable markable) {
-			return items.indexOf(markable);
+		public int indexOfItem(Item item) {
+			return items.indexOf(item);
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#containsItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public boolean containsMarkable(Markable markable) {
-			return items.contains(markable);
+		public boolean containsItem(Item item) {
+			return items.contains(item);
 		}
 
 		/**
@@ -592,34 +592,34 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#addMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public void addMarkable(Markable markable) {
+		public void addItem(Item item) {
 			throw new UnsupportedOperationException();
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addItem(int, de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public void addMarkable(int index, Markable markable) {
+		public void addItem(int index, Item item) {
 			throw new UnsupportedOperationException();
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+		 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 		 */
 		@Override
-		public Markable removeMarkable(int index) {
+		public Item removeItem(int index) {
 			throw new UnsupportedOperationException();
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#removeItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public Markable removeMarkable(Markable markable) {
+		public Item removeItem(Item item) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -632,10 +632,10 @@ abstract class AbstractSegment implements SubCorpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
+		 * @see de.ims.icarus.model.api.members.Container#moveItem(de.ims.icarus.model.api.members.Item, int)
 		 */
 		@Override
-		public void moveMarkable(Markable markable, int index) {
+		public void moveItem(Item item, int index) {
 			throw new UnsupportedOperationException();
 		}
 

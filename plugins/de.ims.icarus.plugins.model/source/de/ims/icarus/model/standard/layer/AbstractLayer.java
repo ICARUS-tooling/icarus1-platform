@@ -32,7 +32,7 @@ import de.ims.icarus.model.api.layer.LayerGroup;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.members.Container;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.util.CorpusUtils;
@@ -51,7 +51,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 
 	private final int uid = CorpusUtils.getNewUID();
 
-	private final Markable markableProxy;
+	private final Item itemProxy;
 
 	public AbstractLayer(M manifest, LayerGroup group) {
 		if (manifest == null)
@@ -63,7 +63,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		this.manifest = manifest;
 		this.group = group;
 
-		markableProxy = new ProxyMarkable();
+		itemProxy = new ProxyMarkable();
 	}
 
 	/**
@@ -141,11 +141,11 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.Layer#getMarkableProxy()
+	 * @see de.ims.icarus.model.api.layer.Layer#getItemProxy()
 	 */
 	@Override
-	public Markable getMarkableProxy() {
-		return markableProxy;
+	public Item getItemProxy() {
+		return itemProxy;
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		return getName();
 	}
 
-	public class ProxyMarkable implements Markable {
+	public class ProxyMarkable implements Item {
 
 		/**
 		 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
@@ -194,12 +194,12 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
-		public int compareTo(Markable o) {
+		public int compareTo(Item o) {
 			return CorpusUtils.compare(this, o);
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+		 * @see de.ims.icarus.model.api.members.Item#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
@@ -207,7 +207,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+		 * @see de.ims.icarus.model.api.members.Item#getLayer()
 		 */
 		@Override
 		public MarkableLayer getLayer() {
@@ -215,7 +215,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+		 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 		 */
 		@Override
 		public long getBeginOffset() {
@@ -223,7 +223,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+		 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 		 */
 		@Override
 		public long getEndOffset() {
@@ -231,7 +231,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getIndex()
+		 * @see de.ims.icarus.model.api.members.Item#getIndex()
 		 */
 		@Override
 		public long getIndex() {
@@ -239,7 +239,7 @@ public class AbstractLayer<M extends LayerManifest> implements Layer {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
+		 * @see de.ims.icarus.model.api.members.Item#setIndex(long)
 		 */
 		@Override
 		public void setIndex(long newIndex) {

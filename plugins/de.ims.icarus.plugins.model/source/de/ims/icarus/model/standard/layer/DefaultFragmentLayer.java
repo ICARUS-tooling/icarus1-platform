@@ -29,7 +29,7 @@ import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.FragmentLayer;
 import de.ims.icarus.model.api.layer.LayerGroup;
 import de.ims.icarus.model.api.manifest.FragmentLayerManifest;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.raster.Rasterizer;
 
 /**
@@ -87,13 +87,13 @@ public class DefaultFragmentLayer extends DefaultMarkableLayer implements Fragme
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.FragmentLayer#getRasterSize(de.ims.icarus.model.api.members.Markable, int)
+	 * @see de.ims.icarus.model.api.layer.FragmentLayer#getRasterSize(de.ims.icarus.model.api.members.Item, int)
 	 */
 	@Override
-	public long getRasterSize(Markable markable, int axis) {
+	public long getRasterSize(Item item, int axis) {
 		String key = getManifest().getAnnotationKey();
-		Object value = valueLayer.getValue(markable, key);
-		return rasterizer.getRasterSize(markable, this, value, axis);
+		Object value = valueLayer.getValue(item, key);
+		return rasterizer.getRasterSize(item, this, value, axis);
 	}
 
 	/**

@@ -32,7 +32,7 @@ import java.util.List;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.ContainerType;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 
 /**
@@ -46,8 +46,8 @@ public class DummyContainer extends DummyMarkable implements Container {
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
-	public Iterator<Markable> iterator() {
-		List<Markable> list = Collections.emptyList();
+	public Iterator<Item> iterator() {
+		List<Item> list = Collections.emptyList();
 		return list.iterator();
 	}
 
@@ -92,26 +92,26 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getItemAt(int)
 	 */
 	@Override
-	public Markable getMarkableAt(int index) {
+	public Item getItemAt(int index) {
 		throw new IndexOutOfBoundsException();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#indexOfItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public int indexOfMarkable(Markable markable) {
+	public int indexOfItem(Item item) {
 		return -1;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#containsItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public boolean containsMarkable(Markable markable) {
+	public boolean containsItem(Item item) {
 		return false;
 	}
 
@@ -124,34 +124,34 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#addMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public void addMarkable(Markable markable) {
+	public void addItem(Item item) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addItem(int, de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public void addMarkable(int index, Markable markable) {
+	public void addItem(int index, Item item) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 	 */
 	@Override
-	public Markable removeMarkable(int index) {
+	public Item removeItem(int index) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public Markable removeMarkable(Markable markable) {
+	public Item removeItem(Item item) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -164,10 +164,10 @@ public class DummyContainer extends DummyMarkable implements Container {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveItem(de.ims.icarus.model.api.members.Item, int)
 	 */
 	@Override
-	public void moveMarkable(Markable markable, int index) {
+	public void moveItem(Item item, int index) {
 		throw new UnsupportedOperationException();
 	}
 

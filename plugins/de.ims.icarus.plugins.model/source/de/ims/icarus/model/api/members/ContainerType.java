@@ -41,13 +41,13 @@ import de.ims.icarus.model.xml.XmlResource;
 public enum ContainerType implements XmlResource {
 
 	/**
-	 * The container holds a single {@code Markable}.
+	 * The container holds a single {@code Item}.
 	 */
 	SINGLETON("singleton", 0, 1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE), //$NON-NLS-1$
 
 	/**
 	 * The container holds a non-continuous collection
-	 * of {@code Markable}s. The elements may appear in
+	 * of {@code Item}s. The elements may appear in
 	 * any order.
 	 *
 	 * @deprecated There is currently no reason to do the hassle of implementing
@@ -59,13 +59,13 @@ public enum ContainerType implements XmlResource {
 
 	/**
 	 * The container holds a non-continuous but ordered
-	 * collection of {@code Markable}s.
+	 * collection of {@code Item}s.
 	 */
 	LIST("list", 0, -1), //$NON-NLS-1$
 
 	/**
 	 * The container holds an ordered and continuous list
-	 * of {@code Markable}s.
+	 * of {@code Item}s.
 	 */
 	SPAN("span", 0, -1, EditOperation.CLEAR, EditOperation.ADD, EditOperation.REMOVE), //$NON-NLS-1$
 	;

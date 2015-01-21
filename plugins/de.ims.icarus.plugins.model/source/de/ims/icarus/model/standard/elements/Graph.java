@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.elements;
 import java.util.Arrays;
 
 import de.ims.icarus.model.api.members.Edge;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -76,7 +76,7 @@ public class Graph {
 	private static class Entry {
 		// Node for which edges need to be stored
 		@Reference
-		Markable node;
+		Item node;
 		// Array index of the first incoming edge
 		@Primitive
 		int countIn = 0;
@@ -89,7 +89,7 @@ public class Graph {
 		@Link
 		Entry next;
 
-		private Entry(Markable node, Entry next) {
+		private Entry(Item node, Entry next) {
 			this.node = node;
 			this.next = next;
 		}
@@ -114,7 +114,7 @@ public class Graph {
 		threshold = (int) (initialCapacity * CollectionUtils.DEFAULT_LOAD_FACTOR);
 	}
 
-	private Entry get(Markable node, boolean createIfMissing) {
+	private Entry get(Item node, boolean createIfMissing) {
 		if (node == null)
 			throw new NullPointerException("Invalid node");  //$NON-NLS-1$
 
@@ -158,7 +158,7 @@ public class Graph {
 		return count==0;
 	}
 
-	public int edgeCount(Markable node) {
+	public int edgeCount(Item node) {
 		Entry entry = get(node, false);
 		if(entry==null) {
 			return 0;
@@ -167,7 +167,7 @@ public class Graph {
 		return entry.countIn + entry.countOut;
 	}
 
-	public int edgeCount(Markable node, boolean incoming) {
+	public int edgeCount(Item node, boolean incoming) {
 		Entry entry = get(node, false);
 		if(entry==null) {
 			return 0;
@@ -176,7 +176,7 @@ public class Graph {
 		return incoming ? entry.countIn : entry.countOut;
 	}
 
-	public Edge edgeAt(Markable node, int index) {
+	public Edge edgeAt(Item node, int index) {
 		Entry entry = get(node, false);
 		if(entry==null || entry.edges==null)
 			throw new IndexOutOfBoundsException("No edges for node "+node); //$NON-NLS-1$
@@ -184,7 +184,7 @@ public class Graph {
 		return entry.edges[index];
 	}
 
-	public Edge edgeAt(Markable node, boolean incoming, int index) {
+	public Edge edgeAt(Item node, boolean incoming, int index) {
 		Entry entry = get(node, false);
 		if(entry==null || entry.edges==null)
 			throw new IndexOutOfBoundsException("No edges for node "+node); //$NON-NLS-1$
@@ -246,7 +246,7 @@ public class Graph {
 	 * @param edge
 	 * @param incoming
 	 */
-	public void add(Markable node, Edge edge, boolean incoming) {
+	public void add(Item node, Edge edge, boolean incoming) {
 		if (node == null)
 			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
 		if (edge == null)
@@ -273,7 +273,7 @@ public class Graph {
 		entry.edges[index] = edge;
 	}
 
-	public void remove(Markable node, Edge edge, boolean incoming) {
+	public void remove(Item node, Edge edge, boolean incoming) {
 		if (node == null)
 			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
 		if (edge == null)
@@ -344,7 +344,7 @@ public class Graph {
 		}
 	}
 
-	private void delete(Markable node) {
+	private void delete(Item node) {
 		Entry tab[] = table;
 		int hash = node.hashCode();
 		int index = (hash & 0x7FFFFFFF) % tab.length;

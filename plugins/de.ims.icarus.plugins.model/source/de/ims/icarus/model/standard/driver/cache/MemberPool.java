@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.driver.cache;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.util.mem.Primitive;
 import de.ims.icarus.util.mem.Reference;
 
@@ -40,7 +40,7 @@ import de.ims.icarus.util.mem.Reference;
 public class MemberPool {
 
 	@Reference
-	private ArrayList<Markable> pool;
+	private ArrayList<Item> pool;
 
 	@Primitive
 	private final int poolSize;
@@ -63,7 +63,7 @@ public class MemberPool {
 	 * and simply discards the given {@code member}.
 	 * @param member
 	 */
-	public boolean recycle(Markable member) {
+	public boolean recycle(Item member) {
 		if (member == null)
 			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
 
@@ -88,7 +88,7 @@ public class MemberPool {
 	 * no object pooled.
 	 * @return
 	 */
-	public Markable revive() {
+	public Item revive() {
 		if(pool==null || pool.isEmpty()) {
 			return null;
 		}
@@ -96,7 +96,7 @@ public class MemberPool {
 		return pool.remove(pool.size()-1);
 	}
 
-	public void recycleAll(Collection<? extends Markable> members) {
+	public void recycleAll(Collection<? extends Item> members) {
 		if (members == null)
 			throw new NullPointerException("Invalid members"); //$NON-NLS-1$
 
@@ -104,7 +104,7 @@ public class MemberPool {
 			pool = new ArrayList<>(poolSize);
 		}
 
-		for(Markable member : members) {
+		for(Item member : members) {
 			if(pool.size()>=poolSize) {
 				break;
 			}

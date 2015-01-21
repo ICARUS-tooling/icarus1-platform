@@ -42,7 +42,7 @@ import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LocationManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.Links.Link;
 import de.ims.icarus.model.standard.manifest.Links.MemoryLink;
@@ -523,7 +523,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 * @see de.ims.icarus.model.api.manifest.ContextManifest#getPrimaryLayerManifest()
 	 */
 	@Override
-	public MarkableLayerManifest getPrimaryLayerManifest() {
+	public ItemLayerManifest getPrimaryLayerManifest() {
 		if(primaryLayer!=null) {
 			return primaryLayer.get();
 		}
@@ -550,7 +550,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 	 * @return the baseLayerManifest
 	 */
 	@Override
-	public MarkableLayerManifest getBaseLayerManifest() {
+	public ItemLayerManifest getBaseLayerManifest() {
 		if(baseLayer!=null) {
 			return baseLayer.get();
 		}
@@ -627,7 +627,7 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 //		resetLookup();
 	}
 
-	protected class LayerLink extends Link<MarkableLayerManifest> {
+	protected class LayerLink extends Link<ItemLayerManifest> {
 
 		/**
 		 * @param id
@@ -640,8 +640,8 @@ public class ContextManifestImpl extends AbstractMemberManifest<ContextManifest>
 		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
-		protected MarkableLayerManifest resolve() {
-			return (MarkableLayerManifest) getLayerManifest(getId());
+		protected ItemLayerManifest resolve() {
+			return (ItemLayerManifest) getLayerManifest(getId());
 		}
 
 	}

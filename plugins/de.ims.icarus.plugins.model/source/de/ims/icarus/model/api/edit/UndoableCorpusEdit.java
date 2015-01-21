@@ -41,7 +41,7 @@ import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.members.CorpusMember;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.util.CorruptedStateException;
@@ -189,6 +189,7 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	 */
 	@Override
 	public void undo() throws CannotUndoException {
+		// Allow default check for available undo
 		super.undo();
 
 		int count = changes.size();
@@ -214,6 +215,7 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	 */
 	@Override
 	public void redo() throws CannotRedoException {
+		// Allow default check for available redo
 		super.redo();
 
 		int count = changes.size();
@@ -238,7 +240,7 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 	 */
 	@Override
 	public String getPresentationName() {
-		return nameKey==null ? ResourceManager.getInstance().get(nameKey)
+		return nameKey!=null ? ResourceManager.getInstance().get(nameKey)
 				: super.getPresentationName();
 	}
 
@@ -273,8 +275,8 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 
 	private Context getContextForChange(AtomicChange change){
 		CorpusMember member = change.getAffectedMember();
-		if(CorpusUtils.isMarkableMember(member)) {
-			return ((Markable)member).getLayer().getContext();
+		if(CorpusUtils.isItemMember(member)) {
+			return ((Item)member).getLayer().getContext();
 		} else if(CorpusUtils.isLayerMember(member)) {
 			return ((Layer)member).getContext();
 		} else {
@@ -284,8 +286,8 @@ public class UndoableCorpusEdit extends AbstractUndoableEdit {
 
 	private Layer getLayerForChange(AtomicChange change){
 		CorpusMember member = change.getAffectedMember();
-		if(CorpusUtils.isMarkableMember(member)) {
-			return ((Markable)member).getLayer();
+		if(CorpusUtils.isItemMember(member)) {
+			return ((Item)member).getLayer();
 		} else if(CorpusUtils.isLayerMember(member)) {
 			return (Layer)member;
 		} else {

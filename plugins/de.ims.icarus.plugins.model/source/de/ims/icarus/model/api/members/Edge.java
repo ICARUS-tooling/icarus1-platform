@@ -27,31 +27,31 @@ package de.ims.icarus.model.api.members;
 
 /**
  * Specifies a member of a {@code Structure} object. In addition to being
- * a simple {@link Markable}, an {@code Edge} consists of a {@code source}
+ * a simple {@link Item}, an {@code Edge} consists of a {@code source}
  * and {@code target} markable.
  * <p>
  * <b>Note</b> that while this interface specifies methods to change terminals
- * ({@link #setSource(Markable)} and {@link #setTarget(Markable)}) one should never
+ * ({@link #setSource(Item)} and {@link #setTarget(Item)}) one should never
  * call them directly! They are necessary for the enclosing structure to modify
  * edge terminals. So to achieve the desired effect <b>always</b> use
- * {@link Structure#setTerminal(Edge, Markable, boolean)} on the structure object
+ * {@link Structure#setTerminal(Edge, Item, boolean)} on the structure object
  * obtained via {@link Edge#getStructure()}!
  *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Edge extends Markable {
+public interface Edge extends Item {
 
 	Structure getStructure();
 
-	Markable getSource();
+	Item getSource();
 
-	Markable getTarget();
+	Item getTarget();
 
-	void setSource(Markable markable);
+	void setSource(Item item);
 
-	void setTarget(Markable markable);
+	void setTarget(Item item);
 
 	boolean isDirected();
 }

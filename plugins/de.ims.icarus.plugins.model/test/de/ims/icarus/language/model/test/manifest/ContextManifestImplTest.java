@@ -56,7 +56,7 @@ import de.ims.icarus.model.standard.manifest.ContextManifestImpl.PrerequisiteMan
 import de.ims.icarus.model.standard.manifest.FragmentLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.LayerGroupManifestImpl;
 import de.ims.icarus.model.standard.manifest.LocationManifestImpl;
-import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl;
 
 /**
  * @author Markus Gärtner
@@ -100,11 +100,11 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 		LayerGroupManifestImpl groupManifest1 = new LayerGroupManifestImpl(manifest);
 		groupManifest1.setId(GROUP_ID_1);
 
-		layerManifest = new MarkableLayerManifestImpl(location, registry, groupManifest1);
+		layerManifest = new ItemLayerManifestImpl(location, registry, groupManifest1);
 		layerManifest.setId(LAYER_ID_1);
 		groupManifest1.addLayerManifest(layerManifest);
 
-		layerManifest = new MarkableLayerManifestImpl(location, registry, groupManifest1);
+		layerManifest = new ItemLayerManifestImpl(location, registry, groupManifest1);
 		layerManifest.setId(LAYER_ID_2);
 		groupManifest1.addLayerManifest(layerManifest);
 
@@ -120,7 +120,7 @@ public class ContextManifestImplTest extends ManifestTestCase<ContextManifestImp
 		LayerGroupManifestImpl groupManifest2 = new LayerGroupManifestImpl(manifest);
 		groupManifest2.setId(GROUP_ID_2);
 
-		layerManifest = new MarkableLayerManifestImpl(location, registry, groupManifest2);
+		layerManifest = new ItemLayerManifestImpl(location, registry, groupManifest2);
 		layerManifest.setId(LAYER_ID_1_B);
 		groupManifest2.addLayerManifest(layerManifest);
 

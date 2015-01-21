@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.iql;
 
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * @author Markus Gärtner
@@ -54,5 +54,5 @@ public interface CandidateFilter {
 	 */
 	double getFilterStrength(QueryContext context);
 
-	boolean accepts(Markable candidate);
+	boolean accepts(Item candidate);
 }

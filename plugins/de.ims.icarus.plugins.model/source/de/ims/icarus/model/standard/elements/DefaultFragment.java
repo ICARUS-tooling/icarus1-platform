@@ -30,7 +30,7 @@ import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.layer.FragmentLayer;
 import de.ims.icarus.model.api.members.CorpusMember;
 import de.ims.icarus.model.api.members.Fragment;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.raster.Position;
 import de.ims.icarus.model.util.CorpusUtils;
@@ -44,22 +44,22 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public class DefaultFragment extends AbstractMarkable implements Fragment {
+public class DefaultFragment extends AbstractItem implements Fragment {
 
 	@Reference(ReferenceType.UPLINK)
-	private Markable markable;
+	private Item item;
 	@Reference(ReferenceType.DOWNLINK)
 	private Position fragmentBegin;
 	@Reference(ReferenceType.DOWNLINK)
 	private Position fragmentEnd;
 
 	/**
-	 * @param markable the markable to set
+	 * @param item the item to set
 	 */
-	public void setMarkable(Markable markable) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
-		this.markable = markable;
+	public void setItem(Item item) {
+		if (item == null)
+			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
+		this.item = item;
 	}
 
 	/**
@@ -101,19 +101,19 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
-		return markable.getBeginOffset();
+		return item.getBeginOffset();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
-		return markable.getEndOffset();
+		return item.getEndOffset();
 	}
 
 	/**
@@ -125,18 +125,18 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Fragment#getMarkable()
+	 * @see de.ims.icarus.model.api.members.Fragment#getItem()
 	 */
 	@Override
-	public Markable getMarkable() {
-		return markable;
+	public Item getItem() {
+		return item;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultMarkable.markable.AbstractMarkable#compareTo(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.standard.elements.DefaultItem.markable.AbstractItem#compareTo(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public int compareTo(Markable o) {
+	public int compareTo(Item o) {
 		return o instanceof Fragment ? CorpusUtils.compare(this, (Fragment)o)
 				: CorpusUtils.compare(this, o);
 	}
@@ -156,7 +156,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	public void recycle() {
 		super.recycle();
 
-		markable = null;
+		item = null;
 		fragmentBegin = fragmentEnd = null;
 	}
 
@@ -165,7 +165,7 @@ public class DefaultFragment extends AbstractMarkable implements Fragment {
 	 */
 	@Override
 	public boolean revive() {
-		return super.revive() && markable!=null
+		return super.revive() && item!=null
 				&& fragmentBegin!=null && fragmentEnd!=null;
 	}
 

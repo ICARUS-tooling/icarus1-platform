@@ -117,7 +117,7 @@ public interface Structure extends Container {
 	 * @throws IllegalArgumentException if the {@code node} is not a member
 	 * of this structure's node-container
 	 */
-	int getEdgeCount(Markable node);
+	int getEdgeCount(Item node);
 
 	/**
 	 * Return the number of either outgoing or incoming edges for a given node
@@ -129,22 +129,22 @@ public interface Structure extends Container {
 	 * @throws IllegalArgumentException if the {@code node} is not a member
 	 * of this structure's node-container
 	 */
-	int getEdgeCount(Markable node, boolean isSource);
+	int getEdgeCount(Item node, boolean isSource);
 
 	/**
 	 * Return the either outgoing or incoming edge at position {@code index}
 	 * for a given node depending on the {@code isSource} argument.
 	 *
-	 * @param node the {@code Markable} in question
+	 * @param node the {@code Item} in question
 	 * @param index the position of the desired {@code Edge} in the list of
 	 * <i>outgoing</i> edges for the given node
 	 * @return the edge at position {@code index} for a given node.
 	 * @throws NullPointerException if the {@code node} is {@code null}
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Markable,boolean)</tt>)
+	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Item,boolean)</tt>)
 	 *         with the given {@code node} and {@code isSource} parameters
 	 */
-	Edge getEdgeAt(Markable node, int index, boolean isSource);
+	Edge getEdgeAt(Item node, int index, boolean isSource);
 
 	/**
 	 * Utility method to fetch the <i>parent</i> of a given markable in this
@@ -158,7 +158,7 @@ public interface Structure extends Container {
 	 * @param node the node whose parent is to be returned
 	 * @return the node's parent or {@code null} if the node has no parent
 	 */
-	Markable getParent(Markable node);
+	Item getParent(Item node);
 
 	/**
 	 * For non-trivial structures returns the <i>generic root</i> node.
@@ -178,20 +178,20 @@ public interface Structure extends Container {
 	 * @return the <i>generic root</i> of this structure or {@code null} if this
 	 * structure is of type {@value StructureType#SET}
 	 */
-	Markable getRoot();
+	Item getRoot();
 
 	/**
-	 * Returns whether or not the given {@code Markable} is a root in this structure.
+	 * Returns whether or not the given {@code Item} is a root in this structure.
 	 * The {@code root} property is determined by a node being directly linked to the
 	 * <i>generic root</i> node as returned by {@link #getRoot()}.
 	 *
-	 * @param node The {@code Markable} in question
+	 * @param node The {@code Item} in question
 	 * @return {@code true} iff the given {@code node} is a root in this structure
 	 * @throws NullPointerException if the {@code node} argument is {@code null}
 	 * @throws IllegalArgumentException if the {@code node} is not a member of this
 	 * structure
 	 */
-	boolean isRoot(Markable node);
+	boolean isRoot(Item node);
 
 	// EDIT METHODS
 
@@ -234,7 +234,7 @@ public interface Structure extends Container {
 	 *
 	 * @see #addEdge(Edge)
 	 */
-	Edge addEdge(Markable source, Markable target);
+	Edge addEdge(Item source, Item target);
 
 	/**
 	 * Creates a new edge as member of this structure
@@ -244,7 +244,7 @@ public interface Structure extends Container {
 	 * Note that calling this method with an {@code index} parameter
 	 * equal to the size of the mutating structure as returned by
 	 * {@link Structure#getEdgeCount()} is equivalent to
-	 * using {@link #addEdge(Markable, Markable)}.
+	 * using {@link #addEdge(Item, Item)}.
 	 *
 	 * @param source
 	 * @param target
@@ -257,7 +257,7 @@ public interface Structure extends Container {
 	 *
 	 * @see #addEdge(Edge, int)
 	 */
-	Edge addEdge(Markable source, Markable target, int index);
+	Edge addEdge(Item source, Item target, int index);
 
 	/**
 	 * Removes and returns the edge at the given index. Shifts the
@@ -315,7 +315,7 @@ public interface Structure extends Container {
 	 * be already contained within the "node" container of this structure.
 	 *
 	 * @param edge The edge whose terminal should be changed
-	 * @param markable The new terminal for the edge
+	 * @param item The new terminal for the edge
 	 * @param isSource Specifies which terminal (source or target) should be changed
 	 * @throws NullPointerException if either one the {@code edge} or {@code markable}
 	 * argument is {@code null}
@@ -324,5 +324,5 @@ public interface Structure extends Container {
 	 * @throws IllegalArgumentException if the given {@code markable} is not a valid
 	 * candidate for the specified terminal
 	 */
-	void setTerminal(Edge edge, Markable markable, boolean isSource);
+	void setTerminal(Edge edge, Item item, boolean isSource);
 }

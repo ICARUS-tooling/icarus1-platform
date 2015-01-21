@@ -30,7 +30,7 @@ import de.ims.icarus.model.api.manifest.ManifestOwner;
 import de.ims.icarus.model.api.manifest.ValueSet;
 import de.ims.icarus.model.api.members.Annotation;
 import de.ims.icarus.model.api.members.Container;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.util.Collector;
 
@@ -61,7 +61,7 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 //	 * @return
 //	 * @throws NullPointerException if the {@code markable} is {@code null}
 //	 */
-//	Object getValue(Markable markable);
+//	Object getValue(Item markable);
 
 	/**
 	 * Collects all the keys in this layer which are mapped to valid annotation values for
@@ -70,13 +70,13 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * default annotations into consideration, since they are not accessed via a dedicated
 	 * key!
 	 *
-	 * @param markable
+	 * @param item
 	 * @param buffer
 	 * @return
 	 * @throws NullPointerException if any one of the two arguments is {@code null}
 	 * @throws UnsupportedOperationException if this layer does not support additional keys
 	 */
-	boolean collectKeys(Markable markable, Collector<String> buffer);
+	boolean collectKeys(Item item, Collector<String> buffer);
 
 	/**
 	 * Returns the annotation for a given markable and key or {@code null} if that markable
@@ -84,20 +84,20 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * Note that the returned object can be either an actual value or an {@link Annotation}
 	 * instance that wraps a value and provides further information.
 	 *
-	 * @param markable
+	 * @param item
 	 * @param key
 	 * @return
 	 * @throws NullPointerException if either the {@code markable} or {@code key}
 	 * is {@code null}
 	 * @throws UnsupportedOperationException if this layer does not support additional keys
 	 */
-	Object getValue(Markable markable, String key);
+	Object getValue(Item item, String key);
 
-	int getIntValue(Markable markable, String key);
-	float getFloatValue(Markable markable, String key);
-	double getDoubleValue(Markable markable, String key);
-	long getLongValue(Markable markable, String key);
-	boolean getBooleanValue(Markable markable, String key);
+	int getIntValue(Item item, String key);
+	float getFloatValue(Item item, String key);
+	double getDoubleValue(Item item, String key);
+	long getLongValue(Item item, String key);
+	boolean getBooleanValue(Item item, String key);
 
 	/**
 	 * Deletes all annotations in this layer
@@ -130,23 +130,23 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * {@code markable} is a {@link Container} or {@link Structure} then all
 	 * annotations defined for members of it should be removed as well.
 	 *
-	 * @param markable the {@code Markable} for which annotations should be removed
+	 * @param item the {@code Item} for which annotations should be removed
 	 * @param recursive if {@code true} removes all annotations defined for
-	 * elements ({@code Markable}s and {@code Edge}s alike) in the supplied
-	 * {@code Markable}
+	 * elements ({@code Item}s and {@code Edge}s alike) in the supplied
+	 * {@code Item}
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable
 	 */
-	void removeAllValues(Markable markable, boolean recursive);
+	void removeAllValues(Item item, boolean recursive);
 
 //	/**
 //	 * Assigns the given {@code value} as new annotation for the specified
-//	 * {@code Markable}, replacing any previously defined value. If the
+//	 * {@code Item}, replacing any previously defined value. If the
 //	 * {@code value} argument is {@code null} any stored annotation for the
 //	 * {@code markable} will be deleted.
 //	 *
-//	 * @param markable The {@code Markable} to change the annotation value for
+//	 * @param markable The {@code Item} to change the annotation value for
 //	 * @param value the new annotation value or {@code null} if the annotation
 //	 * for the given {@code markable} should be deleted
 //	 * @throws NullPointerException if the {@code markable} argument is {@code null}
@@ -156,18 +156,18 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 //	 * @throws UnsupportedOperationException if the corpus
 //	 * is not editable
 //	 */
-//	void setValue(Markable markable, Object value);
+//	void setValue(Item markable, Object value);
 
 
 	/**
 	 * Assigns the given {@code value} as new annotation for the specified
-	 * {@code Markable} and {@code key}, replacing any previously defined value.
+	 * {@code Item} and {@code key}, replacing any previously defined value.
 	 * If the {@code value} argument is {@code null} any stored annotation
 	 * for the combination of {@code markable} and {@code key} will be deleted.
 	 * <p>
 	 * This is an optional method
 	 *
-	 * @param markable The {@code Markable} to change the annotation value for
+	 * @param item The {@code Item} to change the annotation value for
 	 * @param key the key for which the annotation should be changed
 	 * @param value the new annotation value or {@code null} if the annotation
 	 * for the given {@code markable} and {@code key} should be deleted
@@ -180,7 +180,7 @@ public interface AnnotationLayer extends Layer, ManifestOwner<AnnotationLayerMan
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable
 	 */
-	void setValue(Markable markable, String key, Object value);
+	void setValue(Item item, String key, Object value);
 
 	/**
 	 *

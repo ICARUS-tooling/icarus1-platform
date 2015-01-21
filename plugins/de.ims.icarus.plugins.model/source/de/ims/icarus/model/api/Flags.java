@@ -23,21 +23,14 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.model.api.raster;
-
-import de.ims.icarus.model.api.CorpusModel;
-import de.ims.icarus.model.api.members.Item;
+package de.ims.icarus.model.api;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface Metric {
+public class Flags {
 
-	long distance(CorpusModel model, Item m1, Item m2);
-
-	boolean overlaps(CorpusModel model, Item m1, Item m2);
-
-	boolean contains(CorpusModel model, Item m1, Item m2);
+	public static final int
 }

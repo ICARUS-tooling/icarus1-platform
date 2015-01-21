@@ -26,7 +26,7 @@
 package de.ims.icarus.model.api.members;
 
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
@@ -40,7 +40,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface Markable extends CorpusMember, Comparable<Markable> {
+public interface Item extends CorpusMember, Comparable<Item> {
 
 	/**
 	 * If this markable is hosted within a container, returns that enclosing
@@ -79,10 +79,10 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 	 * bounding offsets.
 	 * <p>
 	 * Do <b>not</b> mix up the returned index with the result of a call to
-	 * {@link Container#indexOfMarkable(Markable)}! The latter is limited to integer values
+	 * {@link Container#indexOfItem(Item)}! The latter is limited to integer values
 	 * and returns the <i>current</i> position of a markable within that container's internal storage.
 	 * This index can change over time and is most likely different when using containers from
-	 * multiple {@link SubCorpus}s.
+	 * multiple {@link CorpusView}s.
 	 * The result of the {@code #getIndex()} method on the other features a much larger value space
 	 * and is constant, no matter where the markable in question is stored. The only way to modify
 	 * a markable's index is to remove or insert other markables into the underlying data.
@@ -104,11 +104,11 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 
 	/**
 	 * Returns the zero-based offset of this markable's begin within the corpus.
-	 * The first {@code Markable} in the {@link MarkableLayer} obtained via
+	 * The first {@code Item} in the {@link MarkableLayer} obtained via
 	 * {@link Corpus#getBaseLayer()} is defined to have offset {@code 0}. All other
-	 * offsets are calculated relative to this. If this {@code Markable} is a
+	 * offsets are calculated relative to this. If this {@code Item} is a
 	 * {@link Container} or {@link Structure} then the returned offset is the
-	 * result of calling {@link Markable#getBeginOffset()} on the left-most markable
+	 * result of calling {@link Item#getBeginOffset()} on the left-most markable
 	 * hosted within this object.
 	 * <p>
 	 * Note that is perfectly legal for <i>virtual</i> markables to return
@@ -122,11 +122,11 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 
 	/**
 	 * Returns the zero-based offset of this markable's end within the corpus.
-	 * The first {@code Markable} in the {@link MarkableLayer} obtained via
+	 * The first {@code Item} in the {@link MarkableLayer} obtained via
 	 * {@link Corpus#getBaseLayer()} is defined to have offset {@code 0}. All other
-	 * offsets are calculated relative to this. If this {@code Markable} is a
+	 * offsets are calculated relative to this. If this {@code Item} is a
 	 * {@link Container} or {@link Structure} then the returned offset is the
-	 * result of calling {@link Markable#getEndOffset()} on the right-most markable
+	 * result of calling {@link Item#getEndOffset()} on the right-most markable
 	 * hosted within this object.
 	 * <p>
 	 * Note that is perfectly legal for <i>virtual</i> markables to return
@@ -140,5 +140,5 @@ public interface Markable extends CorpusMember, Comparable<Markable> {
 
 	@Override
 	@AccessRestriction(AccessMode.ALL)
-	int compareTo(Markable o);
+	int compareTo(Item o);
 }

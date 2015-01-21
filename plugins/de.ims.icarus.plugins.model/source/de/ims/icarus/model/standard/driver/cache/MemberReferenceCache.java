@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.standard.driver.cache;
 
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
@@ -58,7 +58,7 @@ public class MemberReferenceCache extends MemberCache {
 		 * @param value The value for this key
 		 * @param next A reference to the next entry in the table
 		 */
-		protected ReferenceEntry(long key, Markable value, Entry next) {
+		protected ReferenceEntry(long key, Item value, Entry next) {
 			super(key, value, next);
 		}
 	}
@@ -84,7 +84,7 @@ public class MemberReferenceCache extends MemberCache {
 	 * @return
 	 */
 	@AccessRestriction(AccessMode.MANAGE)
-	public Markable aquireMember(long key) {
+	public Item aquireMember(long key) {
 		ReferenceEntry entry = (ReferenceEntry) fetch(key);
 		if(entry==null) {
 			return null;
@@ -99,7 +99,7 @@ public class MemberReferenceCache extends MemberCache {
 	 * Called when a segment destroys its contents and frees a markable object.
 	 * This method internally decreases the reference counter for the markable and
 	 * once that counter reaches {@code 0}, removes the entry from the cache.
-	 * In the case the entry is removed, returns the mapped {@link Markable}, otherwise
+	 * In the case the entry is removed, returns the mapped {@link Item}, otherwise
 	 * {@code null}.
 	 * <p>
 	 * Note that the cache does <b>not</b> automatically move released members into the
@@ -111,13 +111,13 @@ public class MemberReferenceCache extends MemberCache {
 	 * @return
 	 */
 	@AccessRestriction(AccessMode.MANAGE)
-	public Markable releaseMember(long key) {
+	public Item releaseMember(long key) {
 		ReferenceEntry entry = (ReferenceEntry) fetch(key);
 		if(entry==null)
 			throw new IllegalArgumentException("No member registered for key: "+key); //$NON-NLS-1$
 
 		if (--entry.refCount <= 0) {
-			Markable member = entry.value;
+			Item member = entry.value;
 			remove(key);
 			return member;
 		}

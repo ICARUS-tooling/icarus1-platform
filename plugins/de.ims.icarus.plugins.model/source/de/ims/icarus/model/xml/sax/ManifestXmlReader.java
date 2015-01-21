@@ -67,7 +67,7 @@ import de.ims.icarus.model.standard.manifest.DriverManifestImpl;
 import de.ims.icarus.model.standard.manifest.ExpressionXmlHandler;
 import de.ims.icarus.model.standard.manifest.FragmentLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.HighlightLayerManifestImpl;
-import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.OptionsManifestImpl;
 import de.ims.icarus.model.standard.manifest.PathResolverManifestImpl;
 import de.ims.icarus.model.standard.manifest.RasterizerManifestImpl;
@@ -439,7 +439,7 @@ public class ManifestXmlReader implements ModelXmlTags, ModelXmlAttributes {
 		templateHandlers.put(TAG_EVAL, ExpressionXmlHandler.class);
 		templateHandlers.put(TAG_FRAGMENT_LAYER, FragmentLayerManifestImpl.class);
 		templateHandlers.put(TAG_HIGHLIGHT_LAYER, HighlightLayerManifestImpl.class);
-		templateHandlers.put(TAG_MARKABLE_LAYER, MarkableLayerManifestImpl.class);
+		templateHandlers.put(TAG_MARKABLE_LAYER, ItemLayerManifestImpl.class);
 		templateHandlers.put(TAG_OPTIONS, OptionsManifestImpl.class);
 		templateHandlers.put(TAG_PATH_RESOLVER, PathResolverManifestImpl.class);
 		templateHandlers.put(TAG_RASTERIZER, RasterizerManifestImpl.class);

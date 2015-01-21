@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.iql;
 
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 
 /**
  * @author Markus Gärtner
@@ -36,7 +36,7 @@ public interface QueryContext {
 
 	Query getQuery();
 
-	SubCorpus getTarget();
+	CorpusView getTarget();
 
 
 }

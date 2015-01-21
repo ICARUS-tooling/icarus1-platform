@@ -64,7 +64,7 @@ public abstract class AbstractString implements CharSequence, Comparable<CharSeq
 	public int hashCode() {
 		int h = hash;
 		if(h==0 && length()>0) {
-			h = StringUtil._hash(this);
+			h = StringUtil.hash(this);
 			hash = h;
 		}
 		return h;
@@ -75,7 +75,7 @@ public abstract class AbstractString implements CharSequence, Comparable<CharSeq
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		return StringUtil._equals(this, obj);
+		return StringUtil.equals(this, obj);
 	}
 
 	/**

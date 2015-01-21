@@ -46,7 +46,7 @@ import de.ims.icarus.model.api.manifest.FragmentLayerManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.manifest.RasterizerManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.raster.Rasterizer;
@@ -97,7 +97,7 @@ public class ContextFactory {
 			}
 
 			// Finally set primary layer
-			MarkableLayerManifest primaryManifest = groupManifest.getPrimaryLayerManifest();
+			ItemLayerManifest primaryManifest = groupManifest.getPrimaryLayerManifest();
 			if(primaryManifest!=null) {
 				group.setPrimaryLayer((MarkableLayer) context.getLayer(primaryManifest.getId()));
 			}
@@ -106,7 +106,7 @@ public class ContextFactory {
 		// Intermediate linking
 
 		// Set context wide primary layer
-		MarkableLayerManifest primaryManifest = manifest.getPrimaryLayerManifest();
+		ItemLayerManifest primaryManifest = manifest.getPrimaryLayerManifest();
 		if(primaryManifest!=null) {
 			context.setPrimaryLayer((MarkableLayer) context.getLayer(primaryManifest.getId()));
 		}
@@ -143,7 +143,7 @@ public class ContextFactory {
 			return createAnnotationLayer((AnnotationLayerManifest) manifest, group);
 
 		case MARKABLE_LAYER_MANIFEST:
-			return createMarkableLayer((MarkableLayerManifest) manifest, group);
+			return createMarkableLayer((ItemLayerManifest) manifest, group);
 
 		case STRUCTURE_LAYER_MANIFEST:
 			return createStructureLayer((StructureLayerManifest) manifest, group);
@@ -166,7 +166,7 @@ public class ContextFactory {
 		}
 	}
 
-	protected LayerLinker createMarkableLayer(MarkableLayerManifest manifest, LayerGroup group) {
+	protected LayerLinker createMarkableLayer(ItemLayerManifest manifest, LayerGroup group) {
 		return new MarkableLayerLinker(new DefaultMarkableLayer(manifest, group));
 	}
 

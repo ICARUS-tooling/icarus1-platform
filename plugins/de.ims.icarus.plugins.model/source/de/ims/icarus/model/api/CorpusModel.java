@@ -34,7 +34,7 @@ import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.api.members.CorpusMember;
 import de.ims.icarus.model.api.members.Edge;
 import de.ims.icarus.model.api.members.Fragment;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.members.Structure;
@@ -80,7 +80,7 @@ public interface CorpusModel {
 
 	Corpus getCorpus();
 
-	SubCorpus getSource();
+	CorpusView getSource();
 
 	//---------------------------------------------
 	//			MEMBER METHODS
@@ -108,7 +108,7 @@ public interface CorpusModel {
 
 	int getMarkableCount(MarkableLayer layer);
 
-	Markable getMarkableAt(MarkableLayer layer, int index);
+	Item getItemAt(MarkableLayer layer, int index);
 
 	Metric getMetric(MarkableLayer layer);
 
@@ -132,7 +132,7 @@ public interface CorpusModel {
 	 * markable is not hosted within a container.
 	 */
 	@AccessRestriction(AccessMode.ALL)
-	Container getContainer(Markable markable);
+	Container getContainer(Item item);
 
 	/**
 	 * Returns the {@code MarkableLayer} this markable is hosted in. For nested
@@ -144,7 +144,7 @@ public interface CorpusModel {
 	 * @return The enclosing {@code MarkableLayer} that hosts this markable object.
 	 */
 	@AccessRestriction(AccessMode.ALL)
-	MarkableLayer getLayer(Markable markable);
+	MarkableLayer getLayer(Item item);
 
 	/**
 	 * Returns the markable's global position in the hosting container. For base markables
@@ -153,10 +153,10 @@ public interface CorpusModel {
 	 * bounding offsets.
 	 * <p>
 	 * Do <b>not</b> mix up the returned index with the result of a call to
-	 * {@link Container#indexOfMarkable(Markable)}! The latter is limited to integer values
+	 * {@link Container#indexOfItem(Item)}! The latter is limited to integer values
 	 * and returns the <i>current</i> position of a markable within that container's internal storage.
 	 * This index can change over time and is most likely different when using containers from
-	 * multiple {@link SubCorpus}s.
+	 * multiple {@link CorpusView}s.
 	 * The result of the {@code #getIndex()} method on the other features a much larger value space
 	 * and is constant, no matter where the markable in question is stored. The only way to modify
 	 * a markable's index is to remove or insert other markables into the underlying data.
@@ -164,7 +164,7 @@ public interface CorpusModel {
 	 * @return
 	 */
 	@AccessRestriction(AccessMode.ALL)
-	long getIndex(Markable markable);
+	long getIndex(Item item);
 
 	/**
 	 * Changes the index value associated with this markable object to {@code newIndex}.
@@ -174,15 +174,15 @@ public interface CorpusModel {
 	 * @param newIndex
 	 */
 	@AccessRestriction(AccessMode.WRITE)
-	void setIndex(Markable markable, long newIndex);
+	void setIndex(Item item, long newIndex);
 
 	/**
 	 * Returns the zero-based offset of this markable's begin within the corpus.
-	 * The first {@code Markable} in the {@link MarkableLayer} obtained via
+	 * The first {@code Item} in the {@link MarkableLayer} obtained via
 	 * {@link Corpus#getBaseLayer()} is defined to have offset {@code 0}. All other
-	 * offsets are calculated relative to this. If this {@code Markable} is a
+	 * offsets are calculated relative to this. If this {@code Item} is a
 	 * {@link Container} or {@link Structure} then the returned offset is the
-	 * result of calling {@link Markable#getBeginOffset()} on the left-most markable
+	 * result of calling {@link Item#getBeginOffset()} on the left-most markable
 	 * hosted within this object.
 	 * <p>
 	 * Note that is perfectly legal for <i>virtual</i> markables to return
@@ -192,15 +192,15 @@ public interface CorpusModel {
 	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
 	@AccessRestriction(AccessMode.ALL)
-	long getBeginOffset(Markable markable);
+	long getBeginOffset(Item item);
 
 	/**
 	 * Returns the zero-based offset of this markable's end within the corpus.
-	 * The first {@code Markable} in the {@link MarkableLayer} obtained via
+	 * The first {@code Item} in the {@link MarkableLayer} obtained via
 	 * {@link Corpus#getBaseLayer()} is defined to have offset {@code 0}. All other
-	 * offsets are calculated relative to this. If this {@code Markable} is a
+	 * offsets are calculated relative to this. If this {@code Item} is a
 	 * {@link Container} or {@link Structure} then the returned offset is the
-	 * result of calling {@link Markable#getEndOffset()} on the right-most markable
+	 * result of calling {@link Item#getEndOffset()} on the right-most markable
 	 * hosted within this object.
 	 * <p>
 	 * Note that is perfectly legal for <i>virtual</i> markables to return
@@ -210,9 +210,9 @@ public interface CorpusModel {
 	 * or {@code -1} if the markable is <i>virtual</i>
 	 */
 	@AccessRestriction(AccessMode.ALL)
-	long getEndOffset(Markable markable);
+	long getEndOffset(Item item);
 
-	boolean isVirtual(Markable markable);
+	boolean isVirtual(Item item);
 
 	//---------------------------------------------
 	//			CONTAINER METHODS
@@ -220,7 +220,7 @@ public interface CorpusModel {
 
 	/**
 	 * Returns the type of this container. This provides
-	 * information about how contained {@code Markable}s are ordered and
+	 * information about how contained {@code Item}s are ordered and
 	 * if they represent a continuous subset of the corpus.
 	 *
 	 * @return The {@code ContainerType} of this {@code Container}
@@ -251,34 +251,34 @@ public interface CorpusModel {
 	Container getBoundaryContainer(Container container);
 
 	/**
-	 * Returns the number of {@code Markable} objects hosted within the given
+	 * Returns the number of {@code Item} objects hosted within the given
 	 * container.
 	 * <p>
 	 * Note that this does <b>not</b> include possible {@code Edge}s stored
 	 * within the container in case it is a {@link Structure}!
 	 *
-	 * @return The number of {@code Markable}s in this container
+	 * @return The number of {@code Item}s in this container
 	 *
 	 * @see #getSize(MarkableLayer)
 	 */
 	int getMarkableCount(Container container);
 
 	/**
-	 * Returns the {@code Markable} stored at position {@code index} within
+	 * Returns the {@code Item} stored at position {@code index} within
 	 * this {@code Container}. Note that however elements in a container may
 	 * be unordered depending on the {@code ContainerType} as returned by
 	 * {@link #getErrorType()}, the same index has always to be mapped to
-	 * the exact same {@code Markable} within a single container!
+	 * the exact same {@code Item} within a single container!
 	 *
-	 * @param index The index of the {@code Markable} to be returned
-	 * @return The {@code Markable} at position {@code index} within this container
+	 * @param index The index of the {@code Item} to be returned
+	 * @return The {@code Item} at position {@code index} within this container
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= getMarkableCount()</tt>)
 	 */
-	Markable getMarkableAt(Container container, int index);
+	Item getItemAt(Container container, int index);
 
 	/**
-	 * Returns the index of the given {@code Markable} within this container's
+	 * Returns the index of the given {@code Item} within this container's
 	 * list of markables or {@code -1} if the markable is not hosted within this
 	 * container.
 	 * <p>
@@ -290,25 +290,25 @@ public interface CorpusModel {
 	 * scale well with the number of markables contained. Constant execution cost
 	 * should be the standard goal!
 	 *
-	 * @param markable The {@code Markable} whose index is to be returned
-	 * @return The index at which the {@code Markable} appears within this
+	 * @param item The {@code Item} whose index is to be returned
+	 * @return The index at which the {@code Item} appears within this
 	 * container or {@code -1} if the markable is not hosted within this container.
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 */
-	int indexOfMarkable(Container container, Markable markable);
+	int indexOfItem(Container container, Item item);
 
 	/**
 	 * Returns {@code true} if this container hosts the specified markable.
-	 * Essentially equal to receiving {@code -1} as result to a {@link #indexOfMarkable(Markable)}
+	 * Essentially equal to receiving {@code -1} as result to a {@link #indexOfMarkable(Item)}
 	 * call.
 	 *
-	 * @param markable The markable to check
+	 * @param item The markable to check
 	 * @return {@code true} iff this container hosts the given markable
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 *
-	 * @see #indexOfMarkable(Markable)
+	 * @see #indexOfMarkable(Item)
 	 */
-	boolean containsMarkable(Container container, Markable markable);
+	boolean containsItem(Container container, Item item);
 
 	/**
 	 * Removes from the mutating container all elements.
@@ -320,12 +320,12 @@ public interface CorpusModel {
 	/**
 	 * Adds a new markable to this container
 	 *
-	 * @param markable
+	 * @param item
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	void addMarkable(Container container, Markable markable);
+	void addItem(Container container, Item item);
 
 	/**
 	 * Adds a new markable to this container
@@ -336,14 +336,14 @@ public interface CorpusModel {
 	 * using {@link #addMarkable()}.
 	 *
 	 * @param index The position to insert the new markable at
-	 * @param markable
+	 * @param item
 	 * @throws IndexOutOfBoundsException if the index is out of range
 	 *         (<tt>index &lt; 0 || index &gt; getMarkableCount()</tt>)
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	void addMarkable(Container container, int index, Markable markable);
+	void addItem(Container container, int index, Item item);
 
 	/**
 	 * Removes and returns the markable at the given index. Shifts the
@@ -357,17 +357,17 @@ public interface CorpusModel {
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	Markable removeMarkable(Container container, int index);
+	Item removeItem(Container container, int index);
 
 	/**
 	 * First determines the index of the given markable object within
 	 * this container and then calls {@link #removeMarkable(int)}.
 	 *
-	 * @param markable
+	 * @param item
 	 * @return
-	 * @see Container#indexOfMarkable(Markable)
+	 * @see Container#indexOfItem(Item)
 	 */
-	boolean removeMarkable(Container container, Markable markable);
+	boolean removeItem(Container container, Item item);
 
 	/**
 	 * Moves the markable currently located at position {@code index0}
@@ -390,11 +390,11 @@ public interface CorpusModel {
 	 * First determines the index of the given markable object within
 	 * this container and then calls {@link #moveMarkable(int, int)}.
 	 *
-	 * @param markable The markable to be moved
+	 * @param item The markable to be moved
 	 * @param index The position the {@code markable} argument should be moved to
-	 * @see Container#indexOfMarkable(Markable)
+	 * @see Container#indexOfItem(Item)
 	 */
-	void moveMarkable(Container container, Markable markable, int index);
+	void moveItem(Container container, Item item, int index);
 
 	//---------------------------------------------
 	//			STRUCTURE METHODS
@@ -460,7 +460,7 @@ public interface CorpusModel {
 	 * @throws IllegalArgumentException if the {@code node} is not a member
 	 * of this structure's node-container
 	 */
-	int getEdgeCount(Structure structure, Markable node);
+	int getEdgeCount(Structure structure, Item node);
 
 	/**
 	 * Return the number of either outgoing or incoming edges for a given node
@@ -472,22 +472,22 @@ public interface CorpusModel {
 	 * @throws IllegalArgumentException if the {@code node} is not a member
 	 * of this structure's node-container
 	 */
-	int getEdgeCount(Structure structure, Markable node, boolean isSource);
+	int getEdgeCount(Structure structure, Item node, boolean isSource);
 
 	/**
 	 * Return the either outgoing or incoming edge at position {@code index}
 	 * for a given node depending on the {@code isSource} argument.
 	 *
-	 * @param node the {@code Markable} in question
+	 * @param node the {@code Item} in question
 	 * @param index the position of the desired {@code Edge} in the list of
 	 * <i>outgoing</i> edges for the given node
 	 * @return the edge at position {@code index} for a given node.
 	 * @throws NullPointerException if the {@code node} is {@code null}
 	 * @throws IndexOutOfBoundsException if the index is out of range
-	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Markable,boolean)</tt>)
+	 *         (<tt>index &lt; 0 || index &gt;= getEdgeCount(Item,boolean)</tt>)
 	 *         with the given {@code node} and {@code isSource} parameters
 	 */
-	Edge getEdgeAt(Structure structure, Markable node, int index, boolean isSource);
+	Edge getEdgeAt(Structure structure, Item node, int index, boolean isSource);
 
 	/**
 	 * Utility method to fetch the <i>parent</i> of a given markable in this
@@ -501,7 +501,7 @@ public interface CorpusModel {
 	 * @param node the node whose parent is to be returned
 	 * @return the node's parent or {@code null} if the node has no parent
 	 */
-	Markable getParent(Structure structure, Markable node);
+	Item getParent(Structure structure, Item node);
 
 	/**
 	 * For non-trivial structures returns the <i>generic root</i> node.
@@ -521,20 +521,20 @@ public interface CorpusModel {
 	 * @return the <i>generic root</i> of this structure or {@code null} if this
 	 * structure is of type {@value StructureType#SET}
 	 */
-	Markable getRoot(Structure structure);
+	Item getRoot(Structure structure);
 
 	/**
-	 * Returns whether or not the given {@code Markable} is a root in this structure.
+	 * Returns whether or not the given {@code Item} is a root in this structure.
 	 * The {@code root} property is determined by a node being directly linked to the
 	 * <i>generic root</i> node as returned by {@link #getRoot()}.
 	 *
-	 * @param node The {@code Markable} in question
+	 * @param node The {@code Item} in question
 	 * @return {@code true} iff the given {@code node} is a root in this structure
 	 * @throws NullPointerException if the {@code node} argument is {@code null}
 	 * @throws IllegalArgumentException if the {@code node} is not a member of this
 	 * structure
 	 */
-	boolean isRoot(Structure structure, Markable node);
+	boolean isRoot(Structure structure, Item node);
 
 	// EDIT METHODS
 
@@ -577,7 +577,7 @@ public interface CorpusModel {
 	 *
 	 * @see #addEdge(Edge)
 	 */
-	Edge addEdge(Structure structure, Markable source, Markable target);
+	Edge addEdge(Structure structure, Item source, Item target);
 
 	/**
 	 * Creates a new edge as member of this structure
@@ -587,7 +587,7 @@ public interface CorpusModel {
 	 * Note that calling this method with an {@code index} parameter
 	 * equal to the size of the mutating structure as returned by
 	 * {@link Structure#getEdgeCount()} is equivalent to
-	 * using {@link #addEdge(Markable, Markable)}.
+	 * using {@link #addEdge(Item, Item)}.
 	 *
 	 * @param source
 	 * @param target
@@ -600,7 +600,7 @@ public interface CorpusModel {
 	 *
 	 * @see #addEdge(Edge, int)
 	 */
-	Edge addEdge(Structure structure, Markable source, Markable target, int index);
+	Edge addEdge(Structure structure, Item source, Item target, int index);
 
 	/**
 	 * Removes and returns the edge at the given index. Shifts the
@@ -658,7 +658,7 @@ public interface CorpusModel {
 	 * be already contained within the "node" container of this structure.
 	 *
 	 * @param edge The edge whose terminal should be changed
-	 * @param markable The new terminal for the edge
+	 * @param item The new terminal for the edge
 	 * @param isSource Specifies which terminal (source or target) should be changed
 	 * @throws NullPointerException if either one the {@code edge} or {@code markable}
 	 * argument is {@code null}
@@ -667,7 +667,7 @@ public interface CorpusModel {
 	 * @throws IllegalArgumentException if the given {@code markable} is not a valid
 	 * candidate for the specified terminal
 	 */
-	void setTerminal(Structure structure, Edge edge, Markable markable, boolean isSource);
+	void setTerminal(Structure structure, Edge edge, Item item, boolean isSource);
 
 	//---------------------------------------------
 	//			EDGE METHODS
@@ -675,13 +675,13 @@ public interface CorpusModel {
 
 	Structure getStructure(Edge edge);
 
-	Markable getSource(Edge edge);
+	Item getSource(Edge edge);
 
-	Markable getTarget(Edge edge);
+	Item getTarget(Edge edge);
 
-	void setSource(Edge edge, Markable markable);
+	void setSource(Edge edge, Item item);
 
-	void setTarget(Edge edge, Markable markable);
+	void setTarget(Edge edge, Item item);
 
 	boolean isDirected();
 
@@ -694,7 +694,7 @@ public interface CorpusModel {
 	 *
 	 * @return
 	 */
-	Markable getMarkable(Fragment fragment);
+	Item getItem(Fragment fragment);
 
 	/**
 	 * Returns the position within the surrounding markable of
@@ -745,13 +745,13 @@ public interface CorpusModel {
 	 * default annotations into consideration, since they are not accessed via a dedicated
 	 * key!
 	 *
-	 * @param markable
+	 * @param item
 	 * @param buffer
 	 * @return
 	 * @throws NullPointerException if any one of the two arguments is {@code null}
 	 * @throws UnsupportedOperationException if this layer does not support additional keys
 	 */
-	boolean collectKeys(AnnotationLayer layer, Markable markable, Collector<String> buffer);
+	boolean collectKeys(AnnotationLayer layer, Item item, Collector<String> buffer);
 
 	/**
 	 * Returns the annotation for a given markable and key or {@code null} if that markable
@@ -759,20 +759,20 @@ public interface CorpusModel {
 	 * Note that the returned object can be either an actual value or an {@link Annotation}
 	 * instance that wraps a value and provides further information.
 	 *
-	 * @param markable
+	 * @param item
 	 * @param key
 	 * @return
 	 * @throws NullPointerException if either the {@code markable} or {@code key}
 	 * is {@code null}
 	 * @throws UnsupportedOperationException if this layer does not support additional keys
 	 */
-	Object getValue(AnnotationLayer layer, Markable markable, String key);
+	Object getValue(AnnotationLayer layer, Item item, String key);
 
-	int getIntegerValue(AnnotationLayer layer, Markable markable, String key);
-	long getLongValue(AnnotationLayer layer, Markable markable, String key);
-	float getFloatValue(AnnotationLayer layer, Markable markable, String key);
-	double getDoubleValue(AnnotationLayer layer, Markable markable, String key);
-	boolean getBooleanValue(AnnotationLayer layer, Markable markable, String key);
+	int getIntegerValue(AnnotationLayer layer, Item item, String key);
+	long getLongValue(AnnotationLayer layer, Item item, String key);
+	float getFloatValue(AnnotationLayer layer, Item item, String key);
+	double getDoubleValue(AnnotationLayer layer, Item item, String key);
+	boolean getBooleanValue(AnnotationLayer layer, Item item, String key);
 
 	/**
 	 * Deletes all annotations in this layer
@@ -805,25 +805,25 @@ public interface CorpusModel {
 	 * {@code markable} is a {@link Container} or {@link Structure} then all
 	 * annotations defined for members of it should be removed as well.
 	 *
-	 * @param markable the {@code Markable} for which annotations should be removed
+	 * @param item the {@code Item} for which annotations should be removed
 	 * @param recursive if {@code true} removes all annotations defined for
-	 * elements ({@code Markable}s and {@code Edge}s alike) in the supplied
-	 * {@code Markable}
+	 * elements ({@code Item}s and {@code Edge}s alike) in the supplied
+	 * {@code Item}
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable
 	 */
-	void removeAllValues(AnnotationLayer layer, Markable markable, boolean recursive);
+	void removeAllValues(AnnotationLayer layer, Item item, boolean recursive);
 
 	/**
 	 * Assigns the given {@code value} as new annotation for the specified
-	 * {@code Markable} and {@code key}, replacing any previously defined value.
+	 * {@code Item} and {@code key}, replacing any previously defined value.
 	 * If the {@code value} argument is {@code null} any stored annotation
 	 * for the combination of {@code markable} and {@code key} will be deleted.
 	 * <p>
 	 * This is an optional method
 	 *
-	 * @param markable The {@code Markable} to change the annotation value for
+	 * @param item The {@code Item} to change the annotation value for
 	 * @param key the key for which the annotation should be changed
 	 * @param value the new annotation value or {@code null} if the annotation
 	 * for the given {@code markable} and {@code key} should be deleted
@@ -835,13 +835,13 @@ public interface CorpusModel {
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable
 	 */
-	Object setValue(AnnotationLayer layer, Markable markable, String key, Object value);
+	Object setValue(AnnotationLayer layer, Item item, String key, Object value);
 
-	int setIntegerValue(AnnotationLayer layer, Markable markable, String key, int value);
-	long setLongValue(AnnotationLayer layer, Markable markable, String key, long value);
-	float setFloatValue(AnnotationLayer layer, Markable markable, String key, float value);
-	double setDoubleValue(AnnotationLayer layer, Markable markable, String key, double value);
-	boolean setBooleanValue(AnnotationLayer layer, Markable markable, String key, boolean value);
+	int setIntegerValue(AnnotationLayer layer, Item item, String key, int value);
+	long setLongValue(AnnotationLayer layer, Item item, String key, long value);
+	float setFloatValue(AnnotationLayer layer, Item item, String key, float value);
+	double setDoubleValue(AnnotationLayer layer, Item item, String key, double value);
+	boolean setBooleanValue(AnnotationLayer layer, Item item, String key, boolean value);
 
 	/**
 	 *
@@ -854,5 +854,5 @@ public interface CorpusModel {
 	 * @return {@code true} iff the layer holds at least one valid annotation object
 	 * for the specified markable.
 	 */
-	boolean hasAnnotations(AnnotationLayer layer, Markable markable);
+	boolean hasAnnotations(AnnotationLayer layer, Item item);
 }

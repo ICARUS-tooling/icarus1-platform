@@ -43,7 +43,7 @@ import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.CorpusMember;
 import de.ims.icarus.model.api.members.Edge;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.model.util.CorpusMemberUtils;
@@ -58,8 +58,8 @@ import de.ims.icarus.util.CorruptedStateException;
  */
 public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifest> implements AnnotationLayer {
 
-	// Lookup for annotations involving markables
-	private final Map<Markable, AnnotationBundle> keyAnnotations = new WeakHashMap<>();
+	// Lookup for annotations involving items
+	private final Map<Item, AnnotationBundle> keyAnnotations = new WeakHashMap<>();
 
 	// Factory for creating annotation bundles (constructor assigns default implementation)
 	private BundleFactory bundleFactory;
@@ -75,7 +75,7 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 			return new BundleFactory() {
 
 				@Override
-				public AnnotationBundle createBundle(Markable markable,
+				public AnnotationBundle createBundle(Item item,
 						AnnotationLayer layer) {
 					return new LargeAnnotationBundle();
 				}
@@ -84,7 +84,7 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 			return new BundleFactory() {
 
 				@Override
-				public AnnotationBundle createBundle(Markable markable,
+				public AnnotationBundle createBundle(Item item,
 						AnnotationLayer layer) {
 					return new CompactAnnotationBundle(keyCount);
 				}
@@ -124,22 +124,22 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 			throw new IllegalArgumentException("Key not allowed in annotation layer: "+key); //$NON-NLS-1$
 	}
 
-	private void checkMarkable(Markable markable) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
+	private void checkItem(Item item) {
+		if (item == null)
+			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
 
-		MarkableLayer layer = markable.getLayer();
+		MarkableLayer layer = item.getLayer();
 		if(!getBaseLayers().contains(layer))
-			throw new IllegalArgumentException("Host layer of markable "+markable+" is not a valid base layer of this annotation layer"); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException("Host layer of item "+item+" is not a valid base layer of this annotation layer"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private AnnotationBundle getAnnotations(Markable markable, boolean createIfMissing) {
-		AnnotationBundle annotations = keyAnnotations.get(markable);
+	private AnnotationBundle getAnnotations(Item item, boolean createIfMissing) {
+		AnnotationBundle annotations = keyAnnotations.get(item);
 		if(annotations==null && createIfMissing) {
 			synchronized (keyAnnotations) {
-				if((annotations = keyAnnotations.get(markable))==null) {
-					annotations = bundleFactory.createBundle(markable, this);
-					keyAnnotations.put(markable, annotations);
+				if((annotations = keyAnnotations.get(item))==null) {
+					annotations = bundleFactory.createBundle(item, this);
+					keyAnnotations.put(item, annotations);
 				}
 			}
 		}
@@ -157,14 +157,14 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SimpleAnnotationLayer.layer.DefaultAnnotationLayer#getValue(de.ims.icarus.model.api.members.Markable, java.lang.String)
+	 * @see de.ims.icarus.model.api.SimpleAnnotationLayer.layer.DefaultAnnotationLayer#getValue(de.ims.icarus.model.api.members.Item, java.lang.String)
 	 */
 	@Override
-	public Object getValue(Markable markable, String key) {
-		checkMarkable(markable);
+	public Object getValue(Item item, String key) {
+		checkItem(item);
 		checkKey(key);
 
-		AnnotationBundle annotations = getAnnotations(markable, false);
+		AnnotationBundle annotations = getAnnotations(item, false);
 		return annotations==null ? null : annotations.getValue(key);
 	}
 
@@ -195,15 +195,15 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SimpleAnnotationLayer.layer.DefaultAnnotationLayer#removeAllValues(de.ims.icarus.model.api.members.Markable, boolean)
+	 * @see de.ims.icarus.model.api.SimpleAnnotationLayer.layer.DefaultAnnotationLayer#removeAllValues(de.ims.icarus.model.api.members.Item, boolean)
 	 */
 	@Override
-	public void removeAllValues(Markable markable, boolean recursive) {
-		checkMarkable(markable);
+	public void removeAllValues(Item item, boolean recursive) {
+		checkItem(item);
 
 		List<AnnotationBuffer> buffers = new ArrayList<>();
 
-		AnnotationBuffer buffer = collectAnnotations(markable);
+		AnnotationBuffer buffer = collectAnnotations(item);
 		if(buffer!=null) {
 			// Ensure the original changes get preserved as well
 			buffers.add(buffer);
@@ -211,21 +211,21 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 		if(recursive && getManifest().isDeepAnnotation()) {
 
-			Set<Markable> lut = new HashSet<>();
+			Set<Item> lut = new HashSet<>();
 
-			collectAnnotatedMembers(markable, lut, buffers);
+			collectAnnotatedMembers(item, lut, buffers);
 		}
 
 		execute(new BatchAnnotationChange(buffers));
 	}
 
-	private AnnotationBuffer collectAnnotations(Markable markable) {
-		AnnotationBundle bundle = getAnnotations(markable, false);
+	private AnnotationBuffer collectAnnotations(Item item) {
+		AnnotationBundle bundle = getAnnotations(item, false);
 
-		return bundle==null ? null : new AnnotationBuffer(markable);
+		return bundle==null ? null : new AnnotationBuffer(item);
 	}
 
-	private void collectAnnotatedMembers(Markable markable, Set<Markable> lut,
+	private void collectAnnotatedMembers(Item item, Set<Item> lut,
 			List<AnnotationBuffer> buffers) {
 
 		// Collect edge annotations
@@ -236,8 +236,8 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		//
 		// Note further, that the virtual root node of a structure is not allowed
 		// to have annotations assigned to it!
-		if(markable.getMemberType()==MemberType.STRUCTURE) {
-			Structure structure = (Structure) markable;
+		if(item.getMemberType()==MemberType.STRUCTURE) {
+			Structure structure = (Structure) item;
 
 			for(int i=0; i<structure.getEdgeCount(); i++) {
 				Edge edge = structure.getEdgeAt(i);
@@ -255,16 +255,16 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 		// Collect regular members of the container or structure
 		//
-		// Note: Containers or structures might hold edges as regular markables or
+		// Note: Containers or structures might hold edges as regular items or
 		// nodes, but the terminals of those edges are only of interest in case they
-		// are available as regular members of the current markable tree!
-		if(markable.getMemberType()==MemberType.CONTAINER
-				|| markable.getMemberType()==MemberType.STRUCTURE) {
+		// are available as regular members of the current item tree!
+		if(item.getMemberType()==MemberType.CONTAINER
+				|| item.getMemberType()==MemberType.STRUCTURE) {
 
-			Container container = (Container) markable;
+			Container container = (Container) item;
 
 			for(int i=0; i<container.getMarkableCount(); i++) {
-				Markable member = container.getMarkableAt(i);
+				Item member = container.getItemAt(i);
 
 				if(!lut.add(member)) {
 					continue;
@@ -283,33 +283,33 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.SimpleAnnotationLayer.layer.DefaultAnnotationLayer#setValue(de.ims.icarus.model.api.members.Markable, java.lang.String, java.lang.Object)
+	 * @see de.ims.icarus.model.api.SimpleAnnotationLayer.layer.DefaultAnnotationLayer#setValue(de.ims.icarus.model.api.members.Item, java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public void setValue(Markable markable, String key, Object value) {
-		checkMarkable(markable);
+	public void setValue(Item item, String key, Object value) {
+		checkItem(item);
 		checkKey(key);
 
-		execute(new KeyAnnotationChange(key, markable, value));
+		execute(new KeyAnnotationChange(key, item, value));
 	}
 
 //	/**
 //	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.Markable)
 //	 */
 //	@Override
-//	public Object getValue(Markable markable) {
+//	public Object getValue(Item item) {
 //		if(!hasDefaultKey)
 //			throw new IllegalStateException("No default key defined");
 //
-//		return getValue(markable, defaultKey);
+//		return getValue(item, defaultKey);
 //	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.members.Markable, de.ims.icarus.util.Collector)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.members.Item, de.ims.icarus.util.Collector)
 	 */
 	@Override
-	public boolean collectKeys(Markable markable, Collector<String> buffer) {
-		AnnotationBundle bundle = getAnnotations(markable, false);
+	public boolean collectKeys(Item item, Collector<String> buffer) {
+		AnnotationBundle bundle = getAnnotations(item, false);
 		if(bundle!=null) {
 			bundle.collectKeys(buffer);
 		}
@@ -321,15 +321,15 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 //	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.Markable, java.lang.Object)
 //	 */
 //	@Override
-//	public void setValue(Markable markable, Object value) {
+//	public void setValue(Item item, Object value) {
 //		if(!hasDefaultKey)
 //			throw new IllegalStateException("No default key defined"); //$NON-NLS-1$
 //
-//		setValue(markable, defaultKey, value);
+//		setValue(item, defaultKey, value);
 //	}
 
-	protected void setValue0(Markable markable, String key, Object value) {
-		getAnnotations(markable, true).setValue(key, value);
+	protected void setValue0(Item item, String key, Object value) {
+		getAnnotations(item, true).setValue(key, value);
 	}
 
 	/**
@@ -347,7 +347,7 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 		private int expectedBundleCount = keyAnnotations.size();
 
-		private Map<Markable, AnnotationBundle> bundles = new HashMap<>();
+		private Map<Item, AnnotationBundle> bundles = new HashMap<>();
 
 		/**
 		 * @see de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange#execute()
@@ -384,27 +384,27 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 	private class KeyAnnotationChange implements AtomicChange {
 
 		private final String annotationKey;
-		private final Markable[] markables;
+		private final Item[] items;
 		private final Object[] values;
 
 		/**
 		 * Models a set of changes to annotation entries
 		 */
-		private KeyAnnotationChange(String annotationKey, Markable[] markables, Object[] values) {
+		private KeyAnnotationChange(String annotationKey, Item[] markables, Object[] values) {
 			if(markables.length!=values.length)
-				throw new IllegalArgumentException("Size mismatch between markables ad values array"); //$NON-NLS-1$
+				throw new IllegalArgumentException("Size mismatch between items ad values array"); //$NON-NLS-1$
 
 			this.annotationKey = annotationKey;
-			this.markables = markables;
+			this.items = markables;
 			this.values = values;
 		}
 
 		/**
 		 * Models the change of a single annotation entry
 		 */
-		private KeyAnnotationChange(String annotationKey, Markable key, Object value) {
+		private KeyAnnotationChange(String annotationKey, Item key, Object value) {
 			this.annotationKey = annotationKey;
-			markables = new Markable[]{key};
+			items = new Item[]{key};
 			values = new Object[]{value};
 		}
 
@@ -412,9 +412,9 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		 * Models removal of a subset of annotations for a single
 		 * annotation key
 		 */
-		private KeyAnnotationChange(String annotationKey, Markable[] markables) {
+		private KeyAnnotationChange(String annotationKey, Item[] markables) {
 			this.annotationKey = annotationKey;
-			this.markables = markables;
+			this.items = markables;
 			this.values = new Object[markables.length];
 		}
 
@@ -424,19 +424,19 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		private KeyAnnotationChange(String annotationKey) {
 			this.annotationKey = annotationKey;
 
-			List<Markable> m = new ArrayList<>();
+			List<Item> m = new ArrayList<>();
 
-			for(Entry<Markable, AnnotationBundle> entry : keyAnnotations.entrySet()) {
+			for(Entry<Item, AnnotationBundle> entry : keyAnnotations.entrySet()) {
 				if(entry.getValue().getValue(annotationKey)!=null) {
 					m.add(entry.getKey());
 				}
 			}
 
 			int size = m.size();
-			markables = new Markable[size];
+			items = new Item[size];
 			values = new Object[size];
 
-			m.toArray(markables);
+			m.toArray(items);
 		}
 
 		/**
@@ -445,10 +445,10 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		@Override
 		public void execute() {
 
-			for(int i=markables.length-1; i>-1; i--) {
-				Markable markable = markables[i];
+			for(int i=items.length-1; i>-1; i--) {
+				Item item = items[i];
 
-				AnnotationBundle bundle = getAnnotations(markable, true);
+				AnnotationBundle bundle = getAnnotations(item, true);
 				Object value = bundle.getValue(annotationKey);
 				bundle.setValue(annotationKey, values[i]);
 
@@ -498,10 +498,10 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 		public void execute() {
 
 			for(AnnotationBuffer buffer : buffers) {
-				Markable markable = buffer.markable;
+				Item item = buffer.item;
 
 				// Now handle mapped annotations
-				AnnotationBundle bundle = keyAnnotations.get(markable);
+				AnnotationBundle bundle = keyAnnotations.get(item);
 				Object[] map = buffer.map;
 				if(map!=null) {
 					for(int i=0; i<map.length-1; i+=2) {
@@ -527,22 +527,22 @@ public class ComplexAnnotationLayer extends AbstractLayer<AnnotationLayerManifes
 
 	private static class AnnotationBuffer {
 
-		private final Markable markable;
+		private final Item item;
 
 		private Object[] map;
 
-		private AnnotationBuffer(Markable markable) {
-			this.markable = markable;
+		private AnnotationBuffer(Item item) {
+			this.item = item;
 		}
 	}
 
 	public interface BundleFactory {
-		AnnotationBundle createBundle(Markable markable, AnnotationLayer layer);
+		AnnotationBundle createBundle(Item item, AnnotationLayer layer);
 	}
 
 	/**
 	 * Models a set of key-value pairs describing annotations for a
-	 * single markable.
+	 * single item.
 	 *
 	 * @author Markus Gärtner
 	 * @version $Id$

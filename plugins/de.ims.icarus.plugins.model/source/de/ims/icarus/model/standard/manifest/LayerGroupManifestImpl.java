@@ -39,7 +39,7 @@ import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.standard.manifest.Links.Link;
@@ -139,7 +139,7 @@ public class LayerGroupManifestImpl extends DefaultModifiableIdentity implements
 		} break;
 
 		case TAG_MARKABLE_LAYER : {
-			return new MarkableLayerManifestImpl(manifestLocation, getRegistry(), this);
+			return new ItemLayerManifestImpl(manifestLocation, getRegistry(), this);
 		}
 
 		case TAG_STRUCTURE_LAYER : {
@@ -189,7 +189,7 @@ public class LayerGroupManifestImpl extends DefaultModifiableIdentity implements
 		switch (qName) {
 
 		case TAG_MARKABLE_LAYER : {
-			addLayerManifest((MarkableLayerManifest) handler);
+			addLayerManifest((ItemLayerManifest) handler);
 		} break;
 
 		case TAG_STRUCTURE_LAYER : {
@@ -241,7 +241,7 @@ public class LayerGroupManifestImpl extends DefaultModifiableIdentity implements
 	 * @see de.ims.icarus.model.api.manifest.LayerGroupManifest#getPrimaryLayerManifest()
 	 */
 	@Override
-	public MarkableLayerManifest getPrimaryLayerManifest() {
+	public ItemLayerManifest getPrimaryLayerManifest() {
 		return primaryLayer.get();
 	}
 
@@ -390,7 +390,7 @@ public class LayerGroupManifestImpl extends DefaultModifiableIdentity implements
 		return lookupLayer(id);
 	}
 
-	protected class LayerLink extends Link<MarkableLayerManifest> {
+	protected class LayerLink extends Link<ItemLayerManifest> {
 
 		/**
 		 * @param lazyResolver
@@ -404,8 +404,8 @@ public class LayerGroupManifestImpl extends DefaultModifiableIdentity implements
 		 * @see de.ims.icarus.model.standard.manifest.Links.Link#resolve()
 		 */
 		@Override
-		protected MarkableLayerManifest resolve() {
-			return (MarkableLayerManifest) lookupLayer(getId());
+		protected ItemLayerManifest resolve() {
+			return (ItemLayerManifest) lookupLayer(getId());
 		}
 
 	}

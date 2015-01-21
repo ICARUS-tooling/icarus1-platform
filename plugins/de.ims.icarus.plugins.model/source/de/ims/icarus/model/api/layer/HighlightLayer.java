@@ -31,7 +31,7 @@ import de.ims.icarus.model.api.highlight.Highlight;
 import de.ims.icarus.model.api.highlight.HighlightCursor;
 import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestOwner;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * @author Markus Gärtner
@@ -53,7 +53,7 @@ public interface HighlightLayer extends Layer, ManifestOwner<HighlightLayerManif
 	 * top-level highlights on the underlying {@code MarkableLayer}. If there are no
 	 * top-level highlights available, this method should return {@code null}.
 	 * <p>
-	 * Note that this method is equivalent to calling {@link #getHighlightCursor(Markable)}
+	 * Note that this method is equivalent to calling {@link #getHighlightCursor(Item)}
 	 * with the root container of this layers <i>base-layer</i>.
 	 *
 	 * @return
@@ -70,12 +70,12 @@ public interface HighlightLayer extends Layer, ManifestOwner<HighlightLayerManif
 	 * built as a hierarchy of containers. If provided with the <i>base-layers</i>
 	 * root container this method is essentially equal to calling {@link #getHighlightCursor()}.
 	 *
-	 * @param container The {@code Markable} to fetch highlight information about
+	 * @param container The {@code Item} to fetch highlight information about
 	 *
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
-	 * @throws IllegalArgumentException if the {@code Markable} is not a member of this
+	 * @throws IllegalArgumentException if the {@code Item} is not a member of this
 	 * layers <i>base-layer</i> as defined by {@link #getBaseLayer()} or if it is not a
 	 * {@code Container}
 	 */
-	HighlightCursor getHighlightCursor(Markable markable);
+	HighlightCursor getHighlightCursor(Item item);
 }

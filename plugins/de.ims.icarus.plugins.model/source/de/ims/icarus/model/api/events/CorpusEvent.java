@@ -30,7 +30,7 @@ import java.util.Map;
 
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.CorpusMember;
@@ -172,7 +172,7 @@ public class CorpusEvent {
 		return (MetaData) getProperty(METADATA_PROPERTY);
 	}
 
-	public SubCorpus getSubCorpus() {
-		return (SubCorpus) getProperty(SUBCORPUS_PROPERTY);
+	public CorpusView getCorpusView() {
+		return (CorpusView) getProperty(SUBCORPUS_PROPERTY);
 	}
 }

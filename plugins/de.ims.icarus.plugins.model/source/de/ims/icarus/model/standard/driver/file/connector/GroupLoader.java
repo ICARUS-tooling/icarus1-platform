@@ -31,7 +31,7 @@ import java.nio.channels.SeekableByteChannel;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.layer.LayerGroup;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * @author Markus Gärtner
@@ -68,7 +68,7 @@ public abstract class GroupLoader {
 	 * @throws ModelException
 	 * @throws InterruptedException
 	 */
-	public abstract Markable load(long index, SeekableByteChannel channel, ChunkStorage storage) throws IOException, ModelException, InterruptedException;
+	public abstract Item load(long index, SeekableByteChannel channel, ChunkStorage storage) throws IOException, ModelException, InterruptedException;
 
 	/**
 	 * @return the group

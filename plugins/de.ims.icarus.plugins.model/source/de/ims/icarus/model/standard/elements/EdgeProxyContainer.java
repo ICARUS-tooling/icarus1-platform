@@ -34,7 +34,7 @@ import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.ContainerType;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.Structure;
 
 /**
@@ -83,10 +83,10 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getItemAt(int)
 	 */
 	@Override
-	public Markable getMarkableAt(int index) {
+	public Item getItemAt(int index) {
 		return structure.getEdgeAt(index);
 	}
 
@@ -99,18 +99,18 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addItem(int, de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public void addMarkable(int index, Markable markable) {
+	public void addItem(int index, Item item) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 	 */
 	@Override
-	public Markable removeMarkable(int index) {
+	public Item removeItem(int index) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -123,7 +123,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Item#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -131,7 +131,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Item#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -150,11 +150,11 @@ public class EdgeProxyContainer extends AbstractContainer {
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
-	public Iterator<Markable> iterator() {
+	public Iterator<Item> iterator() {
 		return new EdgeItr();
 	}
 
-	private class EdgeItr implements Iterator<Markable> {
+	private class EdgeItr implements Iterator<Item> {
 		private final int expectedSize = getMarkableCount();
 
 		private int cursor;
@@ -171,7 +171,7 @@ public class EdgeProxyContainer extends AbstractContainer {
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public Markable next() {
+		public Item next() {
             checkForComodification();
             int i = cursor;
             if (i >= getMarkableCount())

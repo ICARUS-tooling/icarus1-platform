@@ -36,7 +36,7 @@ import de.ims.icarus.model.api.manifest.StructureManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.CorpusMember;
 import de.ims.icarus.model.api.members.Edge;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.model.api.members.StructureType;
 import de.ims.icarus.model.util.CorpusMemberUtils;
@@ -52,15 +52,15 @@ import de.ims.icarus.util.mem.ReferenceType;
 /**
  * Implements an empty structure.
  * <p>
- * This implementation supports adding and removing of {@code Markable} objects
+ * This implementation supports adding and removing of {@code Item} objects
  * but throws an {@code UnsupportedOperationException} for any attempt to
  * add or remove an {@code Edge}.
  * <p>
  * As defined in the {@link Container} specification an optional <i>boundary container</i>
  * can be set at construction time. When a non-null container is set as boundary then all
- * {@code Markable} objects to be added will first be checked for possible boundary violation.
+ * {@code Item} objects to be added will first be checked for possible boundary violation.
  * Note that no boundary checks are performed for <i>virtual</i> markables
- * (see {@link CorpusUtils#isVirtual(Markable)}).
+ * (see {@link CorpusUtils#isVirtual(Item)}).
  * <p>
  * To reduce memory footprint an additional flag can be set to use the members of the <i>boundary
  * container</i> as base markables for this structure, obsoleting the need to maintain a separate
@@ -88,7 +88,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	@Primitive
 	private boolean augment;
 	@Link(type=ReferenceType.DOWNLINK)
-	private Markable root;
+	private Item root;
 
 	private LookupList<Edge> edges() {
 		if(edges==null) {
@@ -219,39 +219,39 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getItemAt(int)
 	 */
 	@Override
-	public Markable getMarkableAt(int index) {
+	public Item getItemAt(int index) {
 		if(boundaryAsBase) {
 			Container boundary = getBoundaryContainer();
 			if(index<boundary.getMarkableCount()) {
-				return boundary.getMarkableAt(index);
+				return boundary.getItemAt(index);
 			} else {
 				index -= boundary.getMarkableCount();
 			}
 		}
 		if(augment) {
-			return super.getMarkableAt(index);
+			return super.getItemAt(index);
 		}
 
 		throw new IndexOutOfBoundsException();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.standard.container.AbstractContainer#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.standard.elements.standard.container.AbstractContainer#indexOfItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public int indexOfMarkable(Markable markable) {
+	public int indexOfItem(Item item) {
 		int result = -1;
 		int offset = 0;
 
 		if(boundaryAsBase) {
 			offset = getBoundaryContainer().getMarkableCount();
-			result = getBoundaryContainer().indexOfMarkable(markable);
+			result = getBoundaryContainer().indexOfItem(item);
 		}
 		if(result==-1 && augment) {
-			result = super.indexOfMarkable(markable);
+			result = super.indexOfItem(item);
 		}
 
 		if(result!=-1) {
@@ -265,7 +265,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 //	 * Checks whether or not the given markable is allowed to be added
 //	 * to this structure. If either the <i>boundary-container</i> is {@code null}
 //	 * or the given {@code markable} is virtual as determined by
-//	 * {@link CorpusUtils#isVirtual(Markable)} then this method does nothing.
+//	 * {@link CorpusUtils#isVirtual(Item)} then this method does nothing.
 //	 * Otherwise it compares the begin and end offset of the markable with those
 //	 * of the <i>boundary-container</i>. If one of those indices lays outside the
 //	 * boundary it will throw an {@code IllegalArgumentException}.
@@ -278,7 +278,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 //	 * @throws IllegalArgumentException if the {@code markable} violates the boundary
 //	 */
 //	@Override
-//	protected void checkMarkable(Markable markable) {
+//	protected void checkMarkable(Item markable) {
 //		if (markable == null)
 //			throw new NullPointerException("Invalid markable");  //$NON-NLS-1$
 //
@@ -288,7 +288,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 //
 //		if(markable.getBeginOffset()<getBoundaryContainer().getBeginOffset()
 //				|| markable.getEndOffset()>getBoundaryContainer().getEndOffset())
-//			throw new IllegalArgumentException("Markable not within boundary: "+markable); //$NON-NLS-1$
+//			throw new IllegalArgumentException("Item not within boundary: "+markable); //$NON-NLS-1$
 //	}
 
 	/**
@@ -298,23 +298,23 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 *
 	 * @return
 	 */
-	protected Markable createRoot() {
-		return new RootMarkable(this);
+	protected Item createRoot() {
+		return new RootItem(this);
 	}
 
 	/**
 	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#getRoot()
 	 */
 	@Override
-	public Markable getRoot() {
+	public Item getRoot() {
 		return root;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#isRoot(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#isRoot(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public boolean isRoot(Markable node) {
+	public boolean isRoot(Item node) {
 		if (node == null)
 			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
 
@@ -331,10 +331,10 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#getEdgeAt(de.ims.icarus.model.api.members.Markable, int, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeAt(de.ims.icarus.model.api.members.Item, int, boolean)
 	 */
 	@Override
-	public Edge getEdgeAt(Markable node, int index, boolean isSource) {
+	public Edge getEdgeAt(Item node, int index, boolean isSource) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -364,15 +364,15 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	@Override
-	public int getEdgeCount(Markable node) {
+	public int getEdgeCount(Item node) {
 		return graph().edgeCount(node);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Markable, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Item, boolean)
 	 */
 	@Override
-	public int getEdgeCount(Markable node, boolean isSource) {
+	public int getEdgeCount(Item node, boolean isSource) {
 		return graph().edgeCount(node, !isSource);
 	}
 
@@ -388,7 +388,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	/**
 	 * Verifies that the given {@code edge} is allowed to be added to this structure.
 	 * The default implementation only checks the source and target of the edge using the
-	 * {@link #checkMarkable(Markable)} method. Subclasses should override this method to
+	 * {@link #checkItem(Item)} method. Subclasses should override this method to
 	 * perform structure type specific checks to ensure that certain constraints are not
 	 * violated (like having at most one incoming edge in the case of a tree structure).
 	 * When overriding a subclass should still call this method via {@code super#checkEdge(Edge)}
@@ -400,11 +400,11 @@ public class DefaultStructure extends ListContainer implements Structure {
 		if (edge == null)
 			throw new NullPointerException("Invalid edge"); //$NON-NLS-1$
 
-		Markable source = edge.getSource();
-		Markable target = edge.getTarget();
+		Item source = edge.getSource();
+		Item target = edge.getTarget();
 
-		checkMarkable(source);
-		checkMarkable(target);
+		checkItem(source);
+		checkItem(target);
 
 		// ROOT not allowed as target
 		if(edge.getTarget()==root)
@@ -425,7 +425,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 		checkEdgeConstraints(source, target, 1, 1);
 	}
 
-	protected void checkEdgeConstraints(Markable source, Markable target, int deltaSource, int deltaTarget) {
+	protected void checkEdgeConstraints(Item source, Item target, int deltaSource, int deltaTarget) {
 
 		// Fetch edge counts as they would be AFTER the desired operation
 		int countIn = graph.edgeCount(target, true)+deltaTarget;
@@ -489,7 +489,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * @param target
 	 * @return
 	 */
-	protected Edge createEdge(Markable source, Markable target) {
+	protected Edge createEdge(Item source, Item target) {
 		if (source == null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		if (target == null)
@@ -508,7 +508,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * @see #addEdge(Edge)
 	 */
 	@Override
-	public Edge addEdge(Markable source, Markable target) {
+	public Edge addEdge(Item source, Item target) {
 		return addEdge(createEdge(source, target));
 	}
 
@@ -520,7 +520,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * @see #addEdge(Edge, int)
 	 */
 	@Override
-	public Edge addEdge(Markable source, Markable target, int index) {
+	public Edge addEdge(Item source, Item target, int index) {
 		return addEdge(createEdge(source, target), index);
 	}
 
@@ -582,16 +582,16 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#setTerminal(de.ims.icarus.model.api.members.Edge, de.ims.icarus.model.api.members.Markable, boolean)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#setTerminal(de.ims.icarus.model.api.members.Edge, de.ims.icarus.model.api.members.Item, boolean)
 	 */
 	@Override
-	public void setTerminal(Edge edge, Markable markable, boolean isSource) {
+	public void setTerminal(Edge edge, Item item, boolean isSource) {
 		if (edge == null)
 			throw new NullPointerException("Invalid edge"); //$NON-NLS-1$
-		if (markable == null)
+		if (item == null)
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 
-		if (!isSource && markable==root)
+		if (!isSource && item==root)
 			throw new IllegalArgumentException("Cannot change target terminal to ROOT node"); //$NON-NLS-1$
 
 		checkStructureAction(EditOperation.LINK);
@@ -600,13 +600,13 @@ public class DefaultStructure extends ListContainer implements Structure {
 		// and another for adding it to the next node
 		if(isSource) {
 			checkEdgeConstraints(edge.getSource(), edge.getTarget(), -1, 0);
-			checkEdgeConstraints(markable, edge.getTarget(), 1, 0);
+			checkEdgeConstraints(item, edge.getTarget(), 1, 0);
 		} else {
 			checkEdgeConstraints(edge.getSource(), edge.getTarget(), 0, -1);
-			checkEdgeConstraints(edge.getSource(), markable, 0, 1);
+			checkEdgeConstraints(edge.getSource(), item, 0, 1);
 		}
 
-		execute(new TerminalChange(edge, isSource, markable));
+		execute(new TerminalChange(edge, isSource, item));
 	}
 
 	/**
@@ -619,8 +619,8 @@ public class DefaultStructure extends ListContainer implements Structure {
 
 		// Make sure all augmentation nodes are "edge free"
 		for(int i=0; i<super.getMarkableCount(); i++) {
-			Markable markable = super.getMarkableAt(i);
-			if(getEdgeCount(markable)!=0)
+			Item item = super.getItemAt(i);
+			if(getEdgeCount(item)!=0)
 				throw new IllegalStateException("Cannot clear markables while some of them are still tied to edges"); //$NON-NLS-1$
 		}
 
@@ -628,10 +628,10 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addItem(int, de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public void addMarkable(int index, Markable markable) {
+	public void addItem(int index, Item item) {
 		if(!augment)
 			throw new UnsupportedOperationException();
 
@@ -639,14 +639,14 @@ public class DefaultStructure extends ListContainer implements Structure {
 			index -= getBoundaryContainer().getMarkableCount();
 		}
 
-		super.addMarkable(index, markable);
+		super.addItem(index, item);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 	 */
 	@Override
-	public Markable removeMarkable(int index) {
+	public Item removeItem(int index) {
 		if(!augment)
 			throw new UnsupportedOperationException();
 
@@ -655,11 +655,11 @@ public class DefaultStructure extends ListContainer implements Structure {
 		}
 
 		// Make sure the markable in question is not tied by an edge!
-		Markable markable = super.getMarkableAt(index);
-		if(getEdgeCount(markable)!=0)
-			throw new IllegalStateException("Cannot remove markable "+markable+" while it is still required for edges"); //$NON-NLS-1$ //$NON-NLS-2$
+		Item item = super.getItemAt(index);
+		if(getEdgeCount(item)!=0)
+			throw new IllegalStateException("Cannot remove markable "+item+" while it is still required for edges"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		return super.removeMarkable(index);
+		return super.removeItem(index);
 	}
 
 	/**
@@ -683,11 +683,11 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
-	public Iterator<Markable> iterator() {
+	public Iterator<Item> iterator() {
 		return new ComboItr();
 	}
 
-	private Iterator<Markable> augIterator() {
+	private Iterator<Item> augIterator() {
 		return super.iterator();
 	}
 
@@ -730,10 +730,10 @@ public class DefaultStructure extends ListContainer implements Structure {
 	 * to make sure that changes are correctly reflected in the internal
 	 * graph structure!
 	 *
-	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#terminalChanged(de.ims.icarus.model.api.members.Edge, boolean, de.ims.icarus.model.api.members.Markable, de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.standard.structure.AbstractRootedStructure#terminalChanged(de.ims.icarus.model.api.members.Edge, boolean, de.ims.icarus.model.api.members.Item, de.ims.icarus.model.api.members.Item)
 	 */
 	protected void terminalChanged(Edge edge, boolean isSource,
-			Markable oldTerminal, Markable newTerminal) {
+			Item oldTerminal, Item newTerminal) {
 
 		Graph graph = graph();
 		graph.remove(oldTerminal, edge, !isSource);
@@ -751,10 +751,10 @@ public class DefaultStructure extends ListContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#getParent(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.standard.elements.DefaultStructure.structure.EmptyStructure#getParent(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public Markable getParent(Markable node) {
+	public Item getParent(Item node) {
 		if (node == null)
 			throw new NullPointerException("Invalid node"); //$NON-NLS-1$
 		if(node==root)
@@ -909,10 +909,10 @@ public class DefaultStructure extends ListContainer implements Structure {
 
 		private final Edge edge;
 		private final boolean isSource;
-		private Markable terminal;
-		private Markable expected;
+		private Item terminal;
+		private Item expected;
 
-		public TerminalChange(Edge edge, boolean isSource, Markable terminal) {
+		public TerminalChange(Edge edge, boolean isSource, Item terminal) {
 			if (edge == null)
 				throw new NullPointerException("Invalid edge"); //$NON-NLS-1$
 			if (terminal == null)
@@ -930,7 +930,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 		 */
 		@Override
 		public void execute() {
-			Markable oldTerminal = isSource ? edge.getSource() : edge.getTarget();
+			Item oldTerminal = isSource ? edge.getSource() : edge.getTarget();
 			if(expected!=oldTerminal)
 				throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
 						"Terminal change failed", expected, oldTerminal)); //$NON-NLS-1$
@@ -958,11 +958,11 @@ public class DefaultStructure extends ListContainer implements Structure {
 
 	}
 
-	private class ComboItr implements Iterator<Markable> {
+	private class ComboItr implements Iterator<Item> {
 
 		private final int expectedSize = getMarkableCount();
-		private final Iterator<Markable> baseItr = boundaryAsBase ? getBoundaryContainer().iterator() : null;
-		private final Iterator<Markable> augmentItr = augment ? augIterator() : null;
+		private final Iterator<Item> baseItr = boundaryAsBase ? getBoundaryContainer().iterator() : null;
+		private final Iterator<Item> augmentItr = augment ? augIterator() : null;
 
 		/**
 		 * @see java.util.Iterator#hasNext()
@@ -979,7 +979,7 @@ public class DefaultStructure extends ListContainer implements Structure {
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public Markable next() {
+		public Item next() {
 			checkModification();
 
 			if(baseItr!=null && baseItr.hasNext()) {

@@ -39,7 +39,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface StructureLayerManifest extends MarkableLayerManifest {
+public interface StructureLayerManifest extends ItemLayerManifest {
 
 	/**
 	 * Returns the manifest for the members of the top-level

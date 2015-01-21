@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.util;
 
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * @author Markus Gärtner
@@ -34,7 +34,7 @@ import de.ims.icarus.model.api.members.Markable;
  */
 public class CorpusMemberUtils {
 
-	public static String mismatchMessage(String msg, Markable expected, Markable provided) {
+	public static String mismatchMessage(String msg, Item expected, Item provided) {
 		return String.format("%s: expected %s - got %s", msg, expected, provided); //$NON-NLS-1$
 	}
 
@@ -54,11 +54,11 @@ public class CorpusMemberUtils {
 		return String.format("%s: index %d out of bounds [%d,%d]", msg, index, min, max); //$NON-NLS-1$
 	}
 
-	public static String insufficientEdgesMessage(String msg, Markable node, int required, int count) {
+	public static String insufficientEdgesMessage(String msg, Item node, int required, int count) {
 		return String.format("%s: insufficient edge count of %d at node %s - got %d", msg, required, node, count); //$NON-NLS-1$
 	}
 
-	public static String edgesOverflowMessage(String msg, Markable node, int max, int count) {
+	public static String edgesOverflowMessage(String msg, Item node, int max, int count) {
 		return String.format("%s: edge count %d exceeds limit of %d at node %s", msg, count, max, node); //$NON-NLS-1$
 	}
 }

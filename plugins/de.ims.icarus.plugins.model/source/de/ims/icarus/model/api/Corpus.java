@@ -110,7 +110,7 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * write lock. Not doing so could mean that another layer might be registered
 	 * with the exact same <i>unique</i> name and render the new layer invalid.
 	 *
-	 * @return the <i>write-lock</i> of this corpus object
+	 * @return the <i>write-lock</i> of this corpus object to be used for <i>descriptor-based</i> changes
 	 */
 	Lock getLock();
 
@@ -146,7 +146,7 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 *
 	 * @see {@link ModelError#SUBCORPUS_ALREADY_OPENED}
 	 */
-	SubCorpus createSubCorpus(Query query, CorpusAccessMode mode) throws ModelException;
+	CorpusView createCorpusView(Query query, CorpusAccessMode mode) throws ModelException;
 
 //	/**
 //	 * Resolves a given id and returns the member within this corpus
@@ -218,7 +218,7 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * elements of this corpus.
 	 * <p>
 	 * This is a shorthand method. The returned {@code MarkableLayer} is the
-	 * reference for all offset related indices used by {@code Markable}s in
+	 * reference for all offset related indices used by {@code Item}s in
 	 * this corpus.
 	 *
 	 * @return The {@code MarkableLayer} hosting the atomic elements of this corpus.
@@ -323,9 +323,9 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * @throws IllegalArgumentException if the specified layer is not a part of
 	 * this corpus
 	 */
-	void addMetaData(ContentType type, Layer layer, Object data);
+	void addMetaData(ContentType type, Layer layer, Object data) throws ModelException;
 
-	void removeMetaData(ContentType type, Layer layer, Object data);
+	void removeMetaData(ContentType type, Layer layer, Object data) throws ModelException;
 
 	/**
 	 * Returns all the previously registered meta-data objects for the given
@@ -349,11 +349,11 @@ public interface Corpus extends Iterable<Layer>, ManifestOwner<CorpusManifest> {
 	 * @throws IllegalArgumentException if the {@code layer} argument is non-{@code null}
 	 * and the layer is not part of this corpus
 	 */
-	Set<MetaData> getMetaData(ContentType type, Layer layer);
+	Set<MetaData> getMetaData(ContentType type, Layer layer) throws ModelException;
 
 	/**
 	 * Called by the framework when the corpus gets unloaded to signal that
 	 * it should free all internal resources and close drivers and other utility modules.
 	 */
-	void close();
+	void close() throws ModelException;
 }

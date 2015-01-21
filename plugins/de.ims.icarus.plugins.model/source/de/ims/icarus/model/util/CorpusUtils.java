@@ -59,14 +59,14 @@ import de.ims.icarus.model.api.manifest.HighlightLayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.ManifestOwner;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.api.manifest.StructureLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.CorpusMember;
 import de.ims.icarus.model.api.members.Fragment;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.raster.Position;
 import de.ims.icarus.model.api.raster.PositionOutOfBoundsException;
@@ -153,7 +153,7 @@ public final class CorpusUtils {
 		case ANNOTATION_LAYER_MANIFEST:
 			return ((AnnotationLayerManifest)manifest).getContextManifest();
 		case MARKABLE_LAYER_MANIFEST:
-			return ((MarkableLayerManifest)manifest).getContextManifest();
+			return ((ItemLayerManifest)manifest).getContextManifest();
 		case STRUCTURE_LAYER_MANIFEST:
 			return ((StructureLayerManifest)manifest).getContextManifest();
 		case HIGHLIGHT_LAYER_MANIFEST:
@@ -187,8 +187,8 @@ public final class CorpusUtils {
 //		return sb.toString();
 //	}
 
-	public static boolean isVirtual(Markable markable) {
-		return markable.getBeginOffset()==-1 || markable.getEndOffset()==-1;
+	public static boolean isVirtual(Item item) {
+		return item.getBeginOffset()==-1 || item.getEndOffset()==-1;
 	}
 
 	public static boolean isOverlayContainer(Container container) {
@@ -206,15 +206,15 @@ public final class CorpusUtils {
 		return layer.getCorpus().getOverlayLayer()==layer;
 	}
 
-	public static boolean isOverlayMember(Markable markable) {
-		return isOverlayLayer(markable.getLayer());
+	public static boolean isOverlayMember(Item item) {
+		return isOverlayLayer(item.getLayer());
 	}
 
 	public static boolean isLayerMember(CorpusMember member) {
 		return member.getMemberType()==MemberType.LAYER;
 	}
 
-	public static boolean isMarkableMember(CorpusMember member) {
+	public static boolean isItemMember(CorpusMember member) {
 		return member.getMemberType()!=MemberType.LAYER;
 	}
 
@@ -270,7 +270,7 @@ public final class CorpusUtils {
 			container = container.getContainer();
 		}
 
-		MarkableLayerManifest manifest = container.getLayer().getManifest();
+		ItemLayerManifest manifest = container.getLayer().getManifest();
 
 		return manifest.getContainerManifest(level);
 	}
@@ -345,8 +345,8 @@ public final class CorpusUtils {
 
 		Layer layer = null;
 
-		if(member instanceof Markable) {
-			layer = ((Markable)member).getLayer();
+		if(member instanceof Item) {
+			layer = ((Item)member).getLayer();
 		} else if(member instanceof Layer) {
 			layer = (Layer)member;
 		}
@@ -381,12 +381,12 @@ public final class CorpusUtils {
 			Layer layer = (Layer)m;
 			return "[Layer: "+layer.getName()+"]"; //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
-			Markable markable = (Markable)m;
-			return "["+getTypePrefix(type)+"_"+markable.getBeginOffset()+"-"+markable.getEndOffset()+"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			Item item = (Item)m;
+			return "["+getTypePrefix(type)+"_"+item.getBeginOffset()+"-"+item.getEndOffset()+"]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 	}
 
-	public static int compare(Markable m1, Markable m2) {
+	public static int compare(Item m1, Item m2) {
 		long result = m1.getBeginOffset()-m2.getBeginOffset();
 
 		if(result==0) {
@@ -400,8 +400,8 @@ public final class CorpusUtils {
 		if(f1.getLayer()!=f2.getLayer())
 			throw new IllegalArgumentException("Cannot compare fragments from different fragment layers"); //$NON-NLS-1$
 
-		if(f1.getMarkable()!=f2.getMarkable()) {
-			return f1.getMarkable().compareTo(f2.getMarkable());
+		if(f1.getItem()!=f2.getItem()) {
+			return f1.getItem().compareTo(f2.getItem());
 		}
 
 		Rasterizer rasterizer = f1.getLayer().getRasterizer();
@@ -419,7 +419,7 @@ public final class CorpusUtils {
 	 * Returns {@code true} if {@code m2} is located within the span
 	 * defined by {@code m1}.
 	 */
-	public static boolean contains(Markable m1, Markable m2) {
+	public static boolean contains(Item m1, Item m2) {
 		return m2.getBeginOffset()>=m1.getBeginOffset()
 				&& m2.getEndOffset()<=m1.getEndOffset();
 	}
@@ -428,7 +428,7 @@ public final class CorpusUtils {
 		if(begin==null && end==null)
 			throw new IllegalArgumentException("At least one position must be non-null!"); //$NON-NLS-1$
 
-		Markable markable = fragment.getMarkable();
+		Item item = fragment.getItem();
 		FragmentLayer layer = fragment.getLayer();
 		Rasterizer rasterizer = layer.getRasterizer();
 
@@ -441,7 +441,7 @@ public final class CorpusUtils {
 					+dimensionality+" - got "+end.getDimensionality()); //$NON-NLS-1$
 
 		for(int axis=0; axis<dimensionality; axis++) {
-			long size = layer.getRasterSize(markable, axis);
+			long size = layer.getRasterSize(item, axis);
 			checkPosition(size, begin, axis);
 			checkPosition(size, end, axis);
 		}

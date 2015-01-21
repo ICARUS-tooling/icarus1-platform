@@ -30,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 import de.ims.icarus.model.api.layer.Layer;
 import de.ims.icarus.model.api.meta.MetaData;
 
@@ -212,32 +212,32 @@ public class EventManager {
 		}
 	}
 
-	public void fireSubCorpuCreated(SubCorpus subCorpus) {
-		if (subCorpus == null)
-			throw new NullPointerException("Invalid subCorpus"); //$NON-NLS-1$
+	public void fireCorpusViewCreated(CorpusView corpusView) {
+		if (corpusView == null)
+			throw new NullPointerException("Invalid corpusView"); //$NON-NLS-1$
 
 		if(listeners.isEmpty()) {
 			return;
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				CorpusEvent.SUBCORPUS_PROPERTY, subCorpus);
+				CorpusEvent.SUBCORPUS_PROPERTY, corpusView);
 
 		for(CorpusListener listener : listeners) {
 			listener.subCorpuCreated(event);
 		}
 	}
 
-	public void fireSubCorpusDestroyed(SubCorpus subCorpus) {
-		if (subCorpus == null)
-			throw new NullPointerException("Invalid subCorpus"); //$NON-NLS-1$
+	public void fireCorpusViewDestroyed(CorpusView corpusView) {
+		if (corpusView == null)
+			throw new NullPointerException("Invalid corpusView"); //$NON-NLS-1$
 
 		if(listeners.isEmpty()) {
 			return;
 		}
 
 		CorpusEvent event = new CorpusEvent(corpus,
-				CorpusEvent.SUBCORPUS_PROPERTY, subCorpus);
+				CorpusEvent.SUBCORPUS_PROPERTY, corpusView);
 
 		for(CorpusListener listener : listeners) {
 			listener.subCorpusDestroyed(event);

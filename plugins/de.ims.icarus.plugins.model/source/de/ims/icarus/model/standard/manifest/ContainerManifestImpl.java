@@ -31,7 +31,7 @@ import org.xml.sax.SAXException;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.xml.ModelXmlHandler;
@@ -46,7 +46,7 @@ import de.ims.icarus.model.xml.XmlSerializer;
 public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManifest> implements ContainerManifest {
 
 //	private ContainerManifest parentManifest;
-	private final MarkableLayerManifest layerManifest;
+	private final ItemLayerManifest layerManifest;
 
 //	private ContainerManifest elementManifest;
 	private ContainerType containerType;
@@ -56,10 +56,10 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 	 * @param registry
 	 */
 	public ContainerManifestImpl(ManifestLocation manifestLocation,
-			CorpusRegistry registry, MarkableLayerManifest layerManifest) {
+			CorpusRegistry registry, ItemLayerManifest layerManifest) {
 		super(manifestLocation, registry);
 
-		verifyEnvironment(manifestLocation, layerManifest, MarkableLayerManifest.class);
+		verifyEnvironment(manifestLocation, layerManifest, ItemLayerManifest.class);
 
 		this.layerManifest = layerManifest;
 	}
@@ -140,7 +140,7 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 	 * @see de.ims.icarus.model.api.manifest.ContainerManifest#getLayerManifest()
 	 */
 	@Override
-	public MarkableLayerManifest getLayerManifest() {
+	public ItemLayerManifest getLayerManifest() {
 		return layerManifest;
 	}
 //
@@ -183,7 +183,7 @@ public class ContainerManifestImpl extends AbstractMemberManifest<ContainerManif
 //	/**
 //	 * @param layerManifest the layerManifest to set
 //	 */
-//	public void setLayerManifest(MarkableLayerManifest layerManifest) {
+//	public void setLayerManifest(ItemLayerManifest layerManifest) {
 //		if (layerManifest == null)
 //			throw new NullPointerException("Invalid layerManifest"); //$NON-NLS-1$
 //

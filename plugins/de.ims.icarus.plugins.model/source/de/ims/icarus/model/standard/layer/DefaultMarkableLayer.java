@@ -27,7 +27,7 @@ package de.ims.icarus.model.standard.layer;
 
 import de.ims.icarus.model.api.layer.LayerGroup;
 import de.ims.icarus.model.api.layer.MarkableLayer;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.standard.driver.cache.MemberCache;
 import de.ims.icarus.model.standard.driver.cache.MemberPool;
 
@@ -36,7 +36,7 @@ import de.ims.icarus.model.standard.driver.cache.MemberPool;
  * @version $Id$
  *
  */
-public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> implements MarkableLayer, CachedLayer {
+public class DefaultMarkableLayer extends AbstractLayer<ItemLayerManifest> implements MarkableLayer, CachedLayer {
 
 	private MarkableLayer boundaryLayer;
 	private MemberCache cache;
@@ -46,7 +46,7 @@ public class DefaultMarkableLayer extends AbstractLayer<MarkableLayerManifest> i
 	 * @param context
 	 * @param manifest
 	 */
-	public DefaultMarkableLayer(MarkableLayerManifest manifest, LayerGroup group) {
+	public DefaultMarkableLayer(ItemLayerManifest manifest, LayerGroup group) {
 		super(manifest, group);
 	}
 

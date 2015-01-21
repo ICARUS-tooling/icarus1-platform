@@ -28,7 +28,7 @@ package de.ims.icarus.model.api.layer;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.manifest.LayerManifest;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.api.members.NamedCorpusMember;
 import de.ims.icarus.model.standard.elements.MemberSets;
@@ -67,14 +67,14 @@ public interface Layer extends NamedCorpusMember {
 	String getName();
 
 	/**
-	 * Returns the {@code Markable} object that allows other members of
+	 * Returns the {@code Item} object that allows other members of
 	 * the corpus framework to treat this layer as a regular markable.
 	 * This feature can be used to assign annotations and/or highlightings
 	 * on the layer level.
 	 *
 	 * @return
 	 */
-	Markable getMarkableProxy();
+	Item getItemProxy();
 
 	/**
 	 * Returns the {@code Context} object that defines the physical

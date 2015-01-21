@@ -39,7 +39,7 @@ public class NativeStringInterner implements Interner<CharSequence> {
 	 */
 	@Override
 	public String intern(CharSequence item) {
-		return StringUtil._toString(item).intern();
+		return StringUtil.toString(item).intern();
 	}
 
 }

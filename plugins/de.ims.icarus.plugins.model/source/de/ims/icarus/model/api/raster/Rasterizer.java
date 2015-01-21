@@ -28,7 +28,7 @@ package de.ims.icarus.model.api.raster;
 import java.util.Comparator;
 
 import de.ims.icarus.model.api.layer.FragmentLayer;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * @author Markus Gärtner
@@ -41,7 +41,7 @@ public interface Rasterizer extends Comparator<Position> {
 
 	Axis getAxisAt(int index);
 
-	long getRasterSize(Markable markable, FragmentLayer layer, Object value, int axis);
+	long getRasterSize(Item item, FragmentLayer layer, Object value, int axis);
 
 	long getGranularity(int axis);
 

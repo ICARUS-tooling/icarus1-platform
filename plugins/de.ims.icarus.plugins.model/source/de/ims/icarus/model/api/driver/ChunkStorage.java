@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.driver;
 
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * @author Markus Gärtner
@@ -47,5 +47,5 @@ public interface ChunkStorage {
 	 * @param member
 	 * @param index
 	 */
-	void add(Markable member, long index);
+	void add(Item member, long index);
 }

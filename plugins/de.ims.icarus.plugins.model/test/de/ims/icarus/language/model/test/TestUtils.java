@@ -235,7 +235,7 @@ public class TestUtils {
 		for(Method method : interfaceClass.getMethods()) {
 
 			// Ignore getters that rely on parameters
-			if(method.getParameterTypes().length>0 || method.isVarArgs()) {
+			if(method.isVarArgs() || method.getParameterTypes().length>0) {
 				continue;
 			}
 

@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.api.path;
 
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 
 /**
  * @author Markus Gärtner
@@ -34,7 +34,7 @@ import de.ims.icarus.model.api.SubCorpus;
  */
 public interface CorpusPath {
 
-	SubCorpus getCorpus();
+	CorpusView getCorpus();
 
 	int getElementCount();
 

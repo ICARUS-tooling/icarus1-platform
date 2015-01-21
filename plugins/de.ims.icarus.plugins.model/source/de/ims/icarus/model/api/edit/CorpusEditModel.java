@@ -94,18 +94,18 @@ public class CorpusEditModel extends WeakEventSource {
 							currentEdit));
 
 					// Copy and then reset current edit
-					UndoableCorpusEdit tmp = currentEdit;
+					UndoableCorpusEdit publishedEdit = currentEdit;
 					currentEdit = createUndoableEdit(null);
 
 					// Allow edit to manage notification (per default this will fire a "change" event)
-					tmp.dispatch();
+					publishedEdit.dispatch();
 
 					// Notify listeners about executed undoable edit
-					fireEvent(new EventObject(CorpusEditEvents.UNDO, "edit", tmp)); //$NON-NLS-1$
+					fireEvent(new EventObject(CorpusEditEvents.UNDO, "edit", publishedEdit)); //$NON-NLS-1$
 
 					// Finally dispatch the edit so undo managers and other specialized
 					// listeners can handle or accumulate it
-					fireUndoableCorpusEdit(tmp);
+					fireUndoableCorpusEdit(publishedEdit);
 				}
 			} finally {
 				endingUpdate = false;

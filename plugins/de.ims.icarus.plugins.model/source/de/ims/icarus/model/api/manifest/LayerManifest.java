@@ -127,7 +127,7 @@ public interface LayerManifest extends MemberManifest {
 		/**
 		 * Returns the actual target layer manifest this manifest refers to. Note that the
 		 * return type is chosen to be the general {@link LayerManifest} class instead of the
-		 * {@link MarkableLayerManifest} usually used for base or boundary layer declarations.
+		 * {@link ItemLayerManifest} usually used for base or boundary layer declarations.
 		 * This is so that {@link FragmentLayerManifest}s do not have to declare another linking
 		 * manifest to account for their value layer declaration. The actually required type of
 		 * layer should be concluded from the context in which the target layer is to be resolved.

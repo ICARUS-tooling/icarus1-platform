@@ -34,6 +34,9 @@ import java.nio.ByteBuffer;
  */
 public class ChunkArrays {
 
+	private static final int INT_BYTES = 4;
+	private static final int LONG_BYTES = 8;
+
 	public interface ArrayAdapter {
 
 		Object createBuffer(int byteCount);
@@ -81,10 +84,10 @@ public class ChunkArrays {
 		return new LongFileAdapter();
 	}
 
-	private static class IntAdapter implements ArrayAdapter {
+	public static class IntAdapter implements ArrayAdapter {
 
 		// begin-offset | end-offset
-		private static final int BYTES_PER_ENTRY = 4 + 4;
+		private static final int BYTES_PER_ENTRY = INT_BYTES + INT_BYTES;
 
 		private final int deltaBegin;
 		private final int deltaEnd;
@@ -207,10 +210,10 @@ public class ChunkArrays {
 
 	}
 
-	private static class IntFileAdapter extends IntAdapter implements ArrayAdapter {
+	public static class IntFileAdapter extends IntAdapter implements ArrayAdapter {
 
 		// file-id | begin-offset | end-offset
-		private static final int BYTES_PER_ENTRY = 4 + 4 + 4;
+		private static final int BYTES_PER_ENTRY = INT_BYTES + INT_BYTES + INT_BYTES;
 
 		private IntFileAdapter() {
 			super(1, 2);
@@ -282,10 +285,10 @@ public class ChunkArrays {
 
 	}
 
-	private static class LongAdapter implements ArrayAdapter {
+	public static class LongAdapter implements ArrayAdapter {
 
 		// begin-offset | end-offset
-		private static final int BYTES_PER_ENTRY = 8 + 8;
+		private static final int BYTES_PER_ENTRY = LONG_BYTES + LONG_BYTES;
 
 		private final int deltaBegin;
 		private final int deltaEnd;
@@ -408,10 +411,10 @@ public class ChunkArrays {
 
 	}
 
-	private static class LongFileAdapter extends IntAdapter implements ArrayAdapter {
+	public static class LongFileAdapter extends IntAdapter implements ArrayAdapter {
 
 		// file-id | begin-offset | end-offset
-		private static final int BYTES_PER_ENTRY = 4 + 8 + 8;
+		private static final int BYTES_PER_ENTRY = INT_BYTES + LONG_BYTES + LONG_BYTES;
 
 		private LongFileAdapter() {
 			super(1, 2);

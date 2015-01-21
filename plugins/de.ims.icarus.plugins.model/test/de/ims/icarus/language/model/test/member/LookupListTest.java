@@ -26,6 +26,7 @@
 package de.ims.icarus.language.model.test.member;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -113,11 +114,11 @@ public class LookupListTest {
 		list.add(dummy1);
 
 		list.remove(dummy1);
-		assertTrue("List must not contain dummy1 after removal", !list.contains(dummy1)); //$NON-NLS-1$
+		assertFalse("List must not contain dummy1 after removal", list.contains(dummy1)); //$NON-NLS-1$
 
 		list.add(dummy2);
 		list.remove(0);
-		assertTrue("List must not contain dummy2 after removal", !list.contains(dummy2)); //$NON-NLS-1$
+		assertFalse("List must not contain dummy2 after removal", list.contains(dummy2)); //$NON-NLS-1$
 	}
 
 	@Test
@@ -136,7 +137,7 @@ public class LookupListTest {
 
 		item = it.next();
 		assertEquals(item, dummy2);
-		assertTrue(!it.hasNext());
+		assertFalse(it.hasNext());
 	}
 
 	@Test

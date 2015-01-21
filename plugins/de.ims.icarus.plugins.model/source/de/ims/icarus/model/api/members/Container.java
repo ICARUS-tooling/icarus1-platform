@@ -36,13 +36,13 @@ import de.ims.icarus.model.standard.elements.MemberSets;
  * @version $Id$
  *
  */
-public interface Container extends Markable, Iterable<Markable>, ManifestOwner<ContainerManifest> {
+public interface Container extends Item, Iterable<Item>, ManifestOwner<ContainerManifest> {
 
 	public static final MemberSet<Container> EMPTY_BASE_SET = MemberSets.emptySet();
 
 	/**
 	 * Returns the type of this container. This provides
-	 * information about how contained {@code Markable}s are ordered and
+	 * information about how contained {@code Item}s are ordered and
 	 * if they represent a continuous subset of the corpus.
 	 *
 	 * @return The {@code ContainerType} of this {@code Container}
@@ -84,32 +84,32 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	Container getBoundaryContainer();
 
 	/**
-	 * Returns the number of {@code Markable} objects hosted within this
+	 * Returns the number of {@code Item} objects hosted within this
 	 * container.
 	 * <p>
 	 * Note that this does <b>not</b> include possible {@code Edge}s stored
 	 * within this container in case it is a {@link Structure}!
 	 *
-	 * @return The number of {@code Markable}s in this container
+	 * @return The number of {@code Item}s in this container
 	 */
 	int getMarkableCount();
 
 	/**
-	 * Returns the {@code Markable} stored at position {@code index} within
+	 * Returns the {@code Item} stored at position {@code index} within
 	 * this {@code Container}. Note that however elements in a container may
 	 * be unordered depending on the {@code ContainerType} as returned by
 	 * {@link #getErrorType()}, the same index has always to be mapped to
-	 * the exact same {@code Markable} within a single container!
+	 * the exact same {@code Item} within a single container!
 	 *
-	 * @param index The index of the {@code Markable} to be returned
-	 * @return The {@code Markable} at position {@code index} within this container
+	 * @param index The index of the {@code Item} to be returned
+	 * @return The {@code Item} at position {@code index} within this container
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= getMarkableCount()</tt>)
 	 */
-	Markable getMarkableAt(int index);
+	Item getItemAt(int index);
 
 	/**
-	 * Returns the index of the given {@code Markable} within this container's
+	 * Returns the index of the given {@code Item} within this container's
 	 * list of markables or {@code -1} if the markable is not hosted within this
 	 * container.
 	 * <p>
@@ -121,25 +121,25 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * scale well with the number of markables contained. Constant execution cost
 	 * should be the standard goal!
 	 *
-	 * @param markable The {@code Markable} whose index is to be returned
-	 * @return The index at which the {@code Markable} appears within this
+	 * @param item The {@code Item} whose index is to be returned
+	 * @return The index at which the {@code Item} appears within this
 	 * container or {@code -1} if the markable is not hosted within this container.
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 */
-	int indexOfMarkable(Markable markable);
+	int indexOfItem(Item item);
 
 	/**
 	 * Returns {@code true} if this container hosts the specified markable.
-	 * Essentially equal to receiving {@code -1} as result to a {@link #indexOfMarkable(Markable)}
+	 * Essentially equal to receiving {@code -1} as result to a {@link #indexOfItem(Item)}
 	 * call.
 	 *
-	 * @param markable The markable to check
+	 * @param item The markable to check
 	 * @return {@code true} iff this container hosts the given markable
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 *
-	 * @see #indexOfMarkable(Markable)
+	 * @see #indexOfItem(Item)
 	 */
-	boolean containsMarkable(Markable markable);
+	boolean containsItem(Item item);
 
 	/**
 	 * Removes from the mutating container all elements.
@@ -151,12 +151,12 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	/**
 	 * Adds a new markable to this container
 	 *
-	 * @param markable
+	 * @param item
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	void addMarkable(Markable markable);
+	void addItem(Item item);
 
 	/**
 	 * Adds a new markable to this container
@@ -167,14 +167,14 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * using {@link #addMarkable()}.
 	 *
 	 * @param index The position to insert the new markable at
-	 * @param markable
+	 * @param item
 	 * @throws IndexOutOfBoundsException if the index is out of range
 	 *         (<tt>index &lt; 0 || index &gt; getMarkableCount()</tt>)
 	 * @throws NullPointerException if the {@code markable} argument is {@code null}
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	void addMarkable(int index, Markable markable);
+	void addItem(int index, Item item);
 
 	/**
 	 * Removes and returns the markable at the given index. Shifts the
@@ -188,17 +188,17 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * @throws UnsupportedOperationException if the corpus
 	 * is not editable or the operation is not supported by the implementation
 	 */
-	Markable removeMarkable(int index);
+	Item removeItem(int index);
 
 	/**
 	 * First determines the index of the given markable object within
-	 * this container and then calls {@link #removeMarkable(int)}.
+	 * this container and then calls {@link #removeItem(int)}.
 	 *
-	 * @param markable
+	 * @param item
 	 * @return
-	 * @see Container#indexOfMarkable(Markable)
+	 * @see Container#indexOfItem(Item)
 	 */
-	Markable removeMarkable(Markable markable);
+	Item removeItem(Item item);
 
 	/**
 	 * Moves the markable currently located at position {@code index0}
@@ -221,9 +221,9 @@ public interface Container extends Markable, Iterable<Markable>, ManifestOwner<C
 	 * First determines the index of the given markable object within
 	 * this container and then calls {@link #moveMarkable(int, int)}.
 	 *
-	 * @param markable The markable to be moved
+	 * @param item The markable to be moved
 	 * @param index The position the {@code markable} argument should be moved to
-	 * @see Container#indexOfMarkable(Markable)
+	 * @see Container#indexOfItem(Item)
 	 */
-	void moveMarkable(Markable markable, int index);
+	void moveItem(Item item, int index);
 }

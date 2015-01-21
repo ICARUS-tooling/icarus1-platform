@@ -35,7 +35,7 @@ import de.ims.icarus.model.iql.Query;
  * @version $Id$
  *
  */
-public interface SubCorpus {
+public interface CorpusView {
 
 	/**
 	 * Returns the {@code Corpus} that is backing this sub corpus.
@@ -68,28 +68,28 @@ public interface SubCorpus {
 	// Destruction support
 
 	/**
-	 * Attempts to acquire shared ownership of this sub corpus by the given {@code owner}.
-	 * If the given owner already holds shared ownership if this sub corpus, the method
+	 * Attempts to acquire shared ownership of this corpus view by the given {@code owner}.
+	 * If the given owner already holds shared ownership if this corpus view, the method
 	 * simply returns.
 	 *
 	 * @param owner
 	 * @throws NullPointerException if the {@code owner} argument is {@code null}.
 	 * @throws ModelException if {@link #close()} has already been called on this
-	 * 			sub corpus and it's in the process of releasing its data.
+	 * 			corpus view and it's in the process of releasing its data.
 	 */
 	void acquire(CorpusOwner owner) throws ModelException;
 
 	/**
-	 * Removes the given {@code owner}'s shared ownership on this sub corpus. If no
-	 * more owners are registered to this sub corpus, a subsequent call to {@link #closable()}
+	 * Removes the given {@code owner}'s shared ownership on this corpus view. If no
+	 * more owners are registered to this corpus view, a subsequent call to {@link #closable()}
 	 * will return {@code true}.
 	 *
 	 * @param owner
 	 * @throws NullPointerException if the {@code owner} argument is {@code null}.
 	 * @throws ModelException if {@link #close()} has already been called on this
-	 * 			sub corpus and it's in the process of releasing its data.
+	 * 			corpus view and it's in the process of releasing its data.
 	 * @throws IllegalArgumentException if the given owner does not hold shared ownership
-	 * 			of this sub corpus.
+	 * 			of this corpus view.
 	 */
 	void release(CorpusOwner owner) throws ModelException;
 
@@ -99,24 +99,24 @@ public interface SubCorpus {
 	Set<CorpusOwner> getOwners();
 
 	/**
-	 * Checks whether or not the sub-corpus is currently closable, i.e.
+	 * Checks whether or not the corpus view is currently closable, i.e.
 	 * @return
 	 */
 	boolean closable();
 
 	/**
-	 * Checks whether this sub corpus is allowed to be closed and if so, releases
+	 * Checks whether this corpus view is allowed to be closed and if so, releases
 	 * all currently held data. Note that if there are still {@code CorpusOwner}s holding
-	 * on to this sub corpus, they will be asked to release their ownership. If after this
+	 * on to this corpus view, they will be asked to release their ownership. If after this
 	 * initial release phase there is still at least one ownership pending, the call will
 	 * fail with an {@code ModelException}.
-	 * Otherwise the sub corpus will release its data and disconnect any links to the hosting
+	 * Otherwise the corpus view will release its data and disconnect any links to the hosting
 	 * corpus.
 	 *
 	 * @throws ModelException
 	 * @throws InterruptedException
 	 * @throws IllegalStateException in case there are still owners that could not be made to
-	 * 			release their partial ownership of this sub corpus
+	 * 			release their partial ownership of this corpus view
 	 */
 	void close() throws ModelException, InterruptedException;
 
@@ -124,7 +124,7 @@ public interface SubCorpus {
 
 	/**
 	 * Returns the maximum number of elements per page, or {@code -1} if this
-	 * sub corpus only contains {@code 1} page and that page's size is therefore determined by
+	 * corpus view only contains {@code 1} page and that page's size is therefore determined by
 	 * the size of this sub corpus's <i>primary layer</i>.
 	 * @return
 	 */

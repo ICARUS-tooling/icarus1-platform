@@ -44,12 +44,12 @@ import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.manifest.StructureManifest;
 import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.api.members.StructureType;
 import de.ims.icarus.model.standard.manifest.ContainerManifestImpl;
-import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.StructureLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.StructureManifestImpl;
 
@@ -106,7 +106,7 @@ public class StructureLayerManifestImplTest extends ManifestTestCase<StructureLa
 	@Test
 	public void testEquals() throws Exception {
 
-		MarkableLayerManifestImpl other = newInstance();
+		ItemLayerManifestImpl other = newInstance();
 
 		assertHashEquals(manifest, other);
 
@@ -212,7 +212,7 @@ public class StructureLayerManifestImplTest extends ManifestTestCase<StructureLa
 
 		// Manifest is empty except for id and templateId
 
-		assertTemplateGetters(MarkableLayerManifest.class, manifest, template);
+		assertTemplateGetters(ItemLayerManifest.class, manifest, template);
 	}
 
 	// SERIALIZATION TESTS

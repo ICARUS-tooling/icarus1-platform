@@ -28,13 +28,13 @@ package de.ims.icarus.model.api.driver;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Scope;
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 import de.ims.icarus.model.api.driver.indexing.Index;
 import de.ims.icarus.model.api.driver.indexing.IndexStorage;
 import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.DriverManifest;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.meta.AnnotationValueDistribution;
 import de.ims.icarus.model.api.meta.AnnotationValueSet;
 import de.ims.icarus.model.iql.Query;
@@ -136,7 +136,7 @@ public interface Driver {
 	 * @return
 	 * @throws ModelException
 	 */
-	Markable load(long index, MarkableLayer layer) throws ModelException;
+	Item load(long index, MarkableLayer layer) throws ModelException;
 
 	/**
 	 * Performs an index lookup to return indices of markables in the designated target layer
@@ -156,15 +156,15 @@ public interface Driver {
 	Candidates mapIndices(MarkableLayer sourceLayer, MarkableLayer targetLayer, IndexSet[] sourceIndices) throws ModelException, InterruptedException;
 
 	/**
-	 * Called by a {@link SubCorpus} when it gets closed or it otherwise decided to discard its current
+	 * Called by a {@link CorpusView} when it gets closed or it otherwise decided to discard its current
 	 * content. The driver is responsible for collecting the layer groups affected by the segment which
 	 * it is able handle and then release their content from its internal cache, potentially moving
 	 * members it no longer requires to a markable pool.
 	 *
 	 * @param container
-	 * @param subCorpus
+	 * @param corpusView
 	 */
-	void release(SubCorpus subCorpus) throws ModelException, InterruptedException;
+	void release(CorpusView corpusView) throws ModelException, InterruptedException;
 
 	/**
 	 * Called when a context is removed from a corpus or the entire model framework is shutting down.
@@ -184,7 +184,7 @@ public interface Driver {
 //	 * @return
 //	 * @throws NullPointerException if the {@code layer} argument is {@code null}
 //	 */
-//	MemberCache<Markable> getCache(MarkableLayer layer);
+//	MemberCache<Item> getCache(MarkableLayer layer);
 
 	/**
 	 * Accesses the driver's internal indexing system and tries to fetch all the occurring values for a given

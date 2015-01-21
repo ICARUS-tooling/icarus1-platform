@@ -39,7 +39,7 @@ import de.ims.icarus.model.api.manifest.AnnotationLayerManifest;
 import de.ims.icarus.model.api.manifest.AnnotationManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.CorpusMember;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.util.CorpusMemberUtils;
 import de.ims.icarus.model.util.CorpusUtils;
@@ -53,7 +53,7 @@ import de.ims.icarus.util.CorruptedStateException;
  */
 public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest> implements AnnotationLayer {
 
-	private final Map<Markable, Object> annotations = new WeakHashMap<>();
+	private final Map<Item, Object> annotations = new WeakHashMap<>();
 	private final String key;
 	private final AnnotationManifest annotationManifest;
 
@@ -79,7 +79,7 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 			throw new IllegalArgumentException("Missing annotation manifest for sole key: "+key); //$NON-NLS-1$
 	}
 
-	protected Map<Markable, Object> getDefaultAnnotations() {
+	protected Map<Item, Object> getDefaultAnnotations() {
 		return annotations;
 	}
 
@@ -102,25 +102,25 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 //	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.Markable)
 //	 */
 //	@Override
-//	public Object getValue(Markable markable) {
+//	public Object getValue(Item markable) {
 //		return annotations.get(markable);
 //	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.members.Markable, java.lang.String)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#getValue(de.ims.icarus.model.api.members.Item, java.lang.String)
 	 */
 	@Override
-	public Object getValue(Markable markable, String key) {
+	public Object getValue(Item item, String key) {
 		checkKey(key);
 
-		return annotations.get(markable);
+		return annotations.get(item);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.members.Markable, de.ims.icarus.util.Collector)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#collectKeys(de.ims.icarus.model.api.members.Item, de.ims.icarus.util.Collector)
 	 */
 	@Override
-	public boolean collectKeys(Markable markable, Collector<String> buffer) {
+	public boolean collectKeys(Item item, Collector<String> buffer) {
 		buffer.collect(key);
 		return true;
 	}
@@ -144,49 +144,49 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#removeAllValues(de.ims.icarus.model.api.members.Markable, boolean)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#removeAllValues(de.ims.icarus.model.api.members.Item, boolean)
 	 */
 	@Override
-	public void removeAllValues(Markable markable, boolean recursive) {
-		if (markable == null)
+	public void removeAllValues(Item item, boolean recursive) {
+		if (item == null)
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 
-		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
-			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
+		if(getBaseLayers().contains(item.getLayer()) && !getManifest().isDeepAnnotation())
+			throw new IllegalArgumentException("Item '"+item+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		List<Markable> buffer = new ArrayList<>();
+		List<Item> buffer = new ArrayList<>();
 
-		if(annotations.get(markable)!=null) {
-			buffer.add(markable);
+		if(annotations.get(item)!=null) {
+			buffer.add(item);
 		}
 
-		if(recursive && (markable.getMemberType()==MemberType.STRUCTURE
-				|| markable.getMemberType()==MemberType.CONTAINER)) {
-			collectAnnotatedMarkables((Container) markable, buffer);
+		if(recursive && (item.getMemberType()==MemberType.STRUCTURE
+				|| item.getMemberType()==MemberType.CONTAINER)) {
+			collectAnnotatedItems((Container) item, buffer);
 		}
 
 		if(buffer.isEmpty()) {
 			return;
 		}
 
-		Markable[] markables = new Markable[buffer.size()];
+		Item[] markables = new Item[buffer.size()];
 		buffer.toArray(markables);
 
 		execute(new AnnotationChange(markables));
 	}
 
-	private void collectAnnotatedMarkables(Container container, List<Markable> buffer) {
+	private void collectAnnotatedItems(Container container, List<Item> buffer) {
 		int size = container.getMarkableCount();
 		for(int i=0; i<size; i++) {
-			Markable markable = container.getMarkableAt(i);
+			Item item = container.getItemAt(i);
 
-			if(annotations.get(markable)!=null) {
-				buffer.add(markable);
+			if(annotations.get(item)!=null) {
+				buffer.add(item);
 			}
 
-			if(markable.getMemberType()==MemberType.STRUCTURE
-					|| markable.getMemberType()==MemberType.CONTAINER) {
-				collectAnnotatedMarkables((Container) markable, buffer);
+			if(item.getMemberType()==MemberType.STRUCTURE
+					|| item.getMemberType()==MemberType.CONTAINER) {
+				collectAnnotatedItems((Container) item, buffer);
 			}
 		}
 	}
@@ -195,12 +195,12 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 //	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.Markable, java.lang.Object)
 //	 */
 //	@Override
-//	public void setValue(Markable markable, Object value) {
+//	public void setValue(Item markable, Object value) {
 //		if (markable == null)
 //			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 //
 //		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
-//			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
+//			throw new IllegalArgumentException("Item '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
 //
 //		if(value!=null && !annotationManifest.getValueType().isValidValue(value))
 //			throw new IllegalArgumentException("Invalid annotation value: "+value); //$NON-NLS-1$
@@ -210,36 +210,36 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 
 	/**
 	 * Directly saves a given annotation value, bypassing most of the default
-	 * sanity checks of the {@link #setValue(Markable, Object)} method.
+	 * sanity checks of the {@link #setValue(Item, Object)} method.
 	 *
-	 * @param markable
+	 * @param item
 	 * @param value
 	 */
-	public void putValue(Markable markable, Object value) {
-		if (markable == null)
+	public void putValue(Item item, Object value) {
+		if (item == null)
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 		if (value == null)
 			throw new NullPointerException("Invalid value"); //$NON-NLS-1$
 
-		annotations.put(markable, value);
+		annotations.put(item, value);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.members.Markable, java.lang.String, java.lang.Object)
+	 * @see de.ims.icarus.model.api.layer.AnnotationLayer#setValue(de.ims.icarus.model.api.members.Item, java.lang.String, java.lang.Object)
 	 */
 	@Override
-	public void setValue(Markable markable, String key, Object value) {
-		if (markable == null)
+	public void setValue(Item item, String key, Object value) {
+		if (item == null)
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 		checkKey(key);
 
-		if(getBaseLayers().contains(markable.getLayer()) && !getManifest().isDeepAnnotation())
-			throw new IllegalArgumentException("Markable '"+markable+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
+		if(getBaseLayers().contains(item.getLayer()) && !getManifest().isDeepAnnotation())
+			throw new IllegalArgumentException("Item '"+item+"' is not a member of this layer's base layer"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		if(!CorpusUtils.isValidValue(value, annotationManifest))
 			throw new IllegalArgumentException("Invalid annotation value: "+value); //$NON-NLS-1$
 
-		execute(new AnnotationChange(markable, value));
+		execute(new AnnotationChange(item, value));
 	}
 
 	/**
@@ -255,7 +255,7 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 
 	private class ClearChange implements AtomicChange {
 
-		private Markable[] markables = null;
+		private Item[] items = null;
 		private Object[] values = null;
 
 		private int expectedSize = annotations.size();
@@ -270,24 +270,24 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
 						"Clear failed", expectedSize, annotations.size())); //$NON-NLS-1$
 
-			if(markables==null) {
-				markables = new Markable[size];
+			if(items==null) {
+				items = new Item[size];
 				values = new Object[size];
 
-				Iterator<Entry<Markable, Object>> it = annotations.entrySet().iterator();
+				Iterator<Entry<Item, Object>> it = annotations.entrySet().iterator();
 				for(int i=0; i<size; i++) {
-					Entry<Markable, Object> entry = it.next();
-					markables[i] = entry.getKey();
+					Entry<Item, Object> entry = it.next();
+					items[i] = entry.getKey();
 					values[i] = entry.getValue();
 				}
 
 				annotations.clear();
 			} else {
 				for(int i=0; i<size; i++) {
-					annotations.put(markables[i], values[i]);
+					annotations.put(items[i], values[i]);
 				}
 
-				markables = null;
+				items = null;
 				values = null;
 			}
 
@@ -306,26 +306,26 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 
 	private class AnnotationChange implements AtomicChange {
 
-		private final Markable[] markables;
+		private final Item[] items;
 		private final Object[] values;
 
 		private int expectedSize = annotations.size();
 
-		private AnnotationChange(Markable[] markables, Object[] values) {
+		private AnnotationChange(Item[] markables, Object[] values) {
 			if(markables.length!=values.length)
-				throw new IllegalArgumentException("Size mismatch between markables and values array"); //$NON-NLS-1$
+				throw new IllegalArgumentException("Size mismatch between items and values array"); //$NON-NLS-1$
 
-			this.markables = markables;
+			this.items = markables;
 			this.values = values;
 		}
 
-		private AnnotationChange(Markable markable, Object value) {
-			markables = new Markable[]{markable};
+		private AnnotationChange(Item item, Object value) {
+			items = new Item[]{item};
 			values = new Object[]{value};
 		}
 
-		private AnnotationChange(Markable[] markables) {
-			this.markables = markables;
+		private AnnotationChange(Item[] markables) {
+			this.items = markables;
 			this.values = new Object[markables.length];
 		}
 
@@ -339,11 +339,11 @@ public class SimpleAnnotationLayer extends AbstractLayer<AnnotationLayerManifest
 				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
 						"Clear failed", expectedSize, annotations.size())); //$NON-NLS-1$
 
-			for(int i=markables.length-1; i>-1; i--) {
-				Markable markable = markables[i];
+			for(int i=items.length-1; i>-1; i--) {
+				Item item = items[i];
 				Object value = values[i];
-				Object current = annotations.get(markable);
-				annotations.put(markable, value);
+				Object current = annotations.get(item);
+				annotations.put(item, value);
 
 				values[i] = current;
 			}

@@ -28,7 +28,7 @@ package de.ims.icarus.model.api.highlight;
 import java.awt.Color;
 
 import de.ims.icarus.model.api.members.Container;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * Models a set of highlight informations for a given {@link Container}
@@ -39,22 +39,22 @@ import de.ims.icarus.model.api.members.Markable;
 public interface Highlight {
 
 	/**
-	 * Returns the container that contains legal {@code Markable} objects
+	 * Returns the container that contains legal {@code Item} objects
 	 * that can be passed to the various methods in this interface.
 	 */
 	Container getContainer();
 
 	HighlightCursor getHighlightCursor();
 
-	boolean isHighlighted(Markable markable);
+	boolean isHighlighted(Item item);
 
-	boolean isHighlighted(Markable markable, int layerIndex);
+	boolean isHighlighted(Item item, int layerIndex);
 
-	Color getHighlightColor(Markable markable);
+	Color getHighlightColor(Item item);
 
-	Color getHighlightColor(Markable markable, int layerIndex);
+	Color getHighlightColor(Item item, int layerIndex);
 
-	int getGroupId(Markable markable);
+	int getGroupId(Item item);
 
-	int getGroupId(Markable markable, int layerIndex);
+	int getGroupId(Item item, int layerIndex);
 }

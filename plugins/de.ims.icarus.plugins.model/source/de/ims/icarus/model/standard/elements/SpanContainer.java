@@ -33,7 +33,7 @@ import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.api.members.CorpusMember;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.util.CorpusMemberUtils;
 import de.ims.icarus.util.CorruptedStateException;
@@ -44,7 +44,7 @@ import de.ims.icarus.util.CorruptedStateException;
  * Does {@code not} support the following operation:
  * <ul>
  * <li>{@code #removeMarkable(int)} with an index other then {@code 0} or {@code #getMarkableCount()-1}</li>
- * <li>{@code #addMarkable(int, Markable)} with an index other then {@code 0} or {@code #getMarkableCount()}</li>
+ * <li>{@code #addMarkable(int, Item)} with an index other then {@code 0} or {@code #getMarkableCount()}</li>
  * <li>Any of the two {@code move} methods</li>
  * </ul>
  *
@@ -56,13 +56,13 @@ public class SpanContainer extends AbstractContainer {
 	private int startIndex = -1;
 	private int endIndex = -1;
 
-	public void appendMarkable(Markable markable) {
-		// The markable has already been added to its original host container.
+	public void appendItem(Item item) {
+		// The item has already been added to its original host container.
 		// Therefore we can safely call the indexOf() method
-		int index = base().indexOfMarkable(markable);
+		int index = base().indexOfItem(item);
 
 		if(index==-1)
-			throw new CorruptedStateException("Markable not yet added to base container: "+markable); //$NON-NLS-1$
+			throw new CorruptedStateException("Item not yet added to base container: "+item); //$NON-NLS-1$
 
 		if(startIndex==-1) {
 			startIndex = endIndex = index;
@@ -71,7 +71,7 @@ public class SpanContainer extends AbstractContainer {
 		} else if(index==endIndex+1) {
 			endIndex++;
 		} else
-			throw new IllegalArgumentException("Markable not adjacent to current span: "+markable); //$NON-NLS-1$
+			throw new IllegalArgumentException("Item not adjacent to current span: "+item); //$NON-NLS-1$
 	}
 
 	/**
@@ -175,11 +175,11 @@ public class SpanContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getItemAt(int)
 	 */
 	@Override
-	public Markable getMarkableAt(int index) {
-		return base().getMarkableAt(startIndex+index);
+	public Item getItemAt(int index) {
+		return base().getItemAt(startIndex+index);
 	}
 
 	/**
@@ -191,10 +191,10 @@ public class SpanContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addItem(int, de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public void addMarkable(int index, Markable markable) {
+	public void addItem(int index, Item item) {
 		int size = getMarkableCount();
 		if(index!=0 && index!=size)
 			throw new IllegalArgumentException(CorpusMemberUtils.outOfBoundsMessage(
@@ -202,14 +202,14 @@ public class SpanContainer extends AbstractContainer {
 
 		boolean append = index==size;
 
-		execute(new ElementChange(append, true, markable));
+		execute(new ElementChange(append, true, item));
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 	 */
 	@Override
-	public Markable removeMarkable(int index) {
+	public Item removeItem(int index) {
 		int size = getMarkableCount();
 
 		if(size==0)
@@ -220,11 +220,11 @@ public class SpanContainer extends AbstractContainer {
 
 		boolean append = index==size-1;
 
-		Markable markable = getMarkableAt(index);
+		Item item = getItemAt(index);
 
 		execute(new ElementChange(append, false, null));
 
-		return markable;
+		return item;
 	}
 
 	/**
@@ -239,20 +239,20 @@ public class SpanContainer extends AbstractContainer {
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
-	public Iterator<Markable> iterator() {
+	public Iterator<Item> iterator() {
 		return new SpanItr();
 	}
 
 	private class ElementChange implements AtomicChange {
 
-		private final Markable markable;
+		private final Item item;
 		private final boolean append;
 		private final boolean add;
 		private int expectedSize;
 
-		public ElementChange(boolean append, boolean add, Markable markable) {
+		public ElementChange(boolean append, boolean add, Item item) {
 			this.append = append;
-			this.markable = markable;
+			this.item = item;
 			this.add = add;
 			expectedSize = base().getMarkableCount();
 		}
@@ -271,34 +271,34 @@ public class SpanContainer extends AbstractContainer {
 
 			if(add) {
 				if(append) {
-					Markable markable = base.getMarkableAt(endIndex+1);
-					if(this.markable!=markable)
+					Item item = base.getItemAt(endIndex+1);
+					if(this.item!=item)
 						throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-								"Add failed (tail)", this.markable, markable)); //$NON-NLS-1$
+								"Add failed (tail)", this.item, item)); //$NON-NLS-1$
 
 					endIndex++;
 				} else {
-					Markable markable = base.getMarkableAt(startIndex-1);
-					if(this.markable!=markable)
+					Item item = base.getItemAt(startIndex-1);
+					if(this.item!=item)
 						throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-								"Add failed (head)", this.markable, markable)); //$NON-NLS-1$
+								"Add failed (head)", this.item, item)); //$NON-NLS-1$
 
 					startIndex--;
 				}
 			} else {
-				Markable markable = null;
+				Item item = null;
 				if(append) {
-					markable = base.getMarkableAt(endIndex);
-					if(this.markable!=markable)
+					item = base.getItemAt(endIndex);
+					if(this.item!=item)
 						throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-								"Remove failed (tail)", this.markable, markable)); //$NON-NLS-1$
+								"Remove failed (tail)", this.item, item)); //$NON-NLS-1$
 
 					endIndex--;
 				} else {
-					markable = base.getMarkableAt(startIndex);
-					if(this.markable!=markable)
+					item = base.getItemAt(startIndex);
+					if(this.item!=item)
 						throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-								"Remove failed (head)", this.markable, markable)); //$NON-NLS-1$
+								"Remove failed (head)", this.item, item)); //$NON-NLS-1$
 
 					startIndex++;
 				}
@@ -320,8 +320,8 @@ public class SpanContainer extends AbstractContainer {
 
 		private final int expectedStartIndex;
 		private final int expectedEndIndex;
-		private final Markable first;
-		private final Markable last;
+		private final Item first;
+		private final Item last;
 
 		private int expectedSize;
 
@@ -333,8 +333,8 @@ public class SpanContainer extends AbstractContainer {
 
 			Container base = base();
 
-			first = base.getMarkableAt(expectedStartIndex);
-			last = base.getMarkableAt(expectedEndIndex);
+			first = base.getItemAt(expectedStartIndex);
+			last = base.getItemAt(expectedEndIndex);
 
 			expectedSize = base.getMarkableCount();
 		}
@@ -357,14 +357,14 @@ public class SpanContainer extends AbstractContainer {
 				if(endIndex!=expectedEndIndex)
 					throw new CorruptedStateException(CorpusMemberUtils.offsetMismatchMessage(
 							"Clear failed (end-index)", expectedEndIndex, endIndex)); //$NON-NLS-1$
-				Markable markable = base.getMarkableAt(expectedStartIndex);
-				if(markable!=first)
+				Item item = base.getItemAt(expectedStartIndex);
+				if(item!=first)
 					throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-							"Clear failed (head mismatch)", first, markable)); //$NON-NLS-1$
-				markable = base.getMarkableAt(expectedEndIndex);
-				if(markable!=last)
+							"Clear failed (head mismatch)", first, item)); //$NON-NLS-1$
+				item = base.getItemAt(expectedEndIndex);
+				if(item!=last)
 					throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-							"Clear failed (tail mismatch)", last, markable)); //$NON-NLS-1$
+							"Clear failed (tail mismatch)", last, item)); //$NON-NLS-1$
 
 				startIndex = -1;
 				endIndex = -1;
@@ -375,14 +375,14 @@ public class SpanContainer extends AbstractContainer {
 				if(endIndex!=-1)
 					throw new CorruptedStateException(CorpusMemberUtils.illegalOffsetMessage(
 							"Fill failed (end-index)", endIndex)); //$NON-NLS-1$
-				Markable markable = base.getMarkableAt(expectedStartIndex);
-				if(markable!=first)
+				Item item = base.getItemAt(expectedStartIndex);
+				if(item!=first)
 					throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-							"Fill failed (head mismatch)", first, markable)); //$NON-NLS-1$
-				markable = base.getMarkableAt(expectedEndIndex);
-				if(markable!=last)
+							"Fill failed (head mismatch)", first, item)); //$NON-NLS-1$
+				item = base.getItemAt(expectedEndIndex);
+				if(item!=last)
 					throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-							"Fill failed (tail mismatch)", last, markable)); //$NON-NLS-1$
+							"Fill failed (tail mismatch)", last, item)); //$NON-NLS-1$
 
 				startIndex = expectedStartIndex;
 				endIndex = expectedEndIndex;
@@ -399,7 +399,7 @@ public class SpanContainer extends AbstractContainer {
 
 	}
 
-	private class SpanItr implements Iterator<Markable> {
+	private class SpanItr implements Iterator<Item> {
 		private final int expectedSize = getMarkableCount();
 
 		private int cursor;
@@ -416,7 +416,7 @@ public class SpanContainer extends AbstractContainer {
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public Markable next() {
+		public Item next() {
             checkForComodification();
             if (cursor >= getMarkableCount())
                 throw new NoSuchElementException();
@@ -424,7 +424,7 @@ public class SpanContainer extends AbstractContainer {
             if (i >= base().getMarkableCount())
                 throw new ConcurrentModificationException();
             cursor++;
-            return base().getMarkableAt(i);
+            return base().getItemAt(i);
 		}
 
 		/**

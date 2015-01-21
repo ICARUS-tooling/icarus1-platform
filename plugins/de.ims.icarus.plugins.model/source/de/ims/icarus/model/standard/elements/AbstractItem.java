@@ -30,7 +30,7 @@ import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.CorpusMember;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.util.CorpusUtils;
 import de.ims.icarus.model.util.Recyclable;
 import de.ims.icarus.util.CorruptedStateException;
@@ -47,7 +47,7 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public abstract class AbstractMarkable implements Markable, Recyclable {
+public abstract class AbstractItem implements Item, Recyclable {
 
 	@Primitive
 	private long index = -1;
@@ -89,7 +89,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Item#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -97,7 +97,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Item#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -144,12 +144,12 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
-	public int compareTo(Markable o) {
+	public int compareTo(Item o) {
 		return CorpusUtils.compare(this, o);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getIndex()
+	 * @see de.ims.icarus.model.api.members.Item#getIndex()
 	 */
 	@Override
 	public long getIndex() {
@@ -170,7 +170,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
+	 * @see de.ims.icarus.model.api.members.Item#setIndex(long)
 	 */
 	@Override
 	public void setIndex(long newIndex) {
@@ -210,7 +210,7 @@ public abstract class AbstractMarkable implements Markable, Recyclable {
 		 */
 		@Override
 		public CorpusMember getAffectedMember() {
-			return AbstractMarkable.this;
+			return AbstractItem.this;
 		}
 	}
 }

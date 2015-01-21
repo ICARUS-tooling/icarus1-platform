@@ -39,7 +39,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface MarkableLayerManifest extends LayerManifest {
+public interface ItemLayerManifest extends LayerManifest {
 
 	/**
 	 * Returns the number of nested containers and/or structures within this
@@ -76,7 +76,7 @@ public interface MarkableLayerManifest extends LayerManifest {
 	int indexOfContainerManifest(ContainerManifest containerManifest);
 
 	/**
-	 * Returns the {@code MarkableLayerManifest} that describes the layer hosting
+	 * Returns the {@code ItemLayerManifest} that describes the layer hosting
 	 * <i>boundary containers</i> for the markables in this manifests'
 	 * {@code MarkableLayer}. If the markables are not restricted by <i>boundary containers</i>
 	 * this method should return {@code null}.

@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.model.standard.driver.cache;
 
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
@@ -64,7 +64,7 @@ public class MemberCache {
 		@Primitive
 		long key;
 		@Link(cache=true)
-		Markable value;
+		Item value;
 		@Link
 		Entry next;
 
@@ -75,7 +75,7 @@ public class MemberCache {
 		 * @param value The value for this key
 		 * @param next A reference to the next entry in the table
 		 */
-		protected Entry(long key, Markable value, Entry next) {
+		protected Entry(long key, Item value, Entry next) {
 			this.key = key;
 			this.value = value;
 			this.next = next;
@@ -138,7 +138,7 @@ public class MemberCache {
 	}
 
 	@AccessRestriction(AccessMode.MANAGE)
-	protected Entry add(long key, Markable member) {
+	protected Entry add(long key, Item member) {
 		// Makes sure the key is not already in the hash-table.
 		Entry tab[] = table;
 		int hash = (int) key;
@@ -165,12 +165,12 @@ public class MemberCache {
 		return e;
 	}
 
-	protected Entry newEntry(long key, Markable member, Entry next) {
+	protected Entry newEntry(long key, Item member, Entry next) {
 		return new Entry(key, member, next);
 	}
 
 	@AccessRestriction(AccessMode.MANAGE)
-	protected Markable remove(long key) {
+	protected Item remove(long key) {
 		Entry tab[] = table;
 		int hash = (int) key;
 		int index = (hash & 0x7FFFFFFF) % tab.length;
@@ -182,7 +182,7 @@ public class MemberCache {
 					tab[index] = e.next;
 				}
 				count--;
-				Markable oldValue = e.value;
+				Item oldValue = e.value;
 				e.value = null;
 				return oldValue;
 			}
@@ -209,7 +209,7 @@ public class MemberCache {
 	 * @throws IllegalArgumentException if there already is an entry for the given key
 	 */
 	@AccessRestriction(AccessMode.MANAGE)
-	public void registerMember(long key, Markable member) {
+	public void registerMember(long key, Item member) {
 		if (member == null)
 			throw new NullPointerException("Invalid member"); //$NON-NLS-1$
 
@@ -224,7 +224,7 @@ public class MemberCache {
 	 * @return
 	 */
 	@AccessRestriction(AccessMode.ALL)
-	public Markable lookupMember(long key) {
+	public Item lookupMember(long key) {
 		Entry entry = fetch(key);
 		if(entry==null) {
 			return null;
@@ -234,7 +234,7 @@ public class MemberCache {
 	}
 
 	@AccessRestriction(AccessMode.MANAGE)
-	public Markable removeMember(long key) {
+	public Item removeMember(long key) {
 		return remove(key);
 	}
 

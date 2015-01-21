@@ -43,7 +43,7 @@ import de.ims.icarus.model.xml.XmlSerializer;
  * @version $Id$
  *
  */
-public class FragmentLayerManifestImpl extends MarkableLayerManifestImpl implements FragmentLayerManifest {
+public class FragmentLayerManifestImpl extends ItemLayerManifestImpl implements FragmentLayerManifest {
 
 	private TargetLayerManifest valueManifest;
 	private String annotationKey;
@@ -78,7 +78,7 @@ public class FragmentLayerManifestImpl extends MarkableLayerManifestImpl impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl#writeElements(de.ims.icarus.model.xml.XmlSerializer)
+	 * @see de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl#writeElements(de.ims.icarus.model.xml.XmlSerializer)
 	 */
 	@Override
 	protected void writeElements(XmlSerializer serializer) throws Exception {
@@ -171,7 +171,7 @@ public class FragmentLayerManifestImpl extends MarkableLayerManifestImpl impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl#xmlTag()
+	 * @see de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl#xmlTag()
 	 */
 	@Override
 	protected String xmlTag() {
@@ -179,7 +179,7 @@ public class FragmentLayerManifestImpl extends MarkableLayerManifestImpl impleme
 	}
 
 	/**
-	 * @see de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl#getManifestType()
+	 * @see de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {

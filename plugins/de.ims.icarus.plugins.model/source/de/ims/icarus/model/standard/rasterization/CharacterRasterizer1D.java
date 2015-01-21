@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.rasterization;
 import javax.swing.Icon;
 
 import de.ims.icarus.model.api.layer.FragmentLayer;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.raster.Axis;
 import de.ims.icarus.model.api.raster.Position;
 import de.ims.icarus.model.api.raster.Rasterizer;
@@ -92,10 +92,10 @@ public class CharacterRasterizer1D implements Rasterizer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.raster.Rasterizer#getRasterSize(de.ims.icarus.model.api.members.Markable, de.ims.icarus.model.api.layer.FragmentLayer, java.lang.Object, int)
+	 * @see de.ims.icarus.model.api.raster.Rasterizer#getRasterSize(de.ims.icarus.model.api.members.Item, de.ims.icarus.model.api.layer.FragmentLayer, java.lang.Object, int)
 	 */
 	@Override
-	public long getRasterSize(Markable markable, FragmentLayer layer,
+	public long getRasterSize(Item item, FragmentLayer layer,
 			Object value, int axis) {
 		checkAxis(axis);
 

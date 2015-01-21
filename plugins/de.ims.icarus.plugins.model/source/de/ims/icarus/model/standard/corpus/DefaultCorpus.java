@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 import de.ims.icarus.model.api.edit.CorpusEditModel;
 import de.ims.icarus.model.api.edit.CorpusUndoManager;
 import de.ims.icarus.model.api.events.CorpusListener;
@@ -46,10 +46,10 @@ import de.ims.icarus.model.api.layer.LayerType;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.CorpusManifest;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.ContainerType;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.meta.MetaData;
@@ -276,7 +276,7 @@ public class DefaultCorpus implements Corpus {
 	 * @see de.ims.icarus.model.api.Corpus#getSegment(de.ims.icarus.model.iql.Query)
 	 */
 	@Override
-	public SubCorpus createSubCorpus(Query query) throws ModelException {
+	public CorpusView createCorpusView(Query query) throws ModelException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -301,10 +301,10 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.layer.Layer#getMarkableProxy()
+		 * @see de.ims.icarus.model.api.layer.Layer#getItemProxy()
 		 */
 		@Override
-		public Markable getMarkableProxy() {
+		public Item getItemProxy() {
 			// Not supported by this layer!
 			return null;
 		}
@@ -361,7 +361,7 @@ public class DefaultCorpus implements Corpus {
 		 * @see de.ims.icarus.model.api.layer.MarkableLayer#getManifest()
 		 */
 		@Override
-		public MarkableLayerManifest getManifest() {
+		public ItemLayerManifest getManifest() {
 			return null;
 		}
 
@@ -393,7 +393,7 @@ public class DefaultCorpus implements Corpus {
 	private class OverlayContainer implements Container {
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+		 * @see de.ims.icarus.model.api.members.Item#getContainer()
 		 */
 		@Override
 		public Container getContainer() {
@@ -401,7 +401,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+		 * @see de.ims.icarus.model.api.members.Item#getLayer()
 		 */
 		@Override
 		public MarkableLayer getLayer() {
@@ -409,7 +409,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+		 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 		 */
 		@Override
 		public long getBeginOffset() {
@@ -417,7 +417,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+		 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 		 */
 		@Override
 		public long getEndOffset() {
@@ -436,7 +436,7 @@ public class DefaultCorpus implements Corpus {
 		 * @see java.lang.Iterable#iterator()
 		 */
 		@Override
-		public Iterator<Markable> iterator() {
+		public Iterator<Item> iterator() {
 			return new OverlayIterator();
 		}
 
@@ -465,11 +465,11 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
+		 * @see de.ims.icarus.model.api.members.Container#getItemAt(int)
 		 */
 		@Override
-		public Markable getMarkableAt(int index) {
-			return layers.get(index).getMarkableProxy();
+		public Item getItemAt(int index) {
+			return layers.get(index).getItemProxy();
 		}
 
 		/**
@@ -481,18 +481,18 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addItem(int, de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public void addMarkable(int index, Markable markable) {
+		public void addItem(int index, Item item) {
 			throw new UnsupportedOperationException();
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+		 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 		 */
 		@Override
-		public Markable removeMarkable(int index) {
+		public Item removeItem(int index) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -505,7 +505,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#getIndex()
+		 * @see de.ims.icarus.model.api.members.Item#getIndex()
 		 */
 		@Override
 		public long getIndex() {
@@ -513,7 +513,7 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
+		 * @see de.ims.icarus.model.api.members.Item#setIndex(long)
 		 */
 		@Override
 		public void setIndex(long newIndex) {
@@ -532,7 +532,7 @@ public class DefaultCorpus implements Corpus {
 		 * @see java.lang.Comparable#compareTo(java.lang.Object)
 		 */
 		@Override
-		public int compareTo(Markable o) {
+		public int compareTo(Item o) {
 			return CorpusUtils.compare(this, o);
 		}
 
@@ -553,12 +553,12 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#indexOfItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public int indexOfMarkable(Markable markable) {
+		public int indexOfItem(Item item) {
 			for(int i=layers.size(); --i>=0;) {
-				if(layers.get(i).getMarkableProxy()==markable) {
+				if(layers.get(i).getItemProxy()==item) {
 					return i;
 				}
 			}
@@ -567,40 +567,40 @@ public class DefaultCorpus implements Corpus {
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#containsItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public boolean containsMarkable(Markable markable) {
-			return indexOfMarkable(markable)!=-1;
+		public boolean containsItem(Item item) {
+			return indexOfItem(item)!=-1;
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#addMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#addItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public void addMarkable(Markable markable) {
+		public void addItem(Item item) {
 			throw new UnsupportedOperationException();
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
+		 * @see de.ims.icarus.model.api.members.Container#removeItem(de.ims.icarus.model.api.members.Item)
 		 */
 		@Override
-		public Markable removeMarkable(Markable markable) {
+		public Item removeItem(Item item) {
 			throw new UnsupportedOperationException();
 		}
 
 		/**
-		 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
+		 * @see de.ims.icarus.model.api.members.Container#moveItem(de.ims.icarus.model.api.members.Item, int)
 		 */
 		@Override
-		public void moveMarkable(Markable markable, int index) {
+		public void moveItem(Item item, int index) {
 			throw new UnsupportedOperationException();
 		}
 
 	}
 
-	private class OverlayIterator implements Iterator<Markable> {
+	private class OverlayIterator implements Iterator<Item> {
 		private final Iterator<Layer> delegate = layers.iterator();
 
 		/**
@@ -615,8 +615,8 @@ public class DefaultCorpus implements Corpus {
 		 * @see java.util.Iterator#next()
 		 */
 		@Override
-		public Markable next() {
-			return delegate.next().getMarkableProxy();
+		public Item next() {
+			return delegate.next().getItemProxy();
 		}
 
 		/**

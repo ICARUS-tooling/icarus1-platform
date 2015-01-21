@@ -37,7 +37,7 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface FragmentLayerManifest extends MarkableLayerManifest {
+public interface FragmentLayerManifest extends ItemLayerManifest {
 
 	/**
 	 * Links to the annotation layer that is used to fetch the annotation

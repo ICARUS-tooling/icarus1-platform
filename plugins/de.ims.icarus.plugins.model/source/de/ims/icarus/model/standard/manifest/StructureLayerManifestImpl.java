@@ -41,7 +41,7 @@ import de.ims.icarus.model.xml.ModelXmlHandler;
  * @version $Id$
  *
  */
-public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implements StructureLayerManifest {
+public class StructureLayerManifestImpl extends ItemLayerManifestImpl implements StructureLayerManifest {
 
 	/**
 	 * @param manifestLocation
@@ -123,7 +123,7 @@ public class StructureLayerManifestImpl extends MarkableLayerManifestImpl implem
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.standard.manifest.MarkableLayerManifestImpl#getManifestType()
+	 * @see de.ims.icarus.model.api.ItemLayerManifestImpl.manifest.MarkableLayerManifestImpl#getManifestType()
 	 */
 	@Override
 	public ManifestType getManifestType() {

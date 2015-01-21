@@ -39,7 +39,7 @@ import de.ims.icarus.model.api.manifest.CorpusManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LocationManifest;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.manifest.MemberManifest;
 import de.ims.icarus.model.api.manifest.OptionsManifest;
 import de.ims.icarus.model.api.manifest.PathResolverManifest;
@@ -215,7 +215,7 @@ public class CorpusVerifier {
 			error("Corrupted hierarchy - foreign context manifest ancestor"); //$NON-NLS-1$
 		}
 
-		MarkableLayerManifest baseLayerManifest = manifest.getBaseLayerManifest();
+		ItemLayerManifest baseLayerManifest = manifest.getBaseLayerManifest();
 		if(baseLayerManifest!=null) {
 			CorpusManifest root = getRoot(baseLayerManifest);
 			if(root!=corpusManifest) {
@@ -229,7 +229,7 @@ public class CorpusVerifier {
 		} break;
 
 		case MARKABLE_LAYER_MANIFEST: {
-			checkMarkableLayer((MarkableLayerManifest) manifest);
+			checkMarkableLayer((ItemLayerManifest) manifest);
 		} break;
 
 		case STRUCTURE_LAYER_MANIFEST: {
@@ -270,7 +270,7 @@ public class CorpusVerifier {
 		pop();
 	}
 
-	private void checkMarkableLayer(MarkableLayerManifest manifest) {
+	private void checkMarkableLayer(ItemLayerManifest manifest) {
 		ContainerManifest rootContainerManifest = manifest.getRootContainerManifest();
 		if(rootContainerManifest==null) {
 			error("Missing root container manifest");
@@ -290,7 +290,7 @@ public class CorpusVerifier {
 		}
 	}
 
-	private void chechContainer(ContainerManifest manifest, MarkableLayerManifest markableLayerManifest) {
+	private void chechContainer(ContainerManifest manifest, ItemLayerManifest itemLayerManifest) {
 
 	}
 

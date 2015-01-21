@@ -44,17 +44,17 @@ import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest.TargetLayerManifest;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.members.ContainerType;
 import de.ims.icarus.model.standard.manifest.ContainerManifestImpl;
-import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLayerManifestImpl> {
+public class ItemLayerManifestImplTest extends ManifestTestCase<ItemLayerManifestImpl> {
 
 	private static final String BOUNDARY_LAYER_ID = "boundary-layer-id"; //$NON-NLS-1$
 
@@ -62,11 +62,11 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 	 * @see de.ims.icarus.language.model.test.manifest.ManifestTestCase#newInstance()
 	 */
 	@Override
-	protected MarkableLayerManifestImpl newInstance() {
-		return new MarkableLayerManifestImpl(location, registry, null);
+	protected ItemLayerManifestImpl newInstance() {
+		return new ItemLayerManifestImpl(location, registry, null);
 	}
 
-	private void fillContainer(MarkableLayerManifestImpl manifest) {
+	private void fillContainer(ItemLayerManifestImpl manifest) {
 		ContainerManifestImpl containerManifest1 = new ContainerManifestImpl(
 				manifest.getManifestLocation(), manifest.getRegistry(), manifest);
 		containerManifest1.setContainerType(ContainerType.LIST);
@@ -80,11 +80,11 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		manifest.addContainerManifest(containerManifest2);
 	}
 
-	private void fillBoundaryLayer(MarkableLayerManifestImpl manifest) {
+	private void fillBoundaryLayer(ItemLayerManifestImpl manifest) {
 		manifest.setBoundaryLayerId(BOUNDARY_LAYER_ID);
 	}
 
-	private void fillAll(MarkableLayerManifestImpl manifest) {
+	private void fillAll(ItemLayerManifestImpl manifest) {
 		fillIdentity(manifest);
 		fillContainer(manifest);
 	}
@@ -101,7 +101,7 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 	@Test
 	public void testEquals() throws Exception {
 
-		MarkableLayerManifestImpl other = newInstance();
+		ItemLayerManifestImpl other = newInstance();
 
 		assertHashEquals(manifest, other);
 
@@ -120,7 +120,7 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		ContainerManifest containerManifest = mock(ContainerManifest.class);
 		int index = 2;
 
-		MarkableLayerManifest template = mock(MarkableLayerManifest.class);
+		ItemLayerManifest template = mock(ItemLayerManifest.class);
 		when(template.indexOfContainerManifest(containerManifest)).thenReturn(index);
 		when(template.isTemplate()).thenReturn(true);
 		when(template.getId()).thenReturn(TEST_TEMPLATE_ID);
@@ -146,7 +146,7 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		LayerGroupManifest groupManifest = mock(LayerGroupManifest.class);
 		when(groupManifest.getContextManifest()).thenReturn(contextManifest);
 
-		manifest = new MarkableLayerManifestImpl(location, registry, groupManifest);
+		manifest = new ItemLayerManifestImpl(location, registry, groupManifest);
 
 		TargetLayerManifest targetLayerManifest = manifest.setBoundaryLayerId(BOUNDARY_LAYER_ID);
 
@@ -169,7 +169,7 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		LayerGroupManifest groupManifest = mock(LayerGroupManifest.class);
 		when(groupManifest.getContextManifest()).thenReturn(contextManifest);
 
-		manifest = new MarkableLayerManifestImpl(location, registry, groupManifest);
+		manifest = new ItemLayerManifestImpl(location, registry, groupManifest);
 
 		thrown.expect(NullPointerException.class);
 		manifest.setBoundaryLayerId(null);
@@ -216,7 +216,7 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 	public void testTemplate() throws Exception {
 
 		// Prepare template
-		MarkableLayerManifestImpl template = newInstance();
+		ItemLayerManifestImpl template = newInstance();
 		fillAll(template);
 		template.setId(TEST_TEMPLATE_ID);
 
@@ -228,7 +228,7 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 
 		// Manifest is empty except for id and templateId
 
-		assertTemplateGetters(MarkableLayerManifest.class, manifest, template);
+		assertTemplateGetters(ItemLayerManifest.class, manifest, template);
 	}
 
 	// SERIALIZATION TESTS
@@ -267,13 +267,13 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		LayerGroupManifest groupManifest = mock(LayerGroupManifest.class);
 		when(groupManifest.getContextManifest()).thenReturn(contextManifest);
 
-		manifest = new MarkableLayerManifestImpl(location, registry, groupManifest);
+		manifest = new ItemLayerManifestImpl(location, registry, groupManifest);
 
 		fillIdentity(manifest);
 
 		fillBoundaryLayer(manifest);
 
-		MarkableLayerManifestImpl newInstance = new MarkableLayerManifestImpl(location, registry, groupManifest);
+		ItemLayerManifestImpl newInstance = new ItemLayerManifestImpl(location, registry, groupManifest);
 
 		assertSerializationEquals(manifest, newInstance);
 	}
@@ -290,11 +290,11 @@ public class MarkableLayerManifestImplTest extends ManifestTestCase<MarkableLaye
 		LayerGroupManifest groupManifest = mock(LayerGroupManifest.class);
 		when(groupManifest.getContextManifest()).thenReturn(contextManifest);
 
-		manifest = new MarkableLayerManifestImpl(location, registry, groupManifest);
+		manifest = new ItemLayerManifestImpl(location, registry, groupManifest);
 
 		fillAll(manifest);
 
-		MarkableLayerManifestImpl newInstance = new MarkableLayerManifestImpl(location, registry, groupManifest);
+		ItemLayerManifestImpl newInstance = new ItemLayerManifestImpl(location, registry, groupManifest);
 
 		assertSerializationEquals(manifest, newInstance);
 	}

@@ -29,7 +29,7 @@ import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.Edge;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.model.util.CorpusUtils;
@@ -49,16 +49,16 @@ import de.ims.icarus.util.mem.ReferenceType;
 public class DefaultEdge implements Edge, Recyclable {
 
 	@Reference
-	private Markable source;
+	private Item source;
 	@Reference
-	private Markable target;
+	private Item target;
 	@Reference(ReferenceType.UPLINK)
 	private Structure structure;
 
 	/**
 	 * @param structure
 	 */
-	public DefaultEdge(Structure structure, Markable source, Markable target) {
+	public DefaultEdge(Structure structure, Item source, Item target) {
 		if (structure == null)
 			throw new NullPointerException("Invalid structure"); //$NON-NLS-1$
 
@@ -99,7 +99,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	 * @param source the source to set
 	 */
 	@Override
-	public void setSource(Markable source) {
+	public void setSource(Item source) {
 		if (source == null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 		this.source = source;
@@ -109,14 +109,14 @@ public class DefaultEdge implements Edge, Recyclable {
 	 * @param target the target to set
 	 */
 	@Override
-	public void setTarget(Markable target) {
+	public void setTarget(Item target) {
 		if (target == null)
 			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 		this.target = target;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -124,7 +124,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -151,7 +151,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	 * @see de.ims.icarus.model.api.members.Edge#getSource()
 	 */
 	@Override
-	public Markable getSource() {
+	public Item getSource() {
 		return source;
 	}
 
@@ -159,7 +159,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	 * @see de.ims.icarus.model.api.members.Edge#getTarget()
 	 */
 	@Override
-	public Markable getTarget() {
+	public Item getTarget() {
 		return target;
 	}
 
@@ -177,7 +177,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	 * added to foreign containers as regular markables, but note, that this does {@code not}
 	 * change ownership!
 	 *
-	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Item#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -186,7 +186,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Item#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -205,7 +205,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
-	public int compareTo(Markable o) {
+	public int compareTo(Item o) {
 		return CorpusUtils.compare(this, o);
 	}
 
@@ -234,7 +234,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getIndex()
+	 * @see de.ims.icarus.model.api.members.Item#getIndex()
 	 */
 	@Override
 	public long getIndex() {
@@ -242,7 +242,7 @@ public class DefaultEdge implements Edge, Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
+	 * @see de.ims.icarus.model.api.members.Item#setIndex(long)
 	 */
 	@Override
 	public void setIndex(long newIndex) {

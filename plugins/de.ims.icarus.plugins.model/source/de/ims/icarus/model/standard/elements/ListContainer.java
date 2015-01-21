@@ -31,7 +31,7 @@ import java.util.List;
 import de.ims.icarus.model.api.edit.EditOperation;
 import de.ims.icarus.model.api.edit.UndoableCorpusEdit.AtomicChange;
 import de.ims.icarus.model.api.members.CorpusMember;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.util.CorpusMemberUtils;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.LookupList;
@@ -49,9 +49,9 @@ public class ListContainer extends AbstractContainer {
 	// Internal storage, will be created lazily, but never
 	// destroyed outside of a recycle() call !
 	@Reference
-	private LookupList<Markable> list;
+	private LookupList<Item> list;
 
-	private LookupList<Markable> list() {
+	private LookupList<Item> list() {
 		if(list==null) {
 			synchronized (this) {
 				if(list==null) {
@@ -63,16 +63,16 @@ public class ListContainer extends AbstractContainer {
 		return list;
 	}
 
-	public void appendAllMarkables(List<? extends Markable> markables) {
+	public void appendAllItems(List<? extends Item> items) {
+		list().addAll(items);
+	}
+
+	public void appendAllMarkables(Item...markables) {
 		list().addAll(markables);
 	}
 
-	public void appendAllMarkables(Markable...markables) {
-		list().addAll(markables);
-	}
-
-	public void appendMarkable(Markable markable) {
-		list().add(markable);
+	public void appendItem(Item item) {
+		list().add(item);
 	}
 
 	public void clear() {
@@ -109,7 +109,7 @@ public class ListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -117,7 +117,7 @@ public class ListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -128,7 +128,7 @@ public class ListContainer extends AbstractContainer {
 	 * @see java.lang.Iterable#iterator()
 	 */
 	@Override
-	public Iterator<Markable> iterator() {
+	public Iterator<Item> iterator() {
 		return list().iterator();
 	}
 
@@ -141,33 +141,33 @@ public class ListContainer extends AbstractContainer {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#getMarkableAt(int)
+	 * @see de.ims.icarus.model.api.members.Container#getItemAt(int)
 	 */
 	@Override
-	public Markable getMarkableAt(int index) {
+	public Item getItemAt(int index) {
 		return list().get(index);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#indexOfItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public int indexOfMarkable(Markable markable) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable");  //$NON-NLS-1$
+	public int indexOfItem(Item item) {
+		if (item == null)
+			throw new NullPointerException("Invalid item");  //$NON-NLS-1$
 
-		return list==null ? -1 : list.indexOf(markable);
+		return list==null ? -1 : list.indexOf(item);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#containsItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public boolean containsMarkable(Markable markable) {
-		if (markable == null)
-			throw new NullPointerException("Invalid markable");  //$NON-NLS-1$
+	public boolean containsItem(Item item) {
+		if (item == null)
+			throw new NullPointerException("Invalid item");  //$NON-NLS-1$
 
-		return list==null ? false : list.contains(markable);
+		return list==null ? false : list.contains(item);
 	}
 
 	/**
@@ -183,30 +183,30 @@ public class ListContainer extends AbstractContainer {
 	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int)
 	 */
 	@Override
-	public void addMarkable(int index, Markable markable) {
-		checkMarkable(markable);
+	public void addItem(int index, Item item) {
+		checkItem(item);
 
 		EditOperation operation = isRandomAccessMarkableIndex(index) ?
 				EditOperation.ADD_RANDOM : EditOperation.ADD;
 		checkContainerAction(operation);
 
-		execute(new ElementChange(index, true, markable));
+		execute(new ElementChange(index, true, item));
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 	 */
 	@Override
-	public Markable removeMarkable(int index) {
-		Markable markable = getMarkableAt(index);
+	public Item removeItem(int index) {
+		Item item = getItemAt(index);
 
 		EditOperation operation = isRandomAccessMarkableIndex(index) ?
 				EditOperation.REMOVE_RANDOM : EditOperation.REMOVE;
 		checkContainerAction(operation);
 
-		execute(new ElementChange(index, false, markable));
+		execute(new ElementChange(index, false, item));
 
-		return markable;
+		return item;
 	}
 
 	/**
@@ -222,29 +222,29 @@ public class ListContainer extends AbstractContainer {
 		// hook for subclasses to clear caches
 	}
 
-	protected void markableAdded(Markable markable, int index) {
+	protected void itemAdded(Item item, int index) {
 		// hook for subclasses
 	}
 
-	protected void markableRemoved(Markable markable, int index) {
+	protected void itemRemoved(Item item, int index) {
 		// hook for subclasses
 	}
 
-	protected void markableMoved(Markable markable, int index0, int index1) {
+	protected void itemMoved(Item item, int index0, int index1) {
 		// hook for subclasses
 	}
 
 	private class ElementChange implements AtomicChange {
 
-		private final Markable markable;
+		private final Item item;
 		private final int index;
 		private final boolean add;
 		private int expectedSize;
 
-		public ElementChange(int index, boolean add, Markable markable) {
+		public ElementChange(int index, boolean add, Item item) {
 			this.index = index;
 			this.add = add;
-			this.markable = markable;
+			this.item = item;
 			expectedSize = list().size();
 		}
 
@@ -253,29 +253,29 @@ public class ListContainer extends AbstractContainer {
 		 */
 		@Override
 		public void execute() {
-			LookupList<Markable> list = list();
+			LookupList<Item> list = list();
 
 			if(list.size()!=expectedSize)
 				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
 						"Removing failed", expectedSize, list.size())); //$NON-NLS-1$
 
 			if(add) {
-				if(list.indexOf(markable)!=-1)
+				if(list.indexOf(item)!=-1)
 					throw new CorruptedStateException(
-							"Add failed, markable already contained: "+markable); //$NON-NLS-1$
+							"Add failed, item already contained: "+item); //$NON-NLS-1$
 
 				// Intercept add
-				markableAdded(markable, index);
+				itemAdded(item, index);
 
-				list.add(index, markable);
+				list.add(index, item);
 				expectedSize++;
 			} else {
-				if(list.get(index) != markable)
+				if(list.get(index) != item)
 					throw new CorruptedStateException(
-							"Removing failed, expected "+markable+" at index "+index); //$NON-NLS-1$ //$NON-NLS-2$
+							"Removing failed, expected "+item+" at index "+index); //$NON-NLS-1$ //$NON-NLS-2$
 
 				// Intercept remove
-				markableRemoved(markable, index);
+				itemRemoved(item, index);
 
 				list.remove(index);
 				expectedSize--;
@@ -295,14 +295,14 @@ public class ListContainer extends AbstractContainer {
 	private class MoveChange implements AtomicChange {
 
 		private int indexFrom, indexTo;
-		private Markable markable;
+		private Item item;
 		private int expectedSize;
 
 		public MoveChange(int indexFrom, int indexTo) {
 			this.indexFrom = indexFrom;
 			this.indexTo = indexTo;
 
-			markable = list().get(indexFrom);
+			item = list().get(indexFrom);
 
 			expectedSize = list().size();
 		}
@@ -312,21 +312,21 @@ public class ListContainer extends AbstractContainer {
 		 */
 		@Override
 		public void execute() {
-			LookupList<Markable> list = list();
+			LookupList<Item> list = list();
 
 			if(list.size()!=expectedSize)
 				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(
 						"Removing failed", expectedSize, list.size())); //$NON-NLS-1$
 
-			if(list.get(indexFrom)!=markable)
+			if(list.get(indexFrom)!=item)
 				throw new CorruptedStateException(CorpusMemberUtils.mismatchMessage(
-						"Moving failed (origin)", markable, list.get(indexFrom))); //$NON-NLS-1$
+						"Moving failed (origin)", item, list.get(indexFrom))); //$NON-NLS-1$
 
 			// Intercept move
-			markableMoved(markable, indexFrom, indexTo);
+			itemMoved(item, indexFrom, indexTo);
 
 			list.remove(indexFrom);
-			list.add(indexTo, markable);
+			list.add(indexTo, item);
 
 			int tmp = indexFrom;
 			indexFrom = indexTo;
@@ -353,7 +353,7 @@ public class ListContainer extends AbstractContainer {
 		 */
 		@Override
 		public void execute() {
-			LookupList<Markable> list = list();
+			LookupList<Item> list = list();
 
 			if(list.size()!=expectedSize)
 				throw new CorruptedStateException(CorpusMemberUtils.sizeMismatchMessage(

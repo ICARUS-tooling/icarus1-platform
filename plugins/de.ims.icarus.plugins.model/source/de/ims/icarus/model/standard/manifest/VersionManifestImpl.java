@@ -34,6 +34,7 @@ import de.ims.icarus.model.xml.ModelXmlElement;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
 import de.ims.icarus.model.xml.XmlSerializer;
+import de.ims.icarus.util.classes.ClassUtils;
 
 /**
  * @author Markus Gärtner
@@ -127,6 +128,39 @@ public class VersionManifestImpl implements VersionManifest, ModelXmlElement, Mo
 			throw new NullPointerException("Invalid versionString"); //$NON-NLS-1$
 
 		this.versionString = versionString;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = versionString.hashCode();
+
+		if(formatId!=null) {
+			hash *= formatId.hashCode();
+		}
+
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof VersionManifest) {
+			VersionManifest other = (VersionManifest) obj;
+			return versionString.equals(other.getVersionString())
+					&& ClassUtils.equals(formatId, other.getFormatId());
+		}
+
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		String result = versionString;
+
+		if(formatId!=null) {
+			versionString += " ("+formatId+")"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		return result;
 	}
 
 }

@@ -30,7 +30,7 @@ import de.ims.icarus.model.api.raster.Position;
 import de.ims.icarus.model.api.raster.PositionOutOfBoundsException;
 
 /**
- * A {@code Fragment} allows for the definition of {@code Markable} objects that
+ * A {@code Fragment} allows for the definition of {@code Item} objects that
  * are not bound by the logical structure of a corpus's base layer. A regular
  * markable references parts of other existing markables, like pre-tokenized
  * and/or split objects in a text that forms
@@ -47,9 +47,9 @@ import de.ims.icarus.model.api.raster.PositionOutOfBoundsException;
  * @author Markus Gärtner
  * @version $Id$
  *
- *@see Markable
+ *@see Item
  */
-public interface Fragment extends Markable {
+public interface Fragment extends Item {
 
 	@Override
 	FragmentLayer getLayer();
@@ -59,7 +59,7 @@ public interface Fragment extends Markable {
 	 *
 	 * @return
 	 */
-	Markable getMarkable();
+	Item getItem();
 
 	/**
 	 * Returns the position within the surrounding markable of

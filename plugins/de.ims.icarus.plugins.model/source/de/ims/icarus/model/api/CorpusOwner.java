@@ -28,7 +28,7 @@ package de.ims.icarus.model.api;
 import de.ims.icarus.util.id.Identity;
 
 /**
- * Represents a single owner that can acquire partial ownership of a {@link SubCorpus}.
+ * Represents a single owner that can acquire partial ownership of a {@link CorpusView}.
  * A sub-corpus will be prevented from being closed as long as at least one registered
  * owner still holds partial ownership of it. Note that each {@code CorpusOwner} can
  * only hold partial ownership to at most one sub-corpus object at any given time!

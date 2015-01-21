@@ -57,7 +57,7 @@ public interface LayerGroupManifest extends ModifiableIdentity, ModelXmlElement 
 	List<LayerManifest> getLayerManifests();
 
 	@AccessRestriction(AccessMode.READ)
-	MarkableLayerManifest getPrimaryLayerManifest();
+	ItemLayerManifest getPrimaryLayerManifest();
 
 	/**
 	 * Signals that the layers in this group do not depend on external data hosted in other
@@ -102,7 +102,7 @@ public interface LayerGroupManifest extends ModifiableIdentity, ModelXmlElement 
 
 //	void removeLayerManifest(LayerManifest layerManifest);
 
-//	void setPrimaryLayerManifest(MarkableLayerManifest layerManifest);
+//	void setPrimaryLayerManifest(ItemLayerManifest layerManifest);
 
 //	void setIndependent(boolean isIndependent);
 

@@ -27,7 +27,7 @@ package de.ims.icarus.model.standard.elements.dummy;
 
 import de.ims.icarus.model.api.manifest.StructureManifest;
 import de.ims.icarus.model.api.members.Edge;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.model.api.members.StructureType;
 
@@ -90,37 +90,37 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public int getEdgeCount(Markable node) {
+	public int getEdgeCount(Item node) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Markable, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeCount(de.ims.icarus.model.api.members.Item, boolean)
 	 */
 	@Override
-	public int getEdgeCount(Markable node, boolean isSource) {
+	public int getEdgeCount(Item node, boolean isSource) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#getEdgeAt(de.ims.icarus.model.api.members.Markable, int, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#getEdgeAt(de.ims.icarus.model.api.members.Item, int, boolean)
 	 */
 	@Override
-	public Edge getEdgeAt(Markable node, int index, boolean isSource) {
+	public Edge getEdgeAt(Item node, int index, boolean isSource) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#getParent(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#getParent(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public Markable getParent(Markable node) {
+	public Item getParent(Item node) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -129,15 +129,15 @@ public class DummyStructure extends DummyContainer implements Structure {
 	 * @see de.ims.icarus.model.api.members.Structure#getRoot()
 	 */
 	@Override
-	public Markable getRoot() {
+	public Item getRoot() {
 		return null;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#isRoot(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#isRoot(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public boolean isRoot(Markable node) {
+	public boolean isRoot(Item node) {
 		return false;
 	}
 
@@ -166,18 +166,18 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Markable, de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Item, de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public Edge addEdge(Markable source, Markable target) {
+	public Edge addEdge(Item source, Item target) {
 		throw new UnsupportedOperationException();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Markable, de.ims.icarus.model.api.members.Markable, int)
+	 * @see de.ims.icarus.model.api.members.Structure#addEdge(de.ims.icarus.model.api.members.Item, de.ims.icarus.model.api.members.Item, int)
 	 */
 	@Override
-	public Edge addEdge(Markable source, Markable target, int index) {
+	public Edge addEdge(Item source, Item target, int index) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -214,10 +214,10 @@ public class DummyStructure extends DummyContainer implements Structure {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Structure#setTerminal(de.ims.icarus.model.api.members.Edge, de.ims.icarus.model.api.members.Markable, boolean)
+	 * @see de.ims.icarus.model.api.members.Structure#setTerminal(de.ims.icarus.model.api.members.Edge, de.ims.icarus.model.api.members.Item, boolean)
 	 */
 	@Override
-	public void setTerminal(Edge edge, Markable markable, boolean isSource) {
+	public void setTerminal(Edge edge, Item item, boolean isSource) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -36,17 +36,17 @@ import de.ims.icarus.util.mem.HeapMember;
  *
  */
 @HeapMember
-public class DefaultMarkable extends AbstractMarkable implements Recyclable {
+public class DefaultItem extends AbstractItem implements Recyclable {
 
-	public DefaultMarkable() {
+	public DefaultItem() {
 		// no-op
 	}
 
-	public DefaultMarkable(Container container) {
+	public DefaultItem(Container container) {
 		setContainer(container);
 	}
 
-	public DefaultMarkable(Container container, long offset) {
+	public DefaultItem(Container container, long offset) {
 		setContainer(container);
 		setOffset(offset);
 	}
@@ -81,7 +81,7 @@ public class DefaultMarkable extends AbstractMarkable implements Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -89,7 +89,7 @@ public class DefaultMarkable extends AbstractMarkable implements Recyclable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {

@@ -26,7 +26,7 @@
 package de.ims.icarus.model.api.layer;
 
 import de.ims.icarus.model.api.manifest.FragmentLayerManifest;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.raster.Rasterizer;
 
 /**
@@ -43,5 +43,5 @@ public interface FragmentLayer extends MarkableLayer {
 
 	Rasterizer getRasterizer();
 
-	long getRasterSize(Markable markable, int axis);
+	long getRasterSize(Item item, int axis);
 }

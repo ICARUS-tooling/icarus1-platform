@@ -27,7 +27,7 @@ package de.ims.icarus.model.standard.elements;
 
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.layer.MarkableLayer;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.api.members.Structure;
 import de.ims.icarus.util.mem.HeapMember;
@@ -40,12 +40,12 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public class RootMarkable implements Markable {
+public class RootItem implements Item {
 
 	@Reference(ReferenceType.UPLINK)
 	private final Structure owner;
 
-	public RootMarkable(Structure owner) {
+	public RootItem(Structure owner) {
 		if (owner == null)
 			throw new NullPointerException("Invalid owner"); //$NON-NLS-1$
 
@@ -72,12 +72,12 @@ public class RootMarkable implements Markable {
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
-	public int compareTo(Markable o) {
+	public int compareTo(Item o) {
 		return -1;
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Item#getContainer()
 	 */
 	@Override
 	public Structure getContainer() {
@@ -85,7 +85,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Item#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -93,7 +93,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -101,7 +101,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -109,7 +109,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getIndex()
+	 * @see de.ims.icarus.model.api.members.Item#getIndex()
 	 */
 	@Override
 	public long getIndex() {
@@ -117,7 +117,7 @@ public class RootMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
+	 * @see de.ims.icarus.model.api.members.Item#setIndex(long)
 	 */
 	@Override
 	public void setIndex(long newIndex) {

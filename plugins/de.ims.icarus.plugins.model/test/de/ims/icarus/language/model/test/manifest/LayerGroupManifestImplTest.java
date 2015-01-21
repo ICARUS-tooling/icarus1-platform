@@ -44,11 +44,11 @@ import org.junit.rules.ExpectedException;
 
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.LayerManifest;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.standard.manifest.AbstractLayerManifest;
 import de.ims.icarus.model.standard.manifest.AnnotationLayerManifestImpl;
 import de.ims.icarus.model.standard.manifest.LayerGroupManifestImpl;
-import de.ims.icarus.model.standard.manifest.MarkableLayerManifestImpl;
+import de.ims.icarus.model.standard.manifest.ItemLayerManifestImpl;
 
 /**
  * @author Markus Gärtner
@@ -91,11 +91,11 @@ public class LayerGroupManifestImplTest implements ManifestTestConstants {
 
 		AbstractLayerManifest<?> layerManifest;
 
-		layerManifest = new MarkableLayerManifestImpl(DEFAULT_TEMPLATE_LOCATION, DEFAULT_REGISTRY, manifest);
+		layerManifest = new ItemLayerManifestImpl(DEFAULT_TEMPLATE_LOCATION, DEFAULT_REGISTRY, manifest);
 		layerManifest.setId(LAYER_ID_1);
 		manifest.addLayerManifest(layerManifest);
 
-		layerManifest = new MarkableLayerManifestImpl(DEFAULT_TEMPLATE_LOCATION, DEFAULT_REGISTRY, manifest);
+		layerManifest = new ItemLayerManifestImpl(DEFAULT_TEMPLATE_LOCATION, DEFAULT_REGISTRY, manifest);
 		layerManifest.setId(LAYER_ID_2);
 		manifest.addLayerManifest(layerManifest);
 
@@ -130,7 +130,7 @@ public class LayerGroupManifestImplTest implements ManifestTestConstants {
 	@Test
 	public void testSetPrimaryLayer() throws Exception {
 
-		MarkableLayerManifest layerManifest = mock(MarkableLayerManifest.class);
+		ItemLayerManifest layerManifest = mock(ItemLayerManifest.class);
 		when(layerManifest.getId()).thenReturn(PRIMARY_LAYER_ID);
 
 		manifest.addLayerManifest(layerManifest);

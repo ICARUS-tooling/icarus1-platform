@@ -28,7 +28,7 @@ package de.ims.icarus.model.standard.elements.dummy;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.members.Container;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.util.CorpusUtils;
 
@@ -37,7 +37,7 @@ import de.ims.icarus.model.util.CorpusUtils;
  * @version $Id$
  *
  */
-public class DummyMarkable implements Markable {
+public class DummyMarkable implements Item {
 
 	/**
 	 * @see de.ims.icarus.model.api.members.CorpusMember#getCorpus()
@@ -56,7 +56,7 @@ public class DummyMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getContainer()
+	 * @see de.ims.icarus.model.api.members.Item#getContainer()
 	 */
 	@Override
 	public Container getContainer() {
@@ -64,7 +64,7 @@ public class DummyMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getLayer()
+	 * @see de.ims.icarus.model.api.members.Item#getLayer()
 	 */
 	@Override
 	public MarkableLayer getLayer() {
@@ -72,7 +72,7 @@ public class DummyMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getIndex()
+	 * @see de.ims.icarus.model.api.members.Item#getIndex()
 	 */
 	@Override
 	public long getIndex() {
@@ -80,7 +80,7 @@ public class DummyMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#setIndex(long)
+	 * @see de.ims.icarus.model.api.members.Item#setIndex(long)
 	 */
 	@Override
 	public void setIndex(long newIndex) {
@@ -88,7 +88,7 @@ public class DummyMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
@@ -96,7 +96,7 @@ public class DummyMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
@@ -104,10 +104,10 @@ public class DummyMarkable implements Markable {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#compareTo(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Item#compareTo(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public int compareTo(Markable o) {
+	public int compareTo(Item o) {
 		return CorpusUtils.compare(this, o);
 	}
 

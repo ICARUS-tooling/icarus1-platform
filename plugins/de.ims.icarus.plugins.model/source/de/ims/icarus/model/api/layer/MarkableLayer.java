@@ -26,7 +26,7 @@
 package de.ims.icarus.model.api.layer;
 
 import de.ims.icarus.model.api.manifest.ManifestOwner;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.iql.access.AccessControl;
 import de.ims.icarus.model.iql.access.AccessMode;
 import de.ims.icarus.model.iql.access.AccessPolicy;
@@ -44,10 +44,10 @@ import de.ims.icarus.model.iql.access.AccessRestriction;
  *
  */
 @AccessControl(AccessPolicy.DENY)
-public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifest> {
+public interface MarkableLayer extends Layer, ManifestOwner<ItemLayerManifest> {
 
 	/**
-	 * Returns the shared {@code MarkableLayerManifest} that holds
+	 * Returns the shared {@code ItemLayerManifest} that holds
 	 * information about markable composition and possible structures
 	 * in this layer.
 	 *
@@ -55,10 +55,10 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 	 */
 	@AccessRestriction(AccessMode.ALL)
 	@Override
-	MarkableLayerManifest getManifest();
+	ItemLayerManifest getManifest();
 
 //	/**
-//	 * Returns the container holding all the {@code Markable} objects this
+//	 * Returns the container holding all the {@code Item} objects this
 //	 * layer defines.
 //	 * @return The root container of this layer
 //	 */
@@ -88,7 +88,7 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 //	 * @param index
 //	 * @return
 //	 */
-//	Markable getCachedMember(long index);
+//	Item getCachedMember(long index);
 
 //	/**
 //	 *
@@ -105,7 +105,7 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 //	 * @return {@code true} iff the given {@code member} has not been present in the cache
 //	 * 			and a new entry was created
 //	 */
-//	boolean registerMember(Markable member);
+//	boolean registerMember(Item member);
 //
 //	/**
 //	 * Decrements the reference count for the given {@code member}, removing it from the
@@ -114,7 +114,7 @@ public interface MarkableLayer extends Layer, ManifestOwner<MarkableLayerManifes
 //	 * @return {@code true} iff unregistering the given {@code member} caused the reference
 //	 * 			count to reach zero and the associated cache entry has been removed
 //	 */
-//	boolean unregisterMember(Markable member);
+//	boolean unregisterMember(Item member);
 
 	/**
 	 * Returns the {@code MarkableLayer} that holds the bounding

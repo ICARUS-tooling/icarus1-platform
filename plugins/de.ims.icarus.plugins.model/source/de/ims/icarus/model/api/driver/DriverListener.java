@@ -27,7 +27,7 @@ package de.ims.icarus.model.api.driver;
 
 import de.ims.icarus.model.api.layer.LayerGroup;
 import de.ims.icarus.model.api.members.Container;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 
 /**
  * Allows intercepting loaded or skipped chunks during load operations of a driver implementation.
@@ -47,9 +47,9 @@ public interface DriverListener {
 	 *
 	 *
 	 * @param id
-	 * @param markable
+	 * @param item
 	 */
-	void chunkLoaded(long index, LayerGroup layerGroup, Markable markable);
+	void chunkLoaded(long index, LayerGroup layerGroup, Item item);
 
 	/**
 	 * Signals that a certain data chunk could not be loaded. The reason is typically
@@ -63,7 +63,7 @@ public interface DriverListener {
 	 * for the specified chunk and later attempt to load it again.</li>
 	 * </ol>
 	 * The latter case is signaled with the {@code corrupted} argument being {@code true}.
-	 * Note that the {@code Markable} associated with the given index will still be available
+	 * Note that the {@code Item} associated with the given index will still be available
 	 * through the layer's cache as long as the {@code corrupted} argument is {@code false}.
 	 * <p>
 	 * Note that this method will only be called for top-level members!
@@ -82,9 +82,9 @@ public interface DriverListener {
 //	 * important aspect of their content in discarding edges.
 //	 *
 //	 * @param layer
-//	 * @param index the global index of the {@code Markable} to be fetched, unaffected by horizontal
+//	 * @param index the global index of the {@code Item} to be fetched, unaffected by horizontal
 //	 * filtering and without index translation.
 //	 * @return
 //	 */
-//	Markable getChunk(MarkableLayer layer, long index);
+//	Item getChunk(MarkableLayer layer, long index);
 }

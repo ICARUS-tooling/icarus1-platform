@@ -48,7 +48,7 @@ public interface ContainerManifest extends MemberManifest {
 	 * @return
 	 */
 	@AccessRestriction(AccessMode.READ)
-	MarkableLayerManifest getLayerManifest();
+	ItemLayerManifest getLayerManifest();
 
 //	/**
 //	 * If this is a nested container this will return the manifest of
@@ -68,7 +68,7 @@ public interface ContainerManifest extends MemberManifest {
 
 	/**
 	 * Returns the type of this container. This provides
-	 * information about how contained {@code Markable}s are ordered and
+	 * information about how contained {@code Item}s are ordered and
 	 * if they represent a continuous subset of the corpus. Note that the
 	 * container type of a {@link Structure} object is undefined and therefore
 	 * this method is optional when this container is a structure.

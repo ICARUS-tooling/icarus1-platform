@@ -82,7 +82,7 @@ public final class StringUtil {
 				 */
 				@Override
 				protected CharSequence delegate(CharSequence item) {
-					return item instanceof String ? item : _toString(item);
+					return item instanceof String ? item : StringUtil.toString(item);
 				}
 
 			};
@@ -96,7 +96,7 @@ public final class StringUtil {
 				 */
 				@Override
 				protected CharSequence delegate(CharSequence item) {
-					return item instanceof String ? item : _toString(item);
+					return item instanceof String ? item : StringUtil.toString(item);
 				}
 
 			};
@@ -122,7 +122,7 @@ public final class StringUtil {
 
 	// EQUALITY
 
-	static boolean _equals(CharSequence cs, Object obj) {
+	public static boolean equals(CharSequence cs, Object obj) {
 		if(obj instanceof CharSequence) {
 			CharSequence other = (CharSequence) obj;
 
@@ -154,7 +154,7 @@ public final class StringUtil {
 	// substitution in hash-tables is possible.
 	// If the hash function of String should ever be changed this needs to be addressed!
 
-	static int _hash(CharSequence cs) {
+	public static int hash(CharSequence cs) {
 
 		int h = 0;
 
@@ -165,7 +165,7 @@ public final class StringUtil {
         return h;
 	}
 
-	static int _hash(char[] c, int offset, int len) {
+	public static int hash(char[] c, int offset, int len) {
 
 		int h = 0;
 
@@ -178,7 +178,7 @@ public final class StringUtil {
 
 	// STRING CONVERSION
 
-	static String _toString(CharSequence cs) {
+	public static String toString(CharSequence cs) {
 		if(cs instanceof String) {
 			return (String) cs;
 		}

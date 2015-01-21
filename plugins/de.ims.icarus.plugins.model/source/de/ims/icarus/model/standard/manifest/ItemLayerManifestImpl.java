@@ -35,7 +35,7 @@ import de.ims.icarus.model.api.manifest.ContainerManifest;
 import de.ims.icarus.model.api.manifest.LayerGroupManifest;
 import de.ims.icarus.model.api.manifest.ManifestLocation;
 import de.ims.icarus.model.api.manifest.ManifestType;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.registry.CorpusRegistry;
 import de.ims.icarus.model.xml.ModelXmlHandler;
 import de.ims.icarus.model.xml.ModelXmlUtils;
@@ -46,7 +46,7 @@ import de.ims.icarus.model.xml.XmlSerializer;
  * @version $Id$
  *
  */
-public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLayerManifest> implements MarkableLayerManifest {
+public class ItemLayerManifestImpl extends AbstractLayerManifest<ItemLayerManifest> implements ItemLayerManifest {
 
 	private final List<ContainerManifest> containerManifests = new ArrayList<>();
 
@@ -57,7 +57,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	 * @param registry
 	 * @param layerGroupManifest
 	 */
-	public MarkableLayerManifestImpl(ManifestLocation manifestLocation,
+	public ItemLayerManifestImpl(ManifestLocation manifestLocation,
 			CorpusRegistry registry, LayerGroupManifest layerGroupManifest) {
 		super(manifestLocation, registry, layerGroupManifest);
 	}
@@ -167,7 +167,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#getContainerDepth()
+	 * @see de.ims.icarus.model.api.manifest.ItemLayerManifest#getContainerDepth()
 	 */
 	@Override
 	public int getContainerDepth() {
@@ -179,7 +179,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#getRootContainerManifest()
+	 * @see de.ims.icarus.model.api.manifest.ItemLayerManifest#getRootContainerManifest()
 	 */
 	@Override
 	public ContainerManifest getRootContainerManifest() {
@@ -187,7 +187,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#getContainerManifest(int)
+	 * @see de.ims.icarus.model.api.manifest.ItemLayerManifest#getContainerManifest(int)
 	 */
 	@Override
 	public ContainerManifest getContainerManifest(int level) {
@@ -206,7 +206,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#indexOfContainerManifest(de.ims.icarus.model.api.manifest.ContainerManifest)
+	 * @see de.ims.icarus.model.api.manifest.ItemLayerManifest#indexOfContainerManifest(de.ims.icarus.model.api.manifest.ContainerManifest)
 	 */
 	@Override
 	public int indexOfContainerManifest(ContainerManifest containerManifest) {
@@ -230,7 +230,7 @@ public class MarkableLayerManifestImpl extends AbstractLayerManifest<MarkableLay
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.manifest.MarkableLayerManifest#getBoundaryLayerManifest()
+	 * @see de.ims.icarus.model.api.manifest.ItemLayerManifest#getBoundaryLayerManifest()
 	 */
 	@Override
 	public TargetLayerManifest getBoundaryLayerManifest() {

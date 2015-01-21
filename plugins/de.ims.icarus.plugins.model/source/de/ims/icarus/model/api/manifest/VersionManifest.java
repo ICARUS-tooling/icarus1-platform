@@ -34,7 +34,19 @@ import de.ims.icarus.model.xml.ModelXmlElement;
  */
 public interface VersionManifest extends ModelXmlElement {
 
+	/**
+	 * Returns the format id that serves as a URI for a certain type
+	 * of version format.
+	 */
 	String getFormatId();
 
 	String getVersionString();
+
+	/**
+	 * Equality of a version manifest requires equality of both the
+	 * format id (which may be {@code null}) and the actual version
+	 *  string.
+	 */
+	@Override
+	boolean equals(Object obj);
 }

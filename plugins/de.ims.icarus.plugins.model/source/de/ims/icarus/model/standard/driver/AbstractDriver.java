@@ -29,7 +29,7 @@ import de.ims.icarus.model.ModelException;
 import de.ims.icarus.model.api.Context;
 import de.ims.icarus.model.api.Corpus;
 import de.ims.icarus.model.api.Scope;
-import de.ims.icarus.model.api.SubCorpus;
+import de.ims.icarus.model.api.CorpusView;
 import de.ims.icarus.model.api.driver.Candidates;
 import de.ims.icarus.model.api.driver.ChunkStorage;
 import de.ims.icarus.model.api.driver.Driver;
@@ -41,7 +41,7 @@ import de.ims.icarus.model.api.layer.AnnotationLayer;
 import de.ims.icarus.model.api.layer.MarkableLayer;
 import de.ims.icarus.model.api.manifest.ContextManifest;
 import de.ims.icarus.model.api.manifest.DriverManifest;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.meta.AnnotationValueDistribution;
 import de.ims.icarus.model.api.meta.AnnotationValueSet;
 import de.ims.icarus.model.standard.driver.cache.MemberCache;
@@ -131,7 +131,7 @@ public abstract class AbstractDriver implements Driver {
 	 * @see de.ims.icarus.model.api.driver.Driver#load(long, de.ims.icarus.model.api.layer.MarkableLayer)
 	 */
 	@Override
-	public Markable load(long index, MarkableLayer layer)
+	public Item load(long index, MarkableLayer layer)
 			throws ModelException {
 		//TODO check of layer is managed by this driver?
 		MemberCache cache = ((CachedLayer)layer).getCache();
@@ -167,10 +167,10 @@ public abstract class AbstractDriver implements Driver {
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.driver.Driver#releaseContainer(de.ims.icarus.model.api.Container, de.ims.icarus.model.api.SubCorpus)
+	 * @see de.ims.icarus.model.api.driver.Driver#releaseContainer(de.ims.icarus.model.api.Container, de.ims.icarus.model.api.CorpusView)
 	 */
 	@Override
-	public void release(SubCorpus subCorpus) {
+	public void release(CorpusView corpusView) {
 		// TODO Auto-generated method stub
 
 	}

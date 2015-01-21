@@ -96,14 +96,14 @@ public interface ContextManifest extends MemberManifest {
 	 * @throws IllegalStateException iff this context is missing a primary layer declaration
 	 */
 	@AccessRestriction(AccessMode.READ)
-	MarkableLayerManifest getPrimaryLayerManifest();
+	ItemLayerManifest getPrimaryLayerManifest();
 
 	/**
 	 * Returns the layer manifest that describes this context's atomic units
 	 * or {@code null} if that layer resides outside of this context.
 	 */
 	@AccessRestriction(AccessMode.READ)
-	MarkableLayerManifest getBaseLayerManifest();
+	ItemLayerManifest getBaseLayerManifest();
 
 	/**
 	 * Looks up the layer manifest accessible via the given {@code id}. Note that
@@ -141,9 +141,9 @@ public interface ContextManifest extends MemberManifest {
 
 //	void setDriverManifest(DriverManifest driverManifest);
 //
-//	void setPrimaryLayerManifest(MarkableLayerManifest manifest);
+//	void setPrimaryLayerManifest(ItemLayerManifest manifest);
 //
-//	void setBaseLayerManifest(MarkableLayerManifest manifest);
+//	void setBaseLayerManifest(ItemLayerManifest manifest);
 //
 //	void setIndependentContext(boolean isIndependent);
 //

@@ -27,10 +27,10 @@ package de.ims.icarus.model.standard.elements;
 
 import de.ims.icarus.model.api.edit.EditOperation;
 import de.ims.icarus.model.api.manifest.ContainerManifest;
-import de.ims.icarus.model.api.manifest.MarkableLayerManifest;
+import de.ims.icarus.model.api.manifest.ItemLayerManifest;
 import de.ims.icarus.model.api.members.Container;
 import de.ims.icarus.model.api.members.ContainerType;
-import de.ims.icarus.model.api.members.Markable;
+import de.ims.icarus.model.api.members.Item;
 import de.ims.icarus.model.api.members.MemberSet;
 import de.ims.icarus.model.api.members.MemberType;
 import de.ims.icarus.model.util.CorpusUtils;
@@ -44,7 +44,7 @@ import de.ims.icarus.util.mem.Reference;
  *
  */
 @HeapMember
-public abstract class AbstractContainer extends AbstractMarkable implements Container {
+public abstract class AbstractContainer extends AbstractItem implements Container {
 
 	@Reference
 	private Container boundary;
@@ -128,33 +128,33 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getBeginOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getBeginOffset()
 	 */
 	@Override
 	public long getBeginOffset() {
 		if(getMarkableCount()==0)
 			throw new IllegalStateException("Container is empty"); //$NON-NLS-1$
 
-		return getMarkableAt(0).getBeginOffset();
+		return getItemAt(0).getBeginOffset();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Markable#getEndOffset()
+	 * @see de.ims.icarus.model.api.members.Item#getEndOffset()
 	 */
 	@Override
 	public long getEndOffset() {
 		if(getMarkableCount()==0)
 			throw new IllegalStateException("Container is empty"); //$NON-NLS-1$
 
-		return getMarkableAt(getMarkableCount()-1).getEndOffset();
+		return getItemAt(getMarkableCount()-1).getEndOffset();
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#containsMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#containsItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public boolean containsMarkable(Markable markable) {
-		return indexOfMarkable(markable)!=-1;
+	public boolean containsItem(Item item) {
+		return indexOfItem(item)!=-1;
 	}
 
 	/**
@@ -195,7 +195,7 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	 * To decrease memory footprint this implementation does not
 	 * store a reference to the assigned manifest itself, but rather
 	 * checks the depth of nesting and forwards the call to the
-	 * {@link MarkableLayerManifest} that describes this
+	 * {@link ItemLayerManifest} that describes this
 	 * container's root.
 	 *
 	 * @see de.ims.icarus.model.api.members.Container#getManifest()
@@ -206,17 +206,17 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#indexOfMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#indexOfItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public int indexOfMarkable(Markable markable) {
-		if (markable == null)
+	public int indexOfItem(Item item) {
+		if (item == null)
 			throw new NullPointerException("Invalid markable");  //$NON-NLS-1$
 
 		int size = getMarkableCount();
 
 		for(int i=0; i<size; i++) {
-			if(markable.equals(getMarkableAt(i))) {
+			if(item.equals(getItemAt(i))) {
 				return i;
 			}
 		}
@@ -230,24 +230,24 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	 * @see de.ims.icarus.model.api.members.Container#addMarkable()
 	 */
 	@Override
-	public void addMarkable(Markable markable) {
-		addMarkable(getMarkableCount(), markable);
+	public void addItem(Item item) {
+		addItem(getMarkableCount(), item);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public Markable removeMarkable(Markable markable) {
-		return removeMarkable(indexOfMarkable(markable));
+	public Item removeItem(Item item) {
+		return removeItem(indexOfItem(item));
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#moveMarkable(de.ims.icarus.model.api.members.Markable, int)
+	 * @see de.ims.icarus.model.api.members.Container#moveItem(de.ims.icarus.model.api.members.Item, int)
 	 */
 	@Override
-	public void moveMarkable(Markable markable, int index) {
-		moveMarkable(indexOfMarkable(markable), index);
+	public void moveItem(Item item, int index) {
+		moveMarkable(indexOfItem(item), index);
 	}
 
 	/**
@@ -259,18 +259,18 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#addMarkable(int, de.ims.icarus.model.api.members.Markable)
+	 * @see de.ims.icarus.model.api.members.Container#addItem(int, de.ims.icarus.model.api.members.Item)
 	 */
 	@Override
-	public void addMarkable(int index, Markable markable) {
+	public void addItem(int index, Item item) {
 		checkContainerAction(EditOperation.ADD_RANDOM);
 	}
 
 	/**
-	 * @see de.ims.icarus.model.api.members.Container#removeMarkable(int)
+	 * @see de.ims.icarus.model.api.members.Container#removeItem(int)
 	 */
 	@Override
-	public Markable removeMarkable(int index) {
+	public Item removeItem(int index) {
 		checkContainerAction(EditOperation.REMOVE_RANDOM);
 		return null;
 	}
@@ -283,17 +283,17 @@ public abstract class AbstractContainer extends AbstractMarkable implements Cont
 		checkContainerAction(EditOperation.MOVE);
 	}
 
-	protected void checkMarkable(Markable markable) {
-		if (markable == null)
+	protected void checkItem(Item item) {
+		if (item == null)
 			throw new NullPointerException("Invalid markable"); //$NON-NLS-1$
 
-		if(boundary!=null && !CorpusUtils.isVirtual(markable)
-				&& !CorpusUtils.contains(boundary, markable))
-			throw new IllegalArgumentException("Markable violates boundary"); //$NON-NLS-1$
+		if(boundary!=null && !CorpusUtils.isVirtual(item)
+				&& !CorpusUtils.contains(boundary, item))
+			throw new IllegalArgumentException("Item violates boundary"); //$NON-NLS-1$
 
-		Container container = markable.getContainer();
+		Container container = item.getContainer();
 
 		if(container!=this && !getBaseContainers().contains(container))
-			throw new IllegalArgumentException("Markable's host container is unknown: "+container); //$NON-NLS-1$
+			throw new IllegalArgumentException("Item's host container is unknown: "+container); //$NON-NLS-1$
 	}
 }
