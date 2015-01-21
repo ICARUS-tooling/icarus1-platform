@@ -5,7 +5,6 @@ package de.ims.icarus.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * @author Markus Gärtner
@@ -92,11 +91,11 @@ public class Options extends HashMap<String, Object> {
 		super.putAll(m);
 	}
 
-	public void putIfAbsent(String key, Object value) {
-		if(!containsKey(key)) {
-			put(key, value);
-		}
-	}
+//	public void putIfAbsent(String key, Object value) {
+//		if(!containsKey(key)) {
+//			put(key, value);
+//		}
+//	}
 
 	public void dump() {
 		System.out.println("Options: "); //$NON-NLS-1$
