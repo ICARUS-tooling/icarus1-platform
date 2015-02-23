@@ -1,0 +1,48 @@
+
+Supported document properties:
+	documentId				string		identifier of the current document (no restrictions)		
+	audio-file				string		file name of the *.wav file containing speech data for the current document
+	audio-offset			string		timestamp of the beginning of the current document within the respective audio file
+
+Supported sentence properties:
+	sent-num				integer		index of the sentence within the enclosing document
+
+Supported word properties (usable as head properties in coref search):
+	tonal_prominence		boolean 	indicating tonal prominence on at least one syllable in the word (calculated from PaIntE)
+	stress					boolean 	indicating presence of at least one stressed syllable in the word
+	syllable_count			integer		number of syllables in the word
+	begin_timestamp			float		begin timestamp of the first syllable in the word
+	end_timestamp			float		end timestamp of the last syllable in the word
+	is_lex					string		lexical information status
+	is_ref					string		referential information status
+	form					string
+	lemma					string
+	pos						string
+	features				string
+	speaker					string
+	speaker_features		string
+
+Supported syllable properties:
+	syllable_offset			integer		character based offsets for syllables in the word
+	syllable_form			string		part of the word form mapped to this syllable
+	syllable_label			string		SAMPA label for the syllable
+	syllable_timestamp		float		begin timestamp of the syllable
+	syllable_vowel			string		phonetic vowel description
+	syllable_stress			boolean
+	syllable_duration		float
+	vowel_duration			float
+	syllable_startpitch		float
+	syllable_midpitch		float
+	syllable_endpitch		float
+	coda_type				string
+	coda_size				integer
+	onset_type				string
+	onset_size				integer
+	phoneme_count			integer
+	painte_a1				float
+	painte_a2				float
+	painte_b				float
+	painte_c1				float
+	painte_c2				float
+	painte_d				float
+	painte_max_c			float		maximum taken from painte_c1 and painte_c2

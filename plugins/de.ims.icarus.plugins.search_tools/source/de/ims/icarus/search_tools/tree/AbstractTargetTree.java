@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.tree;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.ims.icarus.language.LanguageUtils;
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 
@@ -39,40 +39,42 @@ import de.ims.icarus.util.Options;
  *
  */
 public abstract class AbstractTargetTree<E extends Object> implements TargetTree {
-	
+
 	protected int[][] edges;
 	protected boolean[][] locks;
 	protected int[] heights;
 	protected int[] descendantCounts;
-	
+
 	protected List<Integer> roots;
 	protected int rootCount = 0;
-	
+
 	protected int[] heads;
-	
+
 	protected int size;
-	
+
 	protected E data;
-	
+
 	protected int nodePointer = -1;
-	
+
 	// When edgePointer!=-1 then there is a valid edge list
 	protected int edgePointer = -1;
-	
+
 	protected int bufferSize = 200;
-	
+
 	protected static final int LIST_START_SIZE = 3;
 
 	protected AbstractTargetTree() {
 		buildBuffer();
 	}
-	
+
 	protected void buildBuffer() {
 		edges = new int[bufferSize][];
 		locks = new boolean[bufferSize][];
 		heights = new int[bufferSize];
 		descendantCounts = new int[bufferSize];
 		heads = new int[bufferSize];
+
+		roots = new ArrayList<>();
 	}
 
 	@Override
@@ -83,7 +85,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 		descendantCounts = null;
 		heads = null;
 		roots = null;
-		
+
 		data = null;
 		size = 0;
 	}
@@ -103,7 +105,8 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void reset() {
 		nodePointer = -1;
 		edgePointer = -1;
-		
+		roots.clear();
+
 		unlockAll();
 	}
 
@@ -111,15 +114,15 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public E getSource() {
 		return data;
 	}
-	
+
 	protected abstract int fetchSize();
-	
+
 	protected abstract int fetchHead(int index);
-	
+
 	protected void prepare(Options options) {
 		// for subclasses
 	}
-	
+
 	protected abstract boolean supports(Object data);
 
 	/**
@@ -132,9 +135,9 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new NullPointerException("Invalid source data"); //$NON-NLS-1$
 		if(!supports(source))
 			throw new NullPointerException("Invalid source data: "+source.getClass()); //$NON-NLS-1$
-		
+
 		data = (E)source;
-		
+
 		prepare(options);
 
 		size = fetchSize();
@@ -160,17 +163,14 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 				list[0] = 0;
 			}
 		}
-		
+
 		// rebuild edge lookup and locks
 		for (int i = 0; i < size; i++) {
 			head = fetchHead(i);
-			if(head == LanguageUtils.DATA_UNDEFINED_VALUE) {
+			if(head == LanguageConstants.DATA_UNDEFINED_VALUE) {
 				data = null;
 				throw new IllegalArgumentException("Data contains undefined head at index: "+i); //$NON-NLS-1$
-			} else if (head == LanguageUtils.DATA_HEAD_ROOT) {
-				if(roots==null) {
-					roots = new ArrayList<>();
-				}
+			} else if (head == LanguageConstants.DATA_HEAD_ROOT) {
 				roots.add(i);
 			} else {
 				list = edges[head];
@@ -194,16 +194,20 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 				// System.out.printf("%d %s: %d %s\n", i, data.forms[i], head,
 				// Arrays.toString(list));
 			}
-			
+
 			if(locks[i]==null) {
 				locks[i] = new boolean[LIST_START_SIZE];
 			}
-			
+
 			heads[i] = head;
 		}
-		
-		if(roots==null || roots.isEmpty())
-			throw new IllegalArgumentException("Structure is not a tree - no root defined"); //$NON-NLS-1$
+
+		/* FIXED
+		 * There are valid situations for not having any structure whatsoever in the supplied data
+		 * and therefore we should not expect designated root nodes here.
+		 */
+//		if(roots.isEmpty())
+//			throw new IllegalArgumentException("Structure is not a tree - no root defined"); //$NON-NLS-1$
 
 		// refresh descendants counter and depth
 		for(int root : roots) {
@@ -233,7 +237,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			heights[index] = 1; // MARK 1
 		}
 	}
-	
+
 	/**
 	 * @see de.ims.icarus.search_tools.tree.TargetTree#getNodeIndex()
 	 */
@@ -257,9 +261,9 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public int getEdgeCount() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		int[] list = edges[nodePointer];
-		
+
 		return list==null ? 0 : list[0];
 	}
 
@@ -270,29 +274,29 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void viewEdge(int index) {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		int[] list = edges[nodePointer];
-		
+
 		if(list==null || index<0 || index>=list[0])
 			throw new IndexOutOfBoundsException("Edge index out of bounds: "+index); //$NON-NLS-1$
-		
+
 		edgePointer = index;
 	}
 
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.search_tools.tree.TargetTree#viewEdge(int, int)
 	 */
 	@Override
 	public void viewEdge(int nodeIndex, int edgeIndex) {
 		if(nodeIndex<0 || nodeIndex>=size)
 			throw new IndexOutOfBoundsException("Node index out of bounds: "+nodeIndex); //$NON-NLS-1$
-		
-		int[] list = edges[nodeIndex];		
+
+		int[] list = edges[nodeIndex];
 
 		if(list==null || edgeIndex<0 || edgeIndex>=list[0])
 			throw new IndexOutOfBoundsException("Edge index out of bounds: "+edgeIndex); //$NON-NLS-1$
-		
+
 		nodePointer = nodeIndex;
 		edgePointer = edgeIndex;
 	}
@@ -306,7 +310,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-		
+
 		return nodePointer;
 	}
 
@@ -319,7 +323,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-		
+
 		return edges[nodePointer][1+edgePointer];
 	}
 
@@ -327,8 +331,8 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public boolean isRoot() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
-		return heads[nodePointer]==LanguageUtils.DATA_HEAD_ROOT;
+
+		return heads[nodePointer]==LanguageConstants.DATA_HEAD_ROOT;
 	}
 
 	/**
@@ -338,7 +342,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public int getParentIndex() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		return heads[nodePointer];
 	}
 
@@ -349,7 +353,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void viewNode(int index) {
 		if(index<0 || index>=size)
 			throw new IndexOutOfBoundsException("Node index out of bounds: "+index); //$NON-NLS-1$
-		
+
 		nodePointer = index;
 		edgePointer = -1;
 	}
@@ -363,10 +367,10 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
 
 		int[] list = edges[nodePointer];
-		
+
 		if(list==null || index<0 || index>=list[0])
 			throw new IndexOutOfBoundsException("Child index out of bounds: "+index); //$NON-NLS-1$
-		
+
 		nodePointer = list[1+index];
 		edgePointer = -1;
 	}
@@ -378,12 +382,12 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public int getChildIndexAt(int nodeIndex, int index) {
 		if(nodeIndex<0 || nodeIndex>=size)
 			throw new IndexOutOfBoundsException("Node index out of bounds: "+nodeIndex); //$NON-NLS-1$
-		
+
 		int[] list = edges[nodeIndex];
-		
+
 		if(list==null || index<0 || index>=list[0])
 			throw new IndexOutOfBoundsException("Child index out of bounds: "+index); //$NON-NLS-1$
-		
+
 		return list[1+index];
 	}
 
@@ -396,7 +400,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
 		if(heads[nodePointer]==-1)
 			throw new IllegalStateException("Current node is the root node"); //$NON-NLS-1$
-		
+
 		nodePointer = heads[nodePointer];
 		edgePointer = -1;
 	}
@@ -410,7 +414,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-		
+
 		nodePointer = edges[nodePointer][1+edgePointer];
 		edgePointer = -1;
 	}
@@ -436,7 +440,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public int getHeight() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		return heights[nodePointer];
 	}
 
@@ -447,10 +451,10 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public int getDescendantCount() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		return descendantCounts[nodePointer];
 	}
-	
+
 	// LOCKING METHODS
 
 	/**
@@ -460,7 +464,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void lockNode() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		locks[nodePointer][0] = true;
 	}
 
@@ -473,7 +477,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-		
+
 		locks[nodePointer][1+edgePointer] = true;
 	}
 
@@ -484,7 +488,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void lockEdge(int index) {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		locks[nodePointer][1+index] = true;
 	}
 
@@ -511,7 +515,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void unlockNode() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		unlockNode(nodePointer);
 	}
 
@@ -524,7 +528,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-		
+
 		locks[nodePointer][1+edgePointer] = false;
 	}
 
@@ -535,7 +539,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void unlockEdge(int index) {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		locks[nodePointer][1+index] = false;
 	}
 
@@ -554,7 +558,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public void unlockNode(int index) {
 		locks[index][0] = false;
 		int[] list = edges[index];
-		
+
 		// Unlock all edges for this node!
 		if(list!=null) {
 			boolean[] lock = locks[index];
@@ -570,7 +574,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	@Override
 	public void unlockChildren(int index) {
 		int[] list = edges[index];
-		
+
 		if(list!=null) {
 			for(int i=1; i<=list[0]; i++) {
 				unlockNode(list[i]);
@@ -585,7 +589,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public boolean isNodeLocked() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		return locks[nodePointer][0];
 	}
 
@@ -598,7 +602,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$
 		if(nodePointer==-1)
 			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-		
+
 		return locks[nodePointer][1+edgePointer];
 	}
 
@@ -617,7 +621,7 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 	public boolean isEdgeLocked(int index) {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
-		
+
 		return locks[nodePointer][1+index];
 	}
 

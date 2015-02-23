@@ -31,6 +31,7 @@ import org.java.plugin.Plugin;
 import org.java.plugin.registry.Extension;
 import org.java.plugin.registry.ExtensionPoint;
 
+import de.ims.icarus.Core;
 import de.ims.icarus.plugins.PluginUtil;
 
 /**
@@ -45,8 +46,8 @@ public class ProsodyPlugin extends Plugin {
 	 */
 	@Override
 	protected void doStart() throws Exception {
-		// TODO Auto-generated method stub
 
+		ensureReadme();
 	}
 
 	/**
@@ -58,6 +59,11 @@ public class ProsodyPlugin extends Plugin {
 
 	}
 
+	private static void ensureReadme() {
+		final String path = "de/ims/icarus/plugins/prosody/resources/"; //$NON-NLS-1$
+		final String readmeFile = "prosody_readme.txt"; //$NON-NLS-1$
+		Core.getCore().ensureResource(readmeFile, path+readmeFile, ProsodyPlugin.class.getClassLoader());
+	}
 
 	public static Collection<Extension> getProsodySentencePresenterExtensions() {
 		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(

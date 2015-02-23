@@ -27,7 +27,6 @@ package de.ims.icarus.search_tools;
 
 import java.util.logging.Level;
 
-import javax.naming.OperationNotSupportedException;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -148,7 +147,7 @@ public class SearchDescriptor {
 		search = factory.createExampleSearch();
 
 		if(search==null)
-			throw new OperationNotSupportedException("Factory does not support creation of example search instances"); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Factory does not support creation of example search instances"); //$NON-NLS-1$
 
 		if(!search.init()) {
 			return false;

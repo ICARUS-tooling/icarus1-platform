@@ -45,7 +45,7 @@ import de.ims.icarus.util.mem.Primitive;
  *
  */
 @HeapMember
-public class LookupList<E extends Object> extends AbstractPrimitiveList implements Iterable<E> {
+public class LookupList<E extends Object> implements Iterable<E> {
 
 	private static final int MIN_LOOKUP_SIZE = 6;
 
@@ -57,6 +57,8 @@ public class LookupList<E extends Object> extends AbstractPrimitiveList implemen
 	private TObjectIntMap<Object> lookup;
     @Primitive
 	private int modCount = 0;
+    @Primitive
+    private int size = 0;
 
 	public LookupList() {
 		items = EMPTY_ITEMS;
@@ -68,6 +70,20 @@ public class LookupList<E extends Object> extends AbstractPrimitiveList implemen
 
         items = new Object[capacity];
 	}
+
+	protected void rangeCheck(int index) {
+        if (index >= size)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+
+	protected void rangeCheckForAdd(int index) {
+        if (index > size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+
+	protected String outOfBoundsMsg(int index) {
+        return "Index: "+index+", Size: "+size; //$NON-NLS-1$ //$NON-NLS-2$
+    }
 
 	public int size() {
 		return size;

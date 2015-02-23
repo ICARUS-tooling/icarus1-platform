@@ -12,6 +12,7 @@
 	<requires>
 		<import plugin-id="de.ims.icarus.core" />
 		<import plugin-id="de.ims.icarus.languageTools" />
+		<import plugin-id="de.ims.icarus.dependency" />
 	</requires>
 	
 	<runtime>

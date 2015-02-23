@@ -207,18 +207,24 @@ public class SearchManagerView extends View {
 
 		// Show example if required
 		if(IcarusCorePlugin.isShowExampleData()) {
-			try {
-				SearchDescriptor descriptor = new SearchDescriptor();
-				descriptor.setFactoryExtension(factoryExtensions.iterator().next());
+			for(Extension extension : factoryExtensions) {
+				try {
+					SearchDescriptor descriptor = new SearchDescriptor();
+					descriptor.setFactoryExtension(extension);
 
-				descriptor.createExampleSearch();
+					descriptor.createExampleSearch();
 
-				currentSearchEditor.setEditingItem(descriptor);
+					currentSearchEditor.setEditingItem(descriptor);
 
-				callbackHandler.editQuery(null);
-			} catch (Exception e) {
-				LoggerFactory.log(this, Level.SEVERE,
-						"Failed to generate example search", e); //$NON-NLS-1$
+					callbackHandler.editQuery(null);
+
+					break;
+				} catch(UnsupportedOperationException e) {
+					// ignore
+				} catch (Exception e) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Failed to generate example search", e); //$NON-NLS-1$
+				}
 			}
 		}
 
