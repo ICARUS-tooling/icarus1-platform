@@ -165,6 +165,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 		private transient boolean reverseFrom, reverseTo;
 		private transient ValueHandler valueHandler;
 		protected transient boolean ignoreUnstressed = false;
+		protected double minB, maxB;
 
 		public SyllableComparisonConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
@@ -182,6 +183,8 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 			Handle handle = registry.getHandle(configPath);
 
 			ignoreUnstressed = registry.getBoolean(registry.getChildHandle(handle, "ignoreUnstressedSyllables")); //$NON-NLS-1$
+			minB = registry.getDouble(registry.getChildHandle(handle, "minB")); //$NON-NLS-1$
+			maxB = registry.getDouble(registry.getChildHandle(handle, "maxB")); //$NON-NLS-1$
 		}
 
 		protected String getConfigPath() {
@@ -272,7 +275,7 @@ public class SyllableDifferenceConstraintFactory extends AbstractConstraintFacto
 				return null;
 			}
 
-			return aggregationMode.getAggregatedValue(tree, key, fromIndex, toIndex, ignoreUnstressed);
+			return aggregationMode.getAggregatedValue(tree, key, fromIndex, toIndex, ignoreUnstressed, minB, maxB);
 		}
 
 		@Override

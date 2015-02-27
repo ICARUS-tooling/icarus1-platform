@@ -55,11 +55,12 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		proxy.set(rawData);
 
 		if(indexIterator!=null) {
+
+			prepareIndexIterator(indexIterator, rawData);
+
 			if(indexIterator.size()==0) {
 				return false;
 			}
-
-			prepareIndexIterator(indexIterator, rawData);
 
 			for(int i=0; i<indexIterator.size(); i++) {
 				if(i>0) {

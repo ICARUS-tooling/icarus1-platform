@@ -64,6 +64,7 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 	public SearchOperator[] getSupportedOperators() {
 		return new SearchOperator[]{
 				DefaultSearchOperator.EQUALS,
+				DefaultSearchOperator.EQUALS_NOT,
 				DefaultSearchOperator.GROUPING,
 		};
 	}

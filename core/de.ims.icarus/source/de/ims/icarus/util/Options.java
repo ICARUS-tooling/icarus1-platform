@@ -99,7 +99,7 @@ public class Options extends HashMap<String, Object> {
 
 	public void dump() {
 		System.out.println("Options: "); //$NON-NLS-1$
-		for(Entry<String, Object> entry : entrySet())
+		for(Map.Entry<String, Object> entry : entrySet())
 			System.out.printf("  -key=%s value=%s\n",  //$NON-NLS-1$
 					entry.getKey(), String.valueOf(entry.getValue()));
 	}

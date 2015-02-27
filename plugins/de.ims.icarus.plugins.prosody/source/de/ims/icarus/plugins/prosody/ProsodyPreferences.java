@@ -299,6 +299,8 @@ public class ProsodyPreferences {
 		builder.virtual();
 
 		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
+		builder.addDoubleEntry("minB", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("maxB", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
 
 		// END SYLLABLE DIFFERENCE SUBGROUP
 		builder.back();
