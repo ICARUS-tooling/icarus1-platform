@@ -49,8 +49,16 @@ public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> i
 	@Primitive
 	protected int sentenceIndex = -1;
 
-	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {
+	public DefaultCoreferenceData() {
+		super();
+	}
+
+	public DefaultCoreferenceData(String[] forms) {
 		super(forms);
+	}
+
+	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {
+		this(forms);
 		setDocument(document);
 	}
 

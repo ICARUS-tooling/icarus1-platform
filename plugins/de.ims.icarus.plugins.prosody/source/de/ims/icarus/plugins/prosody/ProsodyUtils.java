@@ -68,6 +68,9 @@ public class ProsodyUtils implements ProsodyConstants {
 		SharedPropertyRegistry.registerHandler(PAINTE_D_KEY, ValueHandler.floatHandler);
 		SharedPropertyRegistry.registerHandler(PAINTE_MAX_C_KEY, ValueHandler.doubleHandler);
 
+		SharedPropertyRegistry.registerHandler(TOBI_LABEL, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(TOBI_TONE, ValueHandler.stringHandler);
+
 		// Word level
 		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
 		SharedPropertyRegistry.registerHandler(POS_KEY, ValueHandler.stringHandler);
@@ -173,6 +176,8 @@ public class ProsodyUtils implements ProsodyConstants {
 		CODA_TYPE_KEY,
 		ONSET_SIZE_KEY,
 		ONSET_TYPE_KEY,
+		TOBI_LABEL,
+		TOBI_TONE,
 		PHONEME_COUNT_KEY,
 		PAINTE_A1_KEY,
 		PAINTE_A2_KEY,

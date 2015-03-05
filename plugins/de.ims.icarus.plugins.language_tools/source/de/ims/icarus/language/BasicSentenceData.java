@@ -53,7 +53,7 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 
 	@Link
 	@XmlElement(name="form")
-	protected final String[] forms;
+	protected String[] forms;
 
 	public BasicSentenceData(String...forms) {
 		if(forms==null)
@@ -68,7 +68,13 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 
 	public BasicSentenceData() {
 		//no-op
-		forms = null;
+	}
+
+	public void setForms(String[] forms) {
+		if(this.forms!=null)
+			throw new IllegalStateException("Form tokens already set");
+
+		this.forms = forms;
 	}
 
 	public P getProperties() {

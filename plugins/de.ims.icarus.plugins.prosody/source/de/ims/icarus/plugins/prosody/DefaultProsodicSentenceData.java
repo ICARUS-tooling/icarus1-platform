@@ -49,6 +49,14 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 		super(document, forms);
 	}
 
+	public DefaultProsodicSentenceData(String[] forms) {
+		super(forms);
+	}
+
+	public DefaultProsodicSentenceData() {
+		super();
+	}
+
 	@Override
 	public CoreferenceData clone() {
 		DefaultProsodicSentenceData result = new DefaultProsodicSentenceData(getDocument(), forms);

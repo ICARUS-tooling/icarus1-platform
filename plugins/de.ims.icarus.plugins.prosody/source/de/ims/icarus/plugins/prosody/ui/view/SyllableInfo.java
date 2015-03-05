@@ -54,12 +54,14 @@ public class SyllableInfo extends PartInfo {
 			setLabel(sentence.getSyllableForm(wordIndex, sylIndex));
 		} else {
 			float beginTs = sentence.getBeginTimestamp(wordIndex);
-			float duration = sentence.getEndTimestamp(wordIndex)-beginTs;
-			float sylBegin = sentence.getSyllableTimestamp(wordIndex, sylIndex)-beginTs;
+			float endTs = sentence.getEndTimestamp(wordIndex);
+			float duration = endTs-beginTs;
+			float sylBegin = sentence.getSyllableTimestamp(wordIndex, sylIndex);
+			float sylRelBegin = sylBegin-beginTs;
 			float sylDuration = sentence.getSyllableDuration(wordIndex, sylIndex);
 			int tokenLength = token.length();
-			int offset0 = (int) Math.floor(sylBegin/duration * tokenLength);
-			int offset1 = (int) Math.floor((sylBegin+sylDuration) / duration * tokenLength);
+			int offset0 = (int) Math.floor(sylRelBegin/duration * tokenLength);
+			int offset1 = (int) Math.floor((sylRelBegin+sylDuration) / duration * tokenLength);
 
 			offset1 = Math.min(offset1, tokenLength);
 

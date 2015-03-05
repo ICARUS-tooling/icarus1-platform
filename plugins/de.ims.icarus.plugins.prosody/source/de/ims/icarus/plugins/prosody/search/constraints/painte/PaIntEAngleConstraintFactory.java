@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints.painte;
 
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
@@ -42,6 +44,8 @@ import de.ims.icarus.util.Options;
 public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "painteAngle"; //$NON-NLS-1$
+
+	private static final String CONFIG_PATH = "plugins.prosody.search.painteAngle"; //$NON-NLS-1$
 
 	public PaIntEAngleConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
@@ -96,6 +100,14 @@ public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 
 		private static final long serialVersionUID = 5588616829782787261L;
 
+		private transient boolean useA1;
+		private transient boolean useA2;
+		private transient boolean useB;
+		private transient boolean useC1;
+		private transient boolean useC2;
+		private transient boolean useD;
+		private transient boolean useAlignment;
+
 		public PaIntEAngleConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
@@ -103,6 +115,22 @@ public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 		@Override
 		public SearchConstraint clone() {
 			return new PaIntEAngleConstraint(getValue(), getOperator(), getSpecifier());
+		}
+
+		@Override
+		protected void init() {
+			defaultSetUtilityFields();
+
+			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
+			Handle handle = registry.getHandle(CONFIG_PATH);
+
+			useA1 = registry.getBoolean(registry.getChildHandle(handle, "useA1")); //$NON-NLS-1$
+			useA2 = registry.getBoolean(registry.getChildHandle(handle, "useA2")); //$NON-NLS-1$
+			useB = registry.getBoolean(registry.getChildHandle(handle, "useB")); //$NON-NLS-1$
+			useC1 = registry.getBoolean(registry.getChildHandle(handle, "useC1")); //$NON-NLS-1$
+			useC2 = registry.getBoolean(registry.getChildHandle(handle, "useC2")); //$NON-NLS-1$
+			useD = registry.getBoolean(registry.getChildHandle(handle, "useD")); //$NON-NLS-1$
+			useAlignment = registry.getBoolean(registry.getChildHandle(handle, "useAlignment")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -127,49 +155,49 @@ public class PaIntEAngleConstraintFactory extends AbstractConstraintFactory {
 			double quantB = 0;
 
 			// A1
-			if(specifierParams.isA1Active()) {
+			if(useA1 && specifierParams.isA1Active()) {
 				scal += (specifierParams.getA1()*valueParams.getA1());
 				quantA += specifierParams.getA1()*specifierParams.getA1();
 				quantB += valueParams.getA1()*valueParams.getA1();
 			}
 
 			// A2
-			if(specifierParams.isA2Active()) {
+			if(useA2 && specifierParams.isA2Active()) {
 				scal += (specifierParams.getA2()*valueParams.getA2());
 				quantA += specifierParams.getA2()*specifierParams.getA2();
 				quantB += valueParams.getA2()*valueParams.getA2();
 			}
 
 			// B
-			if(specifierParams.isBActive()) {
+			if(useB && specifierParams.isBActive()) {
 				scal += (specifierParams.getB()*valueParams.getB());
 				quantA += specifierParams.getB()*specifierParams.getB();
 				quantB += valueParams.getB()*valueParams.getB();
 			}
 
 			// C1
-			if(specifierParams.isC1Active()) {
+			if(useC1 && specifierParams.isC1Active()) {
 				scal += (specifierParams.getC1()*valueParams.getC1());
 				quantA += specifierParams.getC1()*specifierParams.getC1();
 				quantB += valueParams.getC1()*valueParams.getC1();
 			}
 
 			// C2
-			if(specifierParams.isC2Active()) {
+			if(useC2 && specifierParams.isC2Active()) {
 				scal += (specifierParams.getC2()*valueParams.getC2());
 				quantA += specifierParams.getC2()*specifierParams.getC2();
 				quantB += valueParams.getC2()*valueParams.getC2();
 			}
 
 			// D
-			if(specifierParams.isDActive()) {
+			if(useD && specifierParams.isDActive()) {
 				scal += (specifierParams.getD()*valueParams.getD());
 				quantA += specifierParams.getD()*specifierParams.getD();
 				quantB += valueParams.getD()*valueParams.getD();
 			}
 
 			// Alignment
-			if(specifierParams.isAlignmentActive()) {
+			if(useAlignment && specifierParams.isAlignmentActive()) {
 				scal += (specifierParams.getAlignment()*valueParams.getAlignment());
 				quantA += specifierParams.getAlignment()*specifierParams.getAlignment();
 				quantB += valueParams.getAlignment()*valueParams.getAlignment();

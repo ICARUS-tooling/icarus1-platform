@@ -215,7 +215,7 @@ public class ProsodyPreferences {
 		// END AUDIO PLAYER GROUP
 		builder.back();
 
-		// READER GROUP
+		// PROSODY READER GROUP
 		builder.addGroup("prosodyReader", true); //$NON-NLS-1$
 
 		builder.addBooleanEntry("syllableOffsetsFromSampa", true); //$NON-NLS-1$
@@ -223,7 +223,18 @@ public class ProsodyPreferences {
 		builder.addIntegerEntry("accentExcursion", 50, 10, 150); //$NON-NLS-1$
 		builder.addBooleanEntry("onlyConsiderStressedSylables", false); //$NON-NLS-1$
 
-		// END READER GROUP
+		// END PROSODY READER GROUP
+		builder.back();
+
+		// FESTIVAL READER GROUP
+		builder.addGroup("festivalReader", true); //$NON-NLS-1$
+
+		builder.addBooleanEntry("syllableOffsetsFromSampa", true); //$NON-NLS-1$
+		builder.addBooleanEntry("markAccentOnWords", true); //$NON-NLS-1$
+		builder.addIntegerEntry("accentExcursion", 50, 10, 150); //$NON-NLS-1$
+		builder.addBooleanEntry("onlyConsiderStressedSylables", false); //$NON-NLS-1$
+
+		// END FESTIVAL READER GROUP
 		builder.back();
 
 		// SEARCH GROUP
@@ -292,6 +303,21 @@ public class ProsodyPreferences {
 		builder.addBooleanEntry("ignoreUnstressedSyllables", true); //$NON-NLS-1$
 
 		// END PAINTE CHANNEL SUBGROUP
+		builder.back();
+
+		// PAINTE ANGLE SUBGROUP
+		builder.addGroup("painteAngle", true); //$NON-NLS-1$
+		builder.virtual();
+
+		builder.addBooleanEntry("useA1", true); //$NON-NLS-1$
+		builder.addBooleanEntry("useA2", true); //$NON-NLS-1$
+		builder.addBooleanEntry("useB", true); //$NON-NLS-1$
+		builder.addBooleanEntry("useC1", true); //$NON-NLS-1$
+		builder.addBooleanEntry("useC2", true); //$NON-NLS-1$
+		builder.addBooleanEntry("useD", true); //$NON-NLS-1$
+		builder.addBooleanEntry("useAlignment", false); //$NON-NLS-1$
+
+		// END PAINTE ANGLE SUBGROUP
 		builder.back();
 
 		// SYLLABLE DIFFERENCE SUBGROUP

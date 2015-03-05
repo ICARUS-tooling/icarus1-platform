@@ -267,6 +267,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 				reader = new SentenceReaderV04(readerControl);
 				break;
 
+			case "0.5": //$NON-NLS-1$
+				reader = new SentenceReaderV05(readerControl);
+				break;
+
 			default:
 				break;
 			}
@@ -523,6 +527,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	private static final String[] EMPTY_STRINGS = new String[0];
 
 	private static float[] getFloats(Row row, int index) {
+		if(index<0) {
+			return EMPTY_FLOATS;
+		}
+
 		Cursor cursor = row.getSplitCursor(index);
 
 		float[] result;
@@ -544,6 +552,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	}
 
 	private static int[] getInts(Row row, int index) {
+		if(index<0) {
+			return EMPTY_INTS;
+		}
+
 		Cursor cursor = row.getSplitCursor(index);
 
 		int[] result;
@@ -565,6 +577,10 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	}
 
 	private static String[] getStrings(Row row, int index) {
+		if(index<0) {
+			return EMPTY_STRINGS;
+		}
+
 		Cursor cursor = row.getSplitCursor(index);
 
 		String[] result;
@@ -1161,6 +1177,42 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 			result.setProperty(i, IS_LEX, get(row, IS_LEX_COL, EMPTY));
 			result.setProperty(i, IS_REF, get(row, IS_REF_COL, EMPTY));
+		}
+	}
+
+	private static class SentenceReaderV05 extends SentenceReaderV04 {
+
+		protected int TOBI_LABEL_COL = 25;
+		protected int TOBI_TONE_COL = 27;
+
+		public SentenceReaderV05(ReaderControl readerControl) {
+			super(readerControl);
+		}
+
+		@Override
+		protected void initColumns() {
+			super.initColumns();
+
+			/*
+			 * VERSION 0.5
+			 */
+			TOBI_LABEL_COL = 25;
+			TOBI_TONE_COL = 27;
+
+			// Reset the captured slots!!!
+			CODA_TYPE_COL = -1;
+			ONSET_TYPE_COL = -1;
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReaderV03#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
+		 */
+		@Override
+		protected void readAdditionalColumns(int i, Row row) {
+			super.readAdditionalColumns(i, row);
+
+			result.setProperty(i, TOBI_LABEL, getStrings(row, TOBI_LABEL_COL));
+			result.setProperty(i, TOBI_TONE, getStrings(row, TOBI_TONE_COL));
 		}
 	}
 }
