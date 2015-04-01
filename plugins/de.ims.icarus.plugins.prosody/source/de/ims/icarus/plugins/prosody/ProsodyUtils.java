@@ -70,6 +70,11 @@ public class ProsodyUtils implements ProsodyConstants {
 
 		SharedPropertyRegistry.registerHandler(TOBI_LABEL, ValueHandler.stringHandler);
 		SharedPropertyRegistry.registerHandler(TOBI_TONE, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(NEXT_SYL_LEXICAL_STRESS, ValueHandler.booleanHandler);
+		SharedPropertyRegistry.registerHandler(PREV_SYL_LEXICAL_STRESS, ValueHandler.booleanHandler);
+		SharedPropertyRegistry.registerHandler(NUM_SYL_NEXT_STRESS, ValueHandler.booleanHandler);
+		SharedPropertyRegistry.registerHandler(NUM_SYL_LAST_STRESS, ValueHandler.booleanHandler);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_POSITION_TYPE, ValueHandler.stringHandler);
 
 		// Word level
 		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
@@ -178,6 +183,11 @@ public class ProsodyUtils implements ProsodyConstants {
 		ONSET_TYPE_KEY,
 		TOBI_LABEL,
 		TOBI_TONE,
+		NEXT_SYL_LEXICAL_STRESS,
+		PREV_SYL_LEXICAL_STRESS,
+		NUM_SYL_NEXT_STRESS,
+		NUM_SYL_LAST_STRESS,
+		SYLLABLE_POSITION_TYPE,
 		PHONEME_COUNT_KEY,
 		PAINTE_A1_KEY,
 		PAINTE_A2_KEY,

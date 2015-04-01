@@ -157,7 +157,7 @@ public class SoundPlayer {
 		}
 	}
 
-	public SoundFile getSoundFile(String fileName) {
+	public SoundFile getSoundFile(String fileName) throws SoundException {
 		if (fileName == null)
 			throw new NullPointerException("Invalid fileName"); //$NON-NLS-1$
 
@@ -170,7 +170,7 @@ public class SoundPlayer {
 			Path path = createPath(fileName);
 
 			if(path==null)
-				throw new IllegalArgumentException("No audio file available for name: "+fileName); //$NON-NLS-1$
+				throw new SoundException("No audio file available for name: "+fileName); //$NON-NLS-1$
 
 			soundFile = new SoundFile(path);
 			fileCache.put(fileName, soundFile);

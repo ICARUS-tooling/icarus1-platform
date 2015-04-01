@@ -25,6 +25,8 @@
  */
 package de.ims.icarus.plugins.prosody.search.constraints;
 
+import de.ims.icarus.config.ConfigRegistry;
+import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
@@ -41,6 +43,8 @@ import de.ims.icarus.util.Options;
 public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
 
 	public static final String TOKEN = "syllableProperty"; //$NON-NLS-1$
+
+	private static final String CONFIG_PATH = "plugins.prosody.search.syllableProperty"; //$NON-NLS-1$
 
 	public ProsodySyllablePropertyConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
@@ -71,6 +75,25 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 
 		public ProsodySyllablePropertyConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
+		}
+
+		@Override
+		public void prepare() {
+			super.prepare();
+
+			String configPath = CONFIG_PATH;
+
+			ConfigRegistry registry = ConfigRegistry.getGlobalRegistry();
+			Handle handle = registry.getHandle(configPath);
+
+			if(registry.getBoolean(registry.getChildHandle(handle, "applyBFilter"))) { //$NON-NLS-1$
+				setMinB(registry.getDouble(registry.getChildHandle(handle, "minB"))); //$NON-NLS-1$
+				setMaxB(registry.getDouble(registry.getChildHandle(handle, "maxB"))); //$NON-NLS-1$
+			} else {
+				setMinB(UNDEFINED_B);
+				setMaxB(UNDEFINED_B);
+			}
+
 		}
 
 		public String getKey() {

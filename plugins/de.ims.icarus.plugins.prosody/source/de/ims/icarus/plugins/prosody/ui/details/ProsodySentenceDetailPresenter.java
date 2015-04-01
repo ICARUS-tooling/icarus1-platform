@@ -251,12 +251,13 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 		boolean hasData = sentenceInfo!=null;
 		SoundFile soundFile = getSoundFile();
-		boolean isPlaying = soundFile!=null && soundFile.isActive();
-		boolean isPaused = soundFile!=null && soundFile.isPaused();
+		boolean hasSound = hasData && soundFile!=null;
+		boolean isPlaying = hasSound && soundFile.isActive();
+		boolean isPaused = hasSound && soundFile.isPaused();
 		boolean showConstraints = config.showConstraints;
 		boolean paintCompact = config.detailPaintCompact;
 
-		actionManager.setEnabled(hasData,
+		actionManager.setEnabled(hasSound,
 				"plugins.prosody.prosodySentenceDetailPresenter.playSentenceAction"); //$NON-NLS-1$
 		actionManager.setEnabled(isPlaying || isPaused,
 				"plugins.prosody.prosodySentenceDetailPresenter.stopPlaybackAction"); //$NON-NLS-1$

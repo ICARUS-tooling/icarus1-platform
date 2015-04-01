@@ -70,9 +70,6 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String IS_LEX = "is_lex"; //$NON-NLS-1$
 	public static final String IS_REF = "is_ref"; //$NON-NLS-1$
 
-	public static final String TOBI_LABEL = "tobi_label"; //$NON-NLS-1$
-	public static final String TOBI_TONE = "tobi_tone"; //$NON-NLS-1$
-
 	// Syllable properties
 	public static final String SYLLABLE_OFFSET_KEY = "syllable_offset"; //$NON-NLS-1$
 	public static final String SYLLABLE_FORM_KEY = "syllable_form"; //$NON-NLS-1$
@@ -99,6 +96,9 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String PAINTE_C2_KEY = "painte_c2"; //$NON-NLS-1$
 	public static final String PAINTE_D_KEY = "painte_d"; //$NON-NLS-1$
 	public static final String PAINTE_MAX_C_KEY = "painte_max_c"; //$NON-NLS-1$
+
+	public static final String TOBI_LABEL = "tobi_label"; //$NON-NLS-1$
+	public static final String TOBI_TONE = "tobi_tone"; //$NON-NLS-1$
 
 	public static final String NEXT_SYL_LEXICAL_STRESS = "next_lex_stress"; //$NON-NLS-1$
 	public static final String PREV_SYL_LEXICAL_STRESS = "next_lex_stress"; //$NON-NLS-1$

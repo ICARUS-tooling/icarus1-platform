@@ -208,7 +208,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
         buildDialog();
 
-        this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        this.setModalityType(Dialog.ModalityType.DOCUMENT_MODAL);
         pack();
         //this.setMinimumSize(new Dimension(800, 650));
         config.addListener(new CfgListener(starthandle));
@@ -266,7 +266,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
         buildDialog();
         //System.out.println(changesMap);
 
-        this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        this.setModalityType(Dialog.ModalityType.DOCUMENT_MODAL);
         pack();
         //this.setMinimumSize(new Dimension(800, 650));
         config.addListener(new CfgListener(handle));
@@ -318,7 +318,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
         buildDialog();
 
-        this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        this.setModalityType(Dialog.ModalityType.DOCUMENT_MODAL);
         pack();
         //this.setMinimumSize(new Dimension(800, 650));
 		config.addListener(new CfgListener(handle));
@@ -2852,7 +2852,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	        //Register an event handler that reacts to option pane state changes.
 	        optionPane.addPropertyChangeListener(this);
 
-	        this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+	        this.setModalityType(Dialog.ModalityType.DOCUMENT_MODAL);
 	        pack();
 	        this.setVisible(true);
 		 }

@@ -331,6 +331,17 @@ public class ProsodyPreferences {
 		// END SYLLABLE DIFFERENCE SUBGROUP
 		builder.back();
 
+		// SYLLABLE PROPERTY SUBGROUP
+		builder.addGroup("syllableProperty", true); //$NON-NLS-1$
+		builder.virtual();
+
+		builder.addBooleanEntry("applyBFilter", true); //$NON-NLS-1$
+		builder.addDoubleEntry("minB", 0.0, -3.0, 2.0, 0.1); //$NON-NLS-1$
+		builder.addDoubleEntry("maxB", 2.0, -2.0, 3.0, 0.1); //$NON-NLS-1$
+
+		// END SYLLABLE PROPERTY SUBGROUP
+		builder.back();
+
 		// END SEARCH GROUP
 		builder.back();
 

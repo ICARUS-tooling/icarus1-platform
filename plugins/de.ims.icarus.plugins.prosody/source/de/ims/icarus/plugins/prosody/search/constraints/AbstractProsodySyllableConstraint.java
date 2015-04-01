@@ -27,6 +27,7 @@ package de.ims.icarus.plugins.prosody.search.constraints;
 
 import java.util.Locale;
 
+import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
@@ -37,16 +38,35 @@ import de.ims.icarus.search_tools.standard.GroupCache;
  * @version $Id$
  *
  */
-public abstract class AbstractProsodySyllableConstraint extends DefaultConstraint implements SyllableConstraint {
+public abstract class AbstractProsodySyllableConstraint extends DefaultConstraint implements SyllableConstraint, ProsodyConstants {
 
 	private static final long serialVersionUID = 8333873086091026549L;
-	protected transient boolean ignoreUnstressed = false;
+	protected  boolean ignoreUnstressed = false;
+
+	protected static final double UNDEFINED_B = Double.NEGATIVE_INFINITY;
+
+	protected double minB = UNDEFINED_B, maxB = UNDEFINED_B;
 
 	public AbstractProsodySyllableConstraint(String token, Object value,
 			SearchOperator operator, Object specifier) {
 		super(token, value, operator, specifier);
 	}
 
+	public double getMinB() {
+		return minB;
+	}
+
+	public double getMaxB() {
+		return maxB;
+	}
+
+	public void setMinB(double minB) {
+		this.minB = minB;
+	}
+
+	public void setMaxB(double maxB) {
+		this.maxB = maxB;
+	}
 
 	/**
 	 * @see de.ims.icarus.search_tools.SearchConstraint#matches(java.lang.Object)
@@ -65,6 +85,16 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 					continue;
 				}
 
+				if(maxB!=UNDEFINED_B
+						&& tree.getPainteB(i)<minB) {
+					continue;
+				}
+
+				if(maxB!=UNDEFINED_B
+						&& tree.getPainteB(i)>maxB) {
+					continue;
+				}
+
 				Object instance = getInstance(tree, i);
 
 				if(instance!=null && operator.apply(instance, constraint)) {
@@ -80,7 +110,9 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 	public boolean matches(Object value, int syllable) {
 		ProsodyTargetTree tree = (ProsodyTargetTree) value;
 
-		if(tree.hasSyllables() && (!ignoreUnstressed || tree.isSyllableStressed(syllable))) {
+		if(tree.hasSyllables() && (!ignoreUnstressed || tree.isSyllableStressed(syllable))
+				&& (minB==UNDEFINED_B || tree.getPainteB(syllable)>=minB)
+				&& (maxB==UNDEFINED_B || tree.getPainteB(syllable)<=maxB)) {
 
 			SearchOperator operator = getOperator();
 			Object constraint = getConstraint();
@@ -105,6 +137,15 @@ public abstract class AbstractProsodySyllableConstraint extends DefaultConstrain
 		// Remember to handle the "empty" cache in the result set implementations!
 		if(tree.hasSyllables()) {
 			for(int i=0; i<tree.getSyllableCount(); i++) {
+				float b = tree.getPainteB(i);
+
+				if(minB!=UNDEFINED_B && b<minB) {
+					continue;
+				}
+				if(maxB!=UNDEFINED_B && b>maxB) {
+					continue;
+				}
+
 				Object instance = getInstance(tree, i);
 
 				if(instance==null) {

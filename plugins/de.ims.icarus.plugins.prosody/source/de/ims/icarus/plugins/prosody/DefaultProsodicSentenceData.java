@@ -110,7 +110,8 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	 */
 	@Override
 	public int getHead(int index) {
-		return (int) getProperty(index, HEAD_KEY);
+		Object value = getProperty(index, HEAD_KEY);
+		return value==null ? DATA_UNDEFINED_VALUE : (int) value;
 	}
 
 	/**

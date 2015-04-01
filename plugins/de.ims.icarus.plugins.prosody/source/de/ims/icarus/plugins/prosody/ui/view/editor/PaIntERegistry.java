@@ -228,6 +228,9 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 
 		wrapper.setLabel(uniqueName);
 
+		idMap.remove(oldName);
+		idMap.put(uniqueName, wrapper);
+
 		paramsChanged(wrapper);
 	}
 

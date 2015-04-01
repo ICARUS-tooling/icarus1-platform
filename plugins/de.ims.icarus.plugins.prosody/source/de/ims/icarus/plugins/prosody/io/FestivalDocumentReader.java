@@ -256,7 +256,20 @@ public class FestivalDocumentReader implements Reader<ProsodicDocumentData>, Dat
 		words.clear();
 		sylCounts.clear();
 
-		while((line = reader.readLine()) != null && !line.isEmpty()) {
+		boolean foundBegin = false;
+
+		while((line = reader.readLine()) != null) {
+
+			if(line.trim().isEmpty()) {
+				if(foundBegin) {
+					break;
+				} else {
+					continue;
+				}
+			}
+
+			foundBegin = true;
+
 			String[] items = line.split(DELIMITER);
 
 			lines.add(items);

@@ -252,11 +252,12 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 		boolean hasData = data!=null;
 		SoundFile soundFile = getSoundFile();
-		boolean isPlaying = soundFile!=null && soundFile.isActive();
-		boolean isPaused = soundFile!=null && soundFile.isPaused();
+		boolean hasSound = hasData && soundFile!=null;
+		boolean isPlaying = hasSound && soundFile.isActive();
+		boolean isPaused = hasSound && soundFile.isPaused();
 		boolean paintCompact = panelConfig.detailPaintCompact;
 
-		actionManager.setEnabled(hasData,
+		actionManager.setEnabled(hasSound,
 				"plugins.prosody.prosodyOutlinePresenter.playDocumentAction"); //$NON-NLS-1$
 		actionManager.setEnabled(isPlaying || isPaused,
 				"plugins.prosody.prosodyOutlinePresenter.stopPlaybackAction"); //$NON-NLS-1$
