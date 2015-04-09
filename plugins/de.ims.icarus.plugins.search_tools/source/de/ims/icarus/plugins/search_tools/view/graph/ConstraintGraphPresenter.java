@@ -19,11 +19,14 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.graph;
+
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -36,6 +39,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import com.mxgraph.model.mxGraphModel;
@@ -92,17 +96,19 @@ import de.ims.icarus.util.data.DataConverter;
  *
  */
 public class ConstraintGraphPresenter extends GraphPresenter {
-	
+
 	public static final String CELL_DATA_TYPE = ConstraintCellData.class.getName();
 
 	private static final long serialVersionUID = -674508666642816142L;
-	
+
 	protected DefaultSearchGraph searchGraph;
-	
+
 	protected ConstraintContext constraintContext;
-	
+
 	protected boolean disjuntiveRoots = false;
-	
+
+	protected final AtomicInteger idGen = new AtomicInteger();
+
 	public static boolean isLinkEdge(mxIGraphModel model, Object cell) {
 		if(model.isVertex(cell)) {
 			return false;
@@ -111,18 +117,18 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		if(!(value instanceof ConstraintEdgeData)) {
 			return false;
 		}
-		
+
 		return ((ConstraintEdgeData)value).getEdgeType()==EdgeType.LINK;
 	}
-	
+
 	public static boolean isLinkEdge(mxCellState state) {
 		return isLinkEdge(state.getView().getGraph().getModel(), state.getCell());
 	}
-	
+
 	public static boolean isLinkEdge(GraphOwner owner, Object cell) {
 		return isLinkEdge(owner.getGraph().getModel(), cell);
 	}
-	
+
 	public static boolean isDisjunctionNode(mxIGraphModel model, Object cell) {
 		if(model.isEdge(cell)) {
 			return false;
@@ -131,27 +137,27 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		if(!(value instanceof ConstraintNodeData)) {
 			return false;
 		}
-		
+
 		return ((ConstraintNodeData)value).getNodeType()==NodeType.DISJUNCTION;
 	}
-	
+
 	public static boolean isDisjunctionNode(mxCellState state) {
 		return isDisjunctionNode(state.getView().getGraph().getModel(), state.getCell());
 	}
-	
+
 	public static boolean isDisjunctionNode(GraphOwner owner, Object cell) {
 		return isDisjunctionNode(owner.getGraph().getModel(), cell);
 	}
-	
+
 	public ConstraintGraphPresenter() {
 		// no-op
 	}
 
 	/**
 	 * This presenter 'creates' constraints that themselves result in
-	 * annotations, so there is no reason to provide navigable 
+	 * annotations, so there is no reason to provide navigable
 	 * visualization of annotation data here.
-	 * 
+	 *
 	 * @see de.ims.icarus.plugins.jgraph.view.GraphPresenter#createAnnotationControl()
 	 */
 	@Override
@@ -163,7 +169,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	protected CallbackHandler createCallbackHandler() {
 		return new CCallbackHandler();
 	}
-	
+
 	@Override
 	protected EdgeHighlightHandler createEdgeHighlightHandler() {
 		// No edge highlighting and therefore no need for caching those infos
@@ -182,13 +188,13 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	@Override
 	protected void initGraphComponentInternals() {
 		super.initGraphComponentInternals();
-		
+
 		editableMainToolBarListId = "plugins.searchTools.constraintGraphPresenter.editableMainToolBarList"; //$NON-NLS-1$
 		editablePopupMenuListId = "plugins.searchTools.constraintGraphPresenter.editablePopupMenuList"; //$NON-NLS-1$
-		
+
 		setMinimumNodeSize(new Dimension(50, 25));
 	}
-	
+
 	protected ConstraintContext createDefaultContext() {
 		ContentType contentType = LanguageManager.getInstance().getSentenceDataContentType();
 		return SearchManager.getInstance().getConstraintContext(contentType);
@@ -203,7 +209,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	protected GraphRenderer createDefaultGraphRenderer() {
 		return new ConstraintGraphRenderer();
 	}
-	
+
 	@Override
 	protected GraphStyle createDefaultGraphStyle() {
 		return new ConstraintGraphStyle();
@@ -230,10 +236,10 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		if(options==null) {
 			options = new Options();
 		}
-		
+
 		// Apply new settings
 		options.put(GraphLayoutConstants.MIN_BASELINE_KEY, 80);
-		
+
 		return options;
 	}
 
@@ -251,7 +257,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		} catch (IOException e) {
 			LoggerFactory.log(this, Level.SEVERE, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
 		}
-		
+
 		return actionManager;
 	}
 
@@ -262,9 +268,9 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		ActionManager actionManager = getActionManager();
 
 		// Init 'selected' states
-		actionManager.setSelected(isDisjuntiveRoots(), 
+		actionManager.setSelected(isDisjuntiveRoots(),
 				"plugins.searchTools.constraintGraphPresenter.toggleRootOperatorAction"); //$NON-NLS-1$
-		
+
 		// Register callback functions
 		actionManager.addHandler(
 				"plugins.searchTools.constraintGraphPresenter.addDisjunctionAction",  //$NON-NLS-1$
@@ -313,70 +319,73 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			newGraph = (DefaultSearchGraph) data;
 		} else if(data instanceof SearchGraph) {
 			SearchGraph searchGraph = (SearchGraph) data;
-			
+
 			newGraph = new DefaultSearchGraph();
 			newGraph.setEdges(searchGraph.getEdges());
 			newGraph.setNodes(searchGraph.getNodes());
 			newGraph.setRootNodes(newGraph.getRootNodes());
 		}
-		
+
 		searchGraph = newGraph;
-		
+
 		boolean disjuntive = newGraph!=null && newGraph.getRootOperator()==SearchGraph.OPERATOR_DISJUNCTION;
-		getActionManager().setSelected(disjuntive, 
+		getActionManager().setSelected(disjuntive,
 				"plugins.searchTools.constraintGraphPresenter.toggleRootOperatorAction"); //$NON-NLS-1$
 	}
-	
+
 	protected ConstraintNodeData createNodeData() {
 		List<ConstraintFactory> factories = getConstraintContext().getNodeFactories();
-		
+
 		ConstraintNodeData nodeData = new ConstraintNodeData(factories.size());
 		nodeData.setConstraints(SearchUtils.createDefaultConstraints(factories));
+
+		String newId = "node"+idGen.getAndIncrement(); //$NON-NLS-1$
+		nodeData.setId(newId);
 //		for(ConstraintFactory factory : factories) {
 //			SearchOperator operator = factory.getSupportedOperators()[0];
 //			Object value = factory.getDefaultValue();
-//			
+//
 //			nodeData.addConstraint(new DefaultConstraint(factory.getToken(), value, operator));
 //		}
-				
+
 		return nodeData;
 	}
-	
-	protected ConstraintNodeData createNodeData(SearchNode source, Map<String, Integer> constraintMap) {
+
+	protected ConstraintNodeData createNodeData(SearchNode source, TObjectIntMap<String> constraintMap) {
 		ConstraintNodeData nodeData = createNodeData();
 		nodeData.setId(source.getId());
 		nodeData.setNegated(source.isNegated());
 		nodeData.setNodeType(source.getNodeType());
-		
+
 		nodeData.setConstraints(source.getConstraints());
-		
+
 		return nodeData;
 	}
-	
+
 	protected ConstraintEdgeData createEdgeData() {
 		List<ConstraintFactory> factories = getConstraintContext().getEdgeFactories();
-		
+
 		ConstraintEdgeData edgeData = new ConstraintEdgeData(factories.size());
 		edgeData.setConstraints(SearchUtils.createDefaultConstraints(factories));
 //		for(int i=0; i<factories.size(); i++) {
 //			ConstraintFactory factory = factories.get(i);
 //			SearchOperator operator = factory.getSupportedOperators()[0];
 //			Object value = factory.getDefaultValue();
-//			
+//
 //			edgeData.setConstraint(i, new DefaultConstraint(factory.getToken(), value, operator));
 //		}
-				
+
 		return edgeData;
 	}
-	
-	protected ConstraintEdgeData createEdgeData(SearchEdge source, Map<String, Integer> constraintMap) {
+
+	protected ConstraintEdgeData createEdgeData(SearchEdge source, TObjectIntMap<String> constraintMap) {
 		ConstraintEdgeData edgeData = createEdgeData();
 		edgeData.setId(source.getId());
 		edgeData.setNegated(source.isNegated());
 		edgeData.setEdgeType(source.getEdgeType());
-		
+
 		edgeData.setConstraints(source.getConstraints());
-		
+
 		return edgeData;
 	}
 
@@ -396,9 +405,9 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	public boolean isLinkEdge(Object cell) {
 		return isLinkEdge(this, cell);
 	}
-	
-	protected Map<String, Integer> getConstraintMap() {		
-		Map<String, Integer> map = new HashMap<>();
+
+	protected TObjectIntMap<String> getConstraintMap() {
+		TObjectIntMap<String> map = new TObjectIntHashMap<>();
 
 		List<ConstraintFactory> edgeFactories = getConstraintContext().getEdgeFactories();
 		for(int i=0; i<edgeFactories.size(); i++) {
@@ -409,8 +418,14 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		for(int i=0; i<nodeFactories.size(); i++) {
 			map.put(nodeFactories.get(i).getToken(), i);
 		}
-		
+
 		return map;
+	}
+
+	@Override
+	public void clearGraph() {
+		idGen.set(0);
+		super.clearGraph();
 	}
 
 	/**
@@ -419,7 +434,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	@Override
 	protected void syncToGraph() {
 
-		Map<String, Integer> constraintMap = getConstraintMap();
+		TObjectIntMap<String> constraintMap = getConstraintMap();
 
 		mxIGraphModel model = graph.getModel();
 		pauseGraphChangeHandling();
@@ -427,26 +442,27 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		try {
 			// Clear graph
 			GraphUtils.clearGraph(graph);
-			
+			idGen.set(0);
+
 			if(SearchUtils.isEmpty(searchGraph)) {
 				return;
 			}
-			
+
 			double x = 2*graph.getGridSize();
 			double y = 2*graph.getGridSize();
-			
+
 			Map<SearchNode, Object> cellMap = new HashMap<>();
-			
+
 			for(SearchNode root : searchGraph.getRootNodes()) {
 				mxRectangle bounds = layoutNode(root, x, y, null, null, cellMap, constraintMap);
 				x += bounds.getWidth() + graph.getGridSize();
 			}
-			
+
 			for(SearchEdge edge : searchGraph.getEdges()) {
-				if(edge.getEdgeType()==EdgeType.LINK 
+				if(edge.getEdgeType()==EdgeType.LINK
 						|| edge.getEdgeType()==EdgeType.PRECEDENCE) {
 					ConstraintEdgeData edgeData = new ConstraintEdgeData(edge);
-					graph.insertEdge(null, null, edgeData, 
+					graph.insertEdge(null, null, edgeData,
 							cellMap.get(edge.getSource()), cellMap.get(edge.getTarget()));
 				}
 			}
@@ -455,38 +471,38 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			resumeGraphChangeHandling();
 		}
 	}
-	
-	protected mxRectangle layoutNode(SearchNode sourceNode, double x, double y, 
+
+	protected mxRectangle layoutNode(SearchNode sourceNode, double x, double y,
 			SearchEdge sourceEdge, Object parent, Map<SearchNode, Object> cellMap,
-			Map<String, Integer> constraintMap) {
+			TObjectIntMap<String> constraintMap) {
 		// Add new vertex
 		ConstraintNodeData nodeData = createNodeData(sourceNode, constraintMap);
 		Object cell = graph.insertVertex(null, null, nodeData, x, y, 50, 25);
 		graph.cellSizeUpdated(cell, false);
 		cellMap.put(sourceNode, cell);
-		
+
 		mxRectangle bounds = new mxRectangle(graph.getCellGeometry(cell));
-		
+
 		if(sourceEdge!=null && parent!=null) {
 			ConstraintEdgeData edgeData = createEdgeData(sourceEdge, constraintMap);
 			graph.insertEdge(parent, null, edgeData, parent, cell);
 		}
-		
+
 		y+= bounds.getHeight()+2*graph.getGridSize();
-		
+
 		for(int i=0; i<sourceNode.getOutgoingEdgeCount(); i++) {
 			SearchEdge edge = sourceNode.getOutgoingEdgeAt(i);
 			if(edge.getEdgeType()==EdgeType.DOMINANCE
 					|| edge.getEdgeType()==EdgeType.TRANSITIVE) {
 				mxRectangle childBounds = layoutNode(
 						edge.getTarget(), x, y, edge, cell, cellMap, constraintMap);
-				
+
 				bounds.add(childBounds);
-				
+
 				x+= childBounds.getWidth()+graph.getGridSize();
 			}
 		}
-		
+
 		return bounds;
 	}
 
@@ -497,7 +513,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	protected void syncToData() {
 		searchGraph = (DefaultSearchGraph) snapshot();
 	}
-	
+
 	/**
 	 * Creates a {@code SearchGraph} that represents the current
 	 * visual state of the {@code mxGraph} this presenter is using.
@@ -506,15 +522,15 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		mxIGraphModel model = graph.getModel();
 		Object parent = graph.getDefaultParent();
 		int cellCount = model.getChildCount(parent);
-		
+
 		if(cellCount==0) {
 			return null;
 		}
-		
+
 		Map<Object, DefaultGraphNode> searchNodes = new LinkedHashMap<>();
 		Map<Object, DefaultGraphEdge> searchEdges = new LinkedHashMap<>();
 		List<DefaultGraphNode> roots = new ArrayList<>();
-		
+
 		// Create and map nodes and edges
 		for(int i=0; i<cellCount; i++) {
 			Object cell = model.getChildAt(parent, i);
@@ -525,14 +541,14 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				node.setNodeType(nodeData.getNodeType());
 				node.setConstraints(nodeData.getConstraints());
 				node.setId(nodeData.getId());
-				
+
 				searchNodes.put(cell, node);
-				
+
 				// Check for roots
 				if(getIncomingEdgeCount(model, cell, true, false)==0) {
 					roots.add(node);
 				}
-				
+
 			} else if(model.isEdge(cell)) {
 				ConstraintEdgeData edgeData = (ConstraintEdgeData)model.getValue(cell);
 				DefaultGraphEdge edge = new DefaultGraphEdge();
@@ -540,75 +556,75 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				edge.setEdgeType(edgeData.getEdgeType());
 				edge.setConstraints(edgeData.getConstraints());
 				edge.setId(edgeData.getId());
-				
+
 				searchEdges.put(cell, edge);
 			}
 		}
-		
+
 		// Now do the mapping
 		for(int i=0; i<cellCount; i++) {
 			Object cell = model.getChildAt(parent, i);
 			if(model.isVertex(cell)) {
-				
+
 				// Connect edges to vertices
 				DefaultGraphNode node = searchNodes.get(cell);
 				int edgeCount = model.getEdgeCount(cell);
 				for(int j=0; j<edgeCount; j++) {
 					Object edge = model.getEdgeAt(cell, j);
 					if(searchEdges.containsKey(edge)) {
-						node.addEdge(searchEdges.get(edge), 
+						node.addEdge(searchEdges.get(edge),
 								model.getTerminal(edge, false)==cell);
 					}
 				}
 			} else if(model.isEdge(cell)) {
-				
+
 				// Add terminals to edges
 				DefaultGraphEdge edge = searchEdges.get(cell);
 				edge.setSource(searchNodes.get(model.getTerminal(cell, true)));
 				edge.setTarget(searchNodes.get(model.getTerminal(cell, false)));
 			}
 		}
-		
+
 		/*List<Object> roots = graph.findTreeRoots(parent);
 		List<SearchNode> rootNodes = new ArrayList<>();
 		for(Object root : roots) {
 			rootNodes.add(searchNodes.get(root));
 		}*/
-		
+
 		// Now wrap everything into a graph object
-		DefaultSearchGraph searchGraph = new DefaultSearchGraph();		
+		DefaultSearchGraph searchGraph = new DefaultSearchGraph();
 		searchGraph.setRootNodes(roots.toArray(new SearchNode[0]));
 		searchGraph.setNodes(searchNodes.values().toArray(new SearchNode[0]));
 		searchGraph.setEdges(searchEdges.values().toArray(new SearchEdge[0]));
-		
-		int operator = isDisjuntiveRoots() ? SearchGraph.OPERATOR_DISJUNCTION : 
+
+		int operator = isDisjuntiveRoots() ? SearchGraph.OPERATOR_DISJUNCTION :
 			SearchGraph.OPERATOR_CONJUNCTION;
 		searchGraph.setRootOperator(operator);
-		
+
 		return searchGraph;
 	}
-	
+
 	protected int getIncomingEdgeCount(mxIGraphModel model, Object cell, boolean includeNormal, boolean includeOrder) {
 		if(!includeNormal && !includeOrder) {
 			includeNormal = includeOrder = true;
 		}
-		
+
 		int count = 0;
-		
+
 		int edgeCount = model.getEdgeCount(cell);
 		for(int i=0; i<edgeCount; i++) {
 			Object edge = model.getEdgeAt(cell, i);
 			boolean isOrder = isOrderEdge(edge);
-			
+
 			if(isOrder!=includeOrder && isOrder==includeNormal) {
 				continue;
 			}
-			
+
 			if(model.getTerminal(edge, false)==cell) {
 				count++;
 			}
 		}
-		
+
 		return count;
 	}
 
@@ -619,7 +635,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 
 	@Override
 	public CellBuffer exportCells(Object[] cells) {
-		return cells!=null ? 
+		return cells!=null ?
 				CellBuffer.createBuffer(cells, graph.getModel(), CELL_DATA_TYPE)
 				: CellBuffer.createBuffer(graph.getModel(),	null, CELL_DATA_TYPE);
 	}
@@ -630,7 +646,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		if(cells==null) {
 			return;
 		}
-		
+
 		importCells(cells, 0, 0, null, null);
 	}
 
@@ -638,11 +654,11 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	public Object[] importCells(Object[] cells, double dx, double dy,
 			Object target, Point location) {
 		Object[] result = super.importCells(cells, dx, dy, target, location);
-		
+
 		if(result!=null) {
 			refreshAll();
 		}
-		
+
 		return result;
 	}
 
@@ -657,15 +673,15 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		mxIGraphModel model = graph.getModel();
 		model.beginUpdate();
 		try {
-			Object cell = graph.insertVertex(null, null, createNodeData(), 
+			Object cell = graph.insertVertex(null, null, createNodeData(),
 					40, 40, 50, 25);
-			
+
 			//graph.cellSizeUpdated(cell, false);
 
 			if(graphStyle!=null) {
 				model.setStyle(cell, graphStyle.getStyle(this, cell, null));
 			}
-			
+
 			graph.setSelectionCell(cell);
 		} finally {
 			model.endUpdate();
@@ -676,18 +692,18 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		mxIGraphModel model = graph.getModel();
 		model.beginUpdate();
 		try {
-			
+
 			ConstraintNodeData nodeData = createNodeData();
 			nodeData.setNodeType(NodeType.DISJUNCTION);
-			Object cell = graph.insertVertex(null, null, nodeData, 
+			Object cell = graph.insertVertex(null, null, nodeData,
 					40, 40, 25, 25);
-			
+
 			graph.cellSizeUpdated(cell, false);
 
 			if(graphStyle!=null) {
 				model.setStyle(cell, graphStyle.getStyle(this, cell, null));
 			}
-			
+
 			graph.setSelectionCell(cell);
 		} finally {
 			model.endUpdate();
@@ -702,16 +718,16 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		if(GraphUtils.isAncestor(graph.getModel(), source, target, !orderEdge, orderEdge)) {
 			return;
 		}
-		
+
 		model.beginUpdate();
 		try {
 			ConstraintEdgeData value = createEdgeData();
 			if(orderEdge) {
 				value.setEdgeType(EdgeType.PRECEDENCE);
 			}
-			
+
 			Object cell = graph.insertEdge(null, null, value, source, target);
-			
+
 			if(enforceTree && !orderEdge) {
 				ensureTree(cell);
 			}
@@ -722,7 +738,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			if(graphLayout!=null) {
 				model.setStyle(cell, graphLayout.getEdgeStyle(this, cell, null));
 			}
-			
+
 			graph.setSelectionCell(cell);
 		} finally {
 			model.endUpdate();
@@ -737,16 +753,16 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		if(disjuntiveRoots==this.disjuntiveRoots) {
 			return;
 		}
-		
+
 		boolean oldValue = this.disjuntiveRoots;
 		this.disjuntiveRoots = disjuntiveRoots;
-		
+
 		if(searchGraph!=null) {
-			int operator = disjuntiveRoots ? SearchGraph.OPERATOR_DISJUNCTION : 
+			int operator = disjuntiveRoots ? SearchGraph.OPERATOR_DISJUNCTION :
 				SearchGraph.OPERATOR_CONJUNCTION;
 			searchGraph.setRootOperator(operator);
 		}
-		
+
 		firePropertyChange("disjunctiveRoots", oldValue, disjuntiveRoots); //$NON-NLS-1$
 	}
 
@@ -757,36 +773,36 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 	public void setConstraintContext(ConstraintContext context) {
 		if(context==null)
 			throw new NullPointerException("Invalid context"); //$NON-NLS-1$
-		
+
 		if(this.constraintContext==context) {
 			return;
 		}
-		
+
 		executeChange(new ContextChange(context));
 	}
 
 	public SearchGraph getData() {
 		return searchGraph;
 	}
-	
+
 	protected void ensureTree(Object newEdge) {
 		mxIGraphModel model = graph.getModel();
-		
+
 		model.beginUpdate();
-		try {			
-			
+		try {
+
 			Object cell = model.getTerminal(newEdge, false);
-			
+
 			// Remove incoming edges other than 'newEdge'
 			for(int i=0; i<model.getEdgeCount(cell); i++) {
 				Object edge = model.getEdgeAt(cell, i);
-				
+
 				// Ignore outgoing and order edges
-				if(edge==newEdge || isOrderEdge(edge) 
+				if(edge==newEdge || isOrderEdge(edge)
 						|| cell==model.getTerminal(edge, true)) {
 					continue;
 				}
-				
+
 				model.remove(edge);
 				i--;
 			}
@@ -794,11 +810,11 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			model.endUpdate();
 		}
 	}
-	
+
 	protected class ContextChange extends mxAtomicGraphModelChange {
-		
+
 		protected ConstraintContext context, previous;
-		
+
 		public ContextChange(ConstraintContext context) {
 			this.context = context;
 			this.previous = this.context;
@@ -811,19 +827,19 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		public void execute() {
 			context = previous;
 			previous = constraintContext;
-			
+
 			constraintContext = context;
-			
+
 			// Erase all content when context is switched
 			clearGraph();
-			
+
 			firePropertyChange("constraintContext", previous, context); //$NON-NLS-1$
 		}
-		
+
 	}
 
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -833,8 +849,8 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 		public ConstraintGraph() {
 			super(new mxGraphModel());
 		}
-		
-		protected Object createValue(Object cell, Object data, Map<String, Integer> constraintMap) {
+
+		protected Object createValue(Object cell, Object data, TObjectIntMap<String> constraintMap) {
 			if(data==null) {
 				return model.isVertex(cell) ?
 						createNodeData() : createEdgeData();
@@ -850,7 +866,7 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			if(cells==null || cells.length==0) {
 				return cells;
 			}
-			
+
 			// Skip entire cloning if there are invalid types contained
 			Map<Object, Object> originalValues = new HashMap<>();
 			for(Object cell : cells) {
@@ -859,47 +875,47 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 
 			Options options = new Options();
 			options.put(Options.CONTEXT, getConstraintContext());
-			
+
 			for(Object cell : cells) {
 				Object value = originalValues.get(cell);
 				if(value instanceof ConstraintCellData) {
 					continue;
 				}
-				
+
 				if(model.isEdge(cell)) {
 					Object targetValue = originalValues.get(model.getTerminal(cell, false));
 					if(targetValue instanceof CompoundGraphNode) {
 						value = targetValue;
 					}
 				}
-				
-				Map<String, Integer> constraintMap = getConstraintMap();
-				
+
+				TObjectIntMap<String> constraintMap = getConstraintMap();
+
 				Object newValue = null;
-				
+
 				if(value instanceof GraphCell) {
 					ContentType inputType = ContentTypeRegistry.getInstance().getEnclosingType(value);
 					ContentType resultType = SearchUtils.getConstraintCellContentType();
 					DataConverter converter = ContentTypeRegistry.getInstance().getConverter(inputType, resultType);
-					
+
 					if(converter!=null) {
 						options.put("isVertex", model.isVertex(cell)); //$NON-NLS-1$
 						try {
 							newValue = converter.convert(value, options);
 						} catch (DataConversionException e) {
-							LoggerFactory.log(this, Level.SEVERE, 
+							LoggerFactory.log(this, Level.SEVERE,
 									"Failed to convert cell value: "+String.valueOf(value), e); //$NON-NLS-1$
 						}
 					}
 				}
-				
+
 				if(value==newValue) {
 					continue;
 				}
-				
+
 				model.setValue(cell, createValue(cell, newValue, constraintMap));
 			}
-			
+
 			// Content check successful -> proceed with regular cloning
 			return super.cloneCells(cells, allowInvalidEdges);
 		}
@@ -911,38 +927,38 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 				setMaximumNodeSize(ConstraintGraphRenderer.disjunctionNodeSize);
 				mxRectangle cellSize = super.getPreferredSizeForCell(cell);
 				setMaximumNodeSize(maxSize);
-				
+
 				return cellSize;
 			} else {
 				return super.getPreferredSizeForCell(cell);
 			}
 		}
 	}
-	
+
 	protected class CConnectPreview extends DelegatingConnectPreview {
 
 		@Override
 		protected Object createCell(mxCellState startState, String style) {
 			mxICell cell = (mxICell) super.createCell(startState, style);
-			
+
 			cell.setValue(createEdgeData());
-			
+
 			return cell;
 		}
 
 		@Override
 		public Object stop(boolean commit, MouseEvent e) {
 			Object result = (sourceState != null) ? sourceState.getCell() : null;
-			
+
 			if(commit && enforceTree) {
 				if(previewState!=null ) {
 					mxIGraphModel model = graph.getModel();
-					
+
 					// TODO access model only when committing?
 					model.beginUpdate();
 					try {
 						result = super.stop(commit, e);
-						
+
 						if(commit && result!=null) {
 							ensureTree(result);
 						}
@@ -953,24 +969,24 @@ public class ConstraintGraphPresenter extends GraphPresenter {
 			} else {
 				result = super.stop(commit, e);
 			}
-			
-			
+
+
 			return result;
-		}		
+		}
 	}
-	
+
 	public class CCallbackHandler extends CallbackHandler {
-		
+
 		public void addDisjunction(ActionEvent e) {
 			if(!canEdit()) {
 				return;
 			}
-			
+
 			try {
 				ConstraintGraphPresenter.this.addDisjunction();
 			} catch(Exception ex) {
 				UIUtil.beep();
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to add disjunction", ex); //$NON-NLS-1$
 			}
 		}

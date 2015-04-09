@@ -89,7 +89,7 @@ public final class CollectionUtils {
 			@SuppressWarnings("unchecked")
 			Set<E> proxy = (Set<E>) proxies.get(set);
 			if(proxy==null) {
-				proxy = Collections.unmodifiableSet(set);
+				proxy = unmodifiableSetProxy(set);
 				proxies.put(set, proxy);
 			}
 
@@ -107,7 +107,7 @@ public final class CollectionUtils {
 			@SuppressWarnings("unchecked")
 			Collection<E> proxy = (Collection<E>) proxies.get(collection);
 			if(proxy==null) {
-				proxy = Collections.unmodifiableCollection(collection);
+				proxy = unmodifiableCollectionProxy(collection);
 				proxies.put(collection, proxy);
 			}
 
@@ -125,7 +125,7 @@ public final class CollectionUtils {
 			@SuppressWarnings("unchecked")
 			List<E> proxy = (List<E>) proxies.get(list);
 			if(proxy==null) {
-				proxy = Collections.unmodifiableList(list);
+				proxy = unmodifiableListProxy(list);
 				proxies.put(list, proxy);
 			}
 
@@ -143,7 +143,7 @@ public final class CollectionUtils {
 			@SuppressWarnings("unchecked")
 			Map<K, V> proxy = (Map<K, V>) proxies.get(map);
 			if(proxy==null) {
-				proxy = Collections.unmodifiableMap(map);
+				proxy = unmodifiableMapProxy(map);
 				proxies.put(map, proxy);
 			}
 

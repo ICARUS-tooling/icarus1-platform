@@ -38,6 +38,7 @@ import de.ims.icarus.search_tools.SearchMode;
 import de.ims.icarus.search_tools.SearchNode;
 import de.ims.icarus.search_tools.result.EntryBuilder;
 import de.ims.icarus.search_tools.standard.GroupCache;
+import de.ims.icarus.search_tools.standard.IntOperator;
 import de.ims.icarus.util.CorruptedStateException;
 
 
@@ -65,8 +66,8 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 	protected Matcher next, previous;
 	protected Matcher alternate;
 
-	protected Matcher[] before;
-	protected Matcher[] after;
+	protected PrecedenceNode[] before;
+	protected PrecedenceNode[] after;
 
 	protected Matcher[] options;
 
@@ -139,28 +140,27 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		targetTree.viewNode(parentAllocation);
 		indexIterator.setMax(targetTree.getEdgeCount()-1);
 
-		int minIndex = getMinIndex();
-		int maxIndex = getMaxIndex();
+//		int minIndex = getMinIndex();
+//		int maxIndex = getMaxIndex();
 
 		boolean matched = false;
 
-		if(minIndex<=maxIndex) {
+//		if(minIndex<=maxIndex) {
 			while(indexIterator.hasNext()) {
 				targetTree.viewNode(parentAllocation);
 				targetTree.viewChild(indexIterator.next());
 
-				if(entryBuilder.getIndex()==49 && targetTree.getNodeIndex()==15) {
-					System.out.println();
-				}
-
-				// Check for precedence constraints
-				if(targetTree.getNodeIndex()<minIndex
-						|| targetTree.getNodeIndex()>maxIndex) {
+				// Honor locked nodes that are allocated to other matchers!
+				if(targetTree.isNodeLocked()) {
 					continue;
 				}
 
-				// Honor locked nodes that are allocated to other matchers!
-				if(targetTree.isNodeLocked()) {
+				// Check for precedence constraints
+//				if(targetTree.getNodeIndex()<minIndex
+//						|| targetTree.getNodeIndex()>maxIndex) {
+//					continue;
+//				}
+				if(!isLegalIndex(targetTree.getNodeIndex())) {
 					continue;
 				}
 
@@ -180,7 +180,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 					continue;
 				}
 
-				// Check if the current node is a potential match
+				// Check if the current node is a potential match based on constraint list
 				if(!matchesConstraints()) {
 					continue;
 				}
@@ -206,7 +206,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 					break;
 				}
 			}
-		}
+//		}
 
 		// Return scope to parent node
 		targetTree.viewNode(parentAllocation);
@@ -313,6 +313,52 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		entryBuilder.allocate(id, allocation);
 	}
 
+	public boolean isLegalIndex(int position) {
+		if(before!=null) {
+			for(PrecedenceNode node : before) {
+				Matcher matcher = node.getMatcher();
+				int alloc = matcher.getAllocation();
+				if(alloc!=-1) {
+					// General precedence check
+					if(alloc>=position) {
+						return false;
+					}
+
+					int offset = node.getOffset();
+					if(offset!=-1) {
+						int distance = position-alloc;
+						if(!node.getOperator().apply(distance, offset)) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		if(after!=null) {
+			for(PrecedenceNode node : after) {
+				Matcher matcher = node.getMatcher();
+				int alloc = matcher.getAllocation();
+				if(alloc!=-1) {
+					// General precedence check
+					if(alloc<=position) {
+						return false;
+					}
+
+					int offset = node.getOffset();
+					if(offset!=-1) {
+						int distance = alloc-position;
+						if(!node.getOperator().apply(distance, offset)) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * Finds the minimum allowed index for this matcher
 	 * considering the allocation of all previous matchers.
@@ -321,9 +367,14 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		int min = -1;
 
 		if(before!=null) {
-			for(Matcher matcher : before) {
+			for(PrecedenceNode node : before) {
+				Matcher matcher = node.getMatcher();
 				int alloc = matcher.getAllocation();
 				if(alloc!=-1) {
+					int offset = node.getOffset();
+					if(offset!=-1) {
+						alloc += offset;
+					}
 					min = Math.max(min, alloc);
 				}
 			}
@@ -341,9 +392,14 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		int max = targetTree.size();
 
 		if(after!=null) {
-			for(Matcher matcher : after) {
+			for(PrecedenceNode node : after) {
+				Matcher matcher = node.getMatcher();
 				int alloc = matcher.getAllocation();
 				if(alloc!=-1) {
+					int offset = node.getOffset();
+					if(offset!=-1) {
+						alloc -= offset;
+					}
 					max = Math.min(max, alloc);
 				}
 			}
@@ -405,11 +461,11 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		return alternate;
 	}
 
-	public Matcher[] getBefore() {
+	public PrecedenceNode[] getBefore() {
 		return before;
 	}
 
-	public Matcher[] getAfter() {
+	public PrecedenceNode[] getAfter() {
 		return after;
 	}
 
@@ -479,11 +535,11 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		this.alternate = alternate;
 	}
 
-	public void setBefore(Matcher[] before) {
+	public void setBefore(PrecedenceNode[] before) {
 		this.before = before;
 	}
 
-	public void setAfter(Matcher[] after) {
+	public void setAfter(PrecedenceNode[] after) {
 		this.after = after;
 	}
 
@@ -708,6 +764,30 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 		}
 
 		return clone;
+	}
+
+	public static class PrecedenceNode {
+		private final Matcher matcher;
+		private final int offset;
+		private final IntOperator operator;
+
+		protected PrecedenceNode(Matcher matcher, IntOperator operator, int offset) {
+			this.matcher = matcher;
+			this.operator = operator;
+			this.offset = offset;
+		}
+
+		public Matcher getMatcher() {
+			return matcher;
+		}
+
+		public IntOperator getOperator() {
+			return operator;
+		}
+
+		public int getOffset() {
+			return offset;
+		}
 	}
 
 	protected static abstract class IndexIterator implements Iterator<Integer> {

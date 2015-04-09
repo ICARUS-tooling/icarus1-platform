@@ -847,6 +847,8 @@ public class DefaultQueryParser {
 			}
 		}
 
+		Map<SearchNode, String> assignedIds = new HashMap<>();
+
 		boolean isDisjuntive = graph.getRootOperator()==SearchGraph.OPERATOR_DISJUNCTION;
 
 		if(isDisjuntive) {
@@ -859,7 +861,7 @@ public class DefaultQueryParser {
 				buffer.append(SPACE);
 			}
 
-			appendNode(roots[i], null, idSet);
+			appendNode(roots[i], null, idSet, assignedIds);
 		}
 
 		if(isDisjuntive) {
@@ -873,7 +875,27 @@ public class DefaultQueryParser {
 		return result;
 	}
 
-	protected void appendNode(SearchNode node, SearchEdge head, Set<SearchNode> idSet) {
+	protected String getId(SearchNode node, Map<SearchNode, String> assignedIds) {
+		String id = assignedIds.get(node);
+		if(id==null) {
+			id = node.getId();
+		}
+
+		if(id==null || id.isEmpty() || "<undefined>".equals(id)) { //$NON-NLS-1$
+			Set<String> ids = new HashSet<>(assignedIds.values());
+			int count=0;
+
+			do {
+				id = "node"+count; //$NON-NLS-1$
+				count++;
+			} while(ids.contains(id));
+
+			assignedIds.put(node, id);
+		}
+		return id;
+	}
+
+	protected void appendNode(SearchNode node, SearchEdge head, Set<SearchNode> idSet, Map<SearchNode, String> assignedIds) {
 		buffer.append(SQUAREBRAKET_OPENING);
 
 		if(node.isNegated()) {
@@ -883,12 +905,13 @@ public class DefaultQueryParser {
 		// Collect properties and meta-constraints
 		CompactProperties properties = new CompactProperties();
 		if(idSet.contains(node)) {
-			properties.put(ID_OPTION, node.getId());
+			properties.put(ID_OPTION, getId(node, assignedIds));
 		}
 		for(int i=0; i<node.getOutgoingEdgeCount(); i++) {
 			SearchEdge edge = node.getOutgoingEdgeAt(i);
 			if(edge.getEdgeType()==EdgeType.PRECEDENCE) {
-				properties.put(edge.getTarget().getId(), Order.AFTER.getToken());
+				String targetId = getId(edge.getTarget(), assignedIds);
+				properties.put(targetId, Order.AFTER.getToken());
 			}
 		}
 		if(node.getNodeType()!=NodeType.GENERAL) {
@@ -942,9 +965,9 @@ public class DefaultQueryParser {
 			SearchNode target = edge.getTarget();
 
 			if(target.getNodeType()==NodeType.DISJUNCTION) {
-				appendDisjunction(target, idSet);
+				appendDisjunction(target, idSet, assignedIds);
 			} else {
-				appendNode(target, edge, idSet);
+				appendNode(target, edge, idSet, assignedIds);
 			}
 		}
 
@@ -953,7 +976,7 @@ public class DefaultQueryParser {
 		buffer.append(SQUAREBRAKET_CLOSING);
 	}
 
-	protected void appendDisjunction(SearchNode node, Set<SearchNode> idSet) {
+	protected void appendDisjunction(SearchNode node, Set<SearchNode> idSet, Map<SearchNode, String> assignedIds) {
 		buffer.append(CURLYBRAKET_OPENING);
 		if(node.isNegated()) {
 			buffer.append(NEGATION_SIGN).append(SPACE);
@@ -967,7 +990,7 @@ public class DefaultQueryParser {
 				continue;
 			}
 
-			appendNode(edge.getTarget(), edge, idSet);
+			appendNode(edge.getTarget(), edge, idSet, assignedIds);
 			nodeCount++;
 		}
 

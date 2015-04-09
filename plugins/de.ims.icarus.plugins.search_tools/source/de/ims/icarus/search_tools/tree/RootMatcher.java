@@ -48,23 +48,26 @@ public class RootMatcher extends Matcher {
 
 		boolean matched = false;
 
-		int minIndex = getMinIndex();
-		int maxIndex = getMaxIndex();
+//		int minIndex = getMinIndex();
+//		int maxIndex = getMaxIndex();
 
 		indexIterator.setMax(nodeCount-1);
 
-		if(minIndex<=maxIndex) {
+//		if(minIndex<=maxIndex) {
 			while(indexIterator.hasNext()) {
 				targetTree.viewNode(indexIterator.next());
 
-				// Check for precedence constraints
-				if(targetTree.getNodeIndex()<minIndex
-						|| targetTree.getNodeIndex()>maxIndex) {
+				// Honor locked nodes that are allocated to other matchers!
+				if(targetTree.isNodeLocked()) {
 					continue;
 				}
 
-				// Honor locked nodes that are allocated to other matchers!
-				if(targetTree.isNodeLocked()) {
+				// Check for precedence constraints
+//				if(targetTree.getNodeIndex()<minIndex
+//						|| targetTree.getNodeIndex()>maxIndex) {
+//					continue;
+//				}
+				if(!isLegalIndex(targetTree.getNodeIndex())) {
 					continue;
 				}
 
@@ -110,7 +113,7 @@ public class RootMatcher extends Matcher {
 					break;
 				}
 			}
-		}
+//		}
 
 
 
