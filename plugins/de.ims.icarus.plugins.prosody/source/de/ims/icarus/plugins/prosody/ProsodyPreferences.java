@@ -132,13 +132,13 @@ public class ProsodyPreferences {
 		// PARAMETER BOUNDS SUBGROUPS
 		builder.addGroup("a1Bounds", true); //$NON-NLS-1$
 		builder.virtual();
-		builder.addDoubleEntry("lower", -40.0, -1000.0, 0.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("lower", 0.0, 0.0, 10.0, 0.01); //$NON-NLS-1$
 		builder.addDoubleEntry("upper", 40.0, 0.0, 1000.0, 0.01); //$NON-NLS-1$
 		builder.addDoubleEntry("default", 4.4, -1000.0, 1000.0, 0.01); //$NON-NLS-1$
 		builder.back();
 		builder.addGroup("a2Bounds", true); //$NON-NLS-1$
 		builder.virtual();
-		builder.addDoubleEntry("lower", -40.0, -1000.0, 0.0, 0.01); //$NON-NLS-1$
+		builder.addDoubleEntry("lower", 0.0, 0.0, 10.0, 0.01); //$NON-NLS-1$
 		builder.addDoubleEntry("upper", 40.0, 0.0, 1000.0, 0.01); //$NON-NLS-1$
 		builder.addDoubleEntry("default", 6.72, -1000.0, 1000.0, 0.01); //$NON-NLS-1$
 		builder.back();
