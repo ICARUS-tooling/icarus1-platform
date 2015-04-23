@@ -920,7 +920,9 @@ public class DependencyGraphPresenter extends GraphPresenter {
 							Object head = model.getTerminal(edge, true);
 							DependencyNodeData headData = (DependencyNodeData) model.getValue(head);
 
-							nodeData.setHead(headData.getIndex());
+							if(headData!=null) {
+								nodeData.setHead(headData.getIndex());
+							}
 
 							continue cell_loop;
 						}

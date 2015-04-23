@@ -131,7 +131,10 @@ public class DefaultConstraint implements SearchConstraint, Cloneable {
 	protected boolean matches(Object value, Object constraint) {
 		Matcher matcher = SearchManager.getMatcher((String)constraint, (String)value);
 		boolean result = matcher==null ? false : matcher.find();
-		SearchManager.recycleMatcher(matcher);
+
+		if(matcher!=null) {
+			SearchManager.recycleMatcher(matcher);
+		}
 
 		return result;
 	}
