@@ -59,7 +59,7 @@ public class PaIntEParamsListCellRenderer extends DefaultListCellRenderer {
 
 	private final boolean adjustAxis;
 
-	private final Icon graphIcon = new Icon() {
+	private final transient Icon graphIcon = new Icon() {
 
 		private final Rectangle bounds = new Rectangle();
 

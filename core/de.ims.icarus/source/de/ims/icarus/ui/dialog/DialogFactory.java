@@ -64,7 +64,7 @@ import de.ims.icarus.util.strings.StringUtil;
  */
 public final class DialogFactory {
 
-	private static DialogFactory globalFactory;
+	private static volatile DialogFactory globalFactory;
 
 	public static final int DEFAULT_TEXT_WIDTH = 300;
 
@@ -104,7 +104,7 @@ public final class DialogFactory {
 	public static final int OK_OPTION = registerOptions("ok"); //$NON-NLS-1$
 	public static final int OK_CANCEL_OPTION = registerOptions("ok", "cancel"); //$NON-NLS-1$ //$NON-NLS-2$
 
-	private JFileChooser sharedFileChooser;
+	private volatile JFileChooser sharedFileChooser;
 
 	protected final ResourceDomain resourceDomain;
 

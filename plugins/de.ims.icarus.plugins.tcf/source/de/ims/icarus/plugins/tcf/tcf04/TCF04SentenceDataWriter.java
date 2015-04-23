@@ -92,9 +92,9 @@ public class TCF04SentenceDataWriter implements SentenceDataWriter {
 		if (file == null)
 			throw new IllegalArgumentException("Filelocation Undef"); //$NON-NLS-1$
 
-		if (options == null){
-			options = Options.emptyOptions;
-		}
+//		if (options == null){
+//			options = Options.emptyOptions;
+//		}
 
 
 		fos = Files.newOutputStream(file);
@@ -168,7 +168,7 @@ public class TCF04SentenceDataWriter implements SentenceDataWriter {
 				// store feature string: like cat=noun|case=accusative|...
 				String sfeatures = sdd.getFeatures(i);
 				// only add features if there are features
-				if (sfeatures != "") { //$NON-NLS-1$
+				if (sfeatures!=null && !sfeatures.isEmpty()) {
 					// split featurestring ( | split by char so use \\| )
 					for (String keyValue : sfeatures.split("\\|")) { //$NON-NLS-1$
 						String[] pairs = keyValue.split("="); //$NON-NLS-1$

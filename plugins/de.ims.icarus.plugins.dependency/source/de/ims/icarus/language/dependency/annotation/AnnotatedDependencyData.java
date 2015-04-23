@@ -36,7 +36,7 @@ import de.ims.icarus.util.annotation.Annotation;
  * @version $Id$
  *
  */
-public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenceData, Wrapper<DependencyData> {
+public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenceData, Wrapper<DependencyData>, Cloneable {
 
 	private static final long serialVersionUID = -883053201659702672L;
 
@@ -57,7 +57,11 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 
 	@Override
 	public AnnotatedDependencyData clone() {
-		return new AnnotatedDependencyData(source, annotation);
+		try {
+			return (AnnotatedDependencyData) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException();
+		}
 	}
 
 	/**

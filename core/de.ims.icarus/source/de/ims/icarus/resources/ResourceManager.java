@@ -60,7 +60,7 @@ public final class ResourceManager {
 	private List<ChangeListener> listeners;
 	private final ChangeEvent changeEvent = new ChangeEvent(this);
 
-	private static ResourceManager instance;
+	private static volatile ResourceManager instance;
 
 	private static boolean notifyMissingResource = true;
 
@@ -327,10 +327,12 @@ public final class ResourceManager {
 		for(Iterator<WeakReference<ManagedResource>> i = managedResources.iterator(); i.hasNext();) {
 			WeakReference<ManagedResource> ref = i.next();
 
-			if(ref.get()==null)
+			ManagedResource res = ref.get();
+
+			if(res==null)
 				i.remove();
 			else
-				ref.get().clear();
+				res.clear();
 		}
 
 		// notify all localizers

@@ -107,7 +107,7 @@ public class CoreferenceEdgePropertyConstraintFactory extends AbstractConstraint
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public CoreferenceEdgePropertyIConstraint clone() {
 			return new CoreferenceEdgePropertyIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}

@@ -101,7 +101,7 @@ public class SampaValidator {
 		return parts!=null;
 	}
 
-	public SampaMapper2 getMapper() {
+	public synchronized SampaMapper2 getMapper() {
 		return mapper;
 	}
 

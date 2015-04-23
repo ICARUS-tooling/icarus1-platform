@@ -107,7 +107,7 @@ public class PaIntERangeConstraintFactory extends AbstractConstraintFactory impl
 			super.setValue(specifier);
 
 			String s = (String)specifier;
-			if(s!=null && !LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
+			if(!LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
 				if(toParams==null) {
 					toParams = new PaIntEConstraintParams();
 				}

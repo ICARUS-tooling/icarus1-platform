@@ -432,7 +432,7 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 	@Override
 	public PaIntEConstraintParams clone() {
-		return new PaIntEConstraintParams(this);
+		return (PaIntEConstraintParams) super.clone();
 	}
 
 	@Override
@@ -456,16 +456,13 @@ public class PaIntEConstraintParams extends PaIntEParams {
 
 	@Override
 	public boolean equals(Object obj) {
+		if(!super.equals(obj)) {
+			return false;
+		}
+
 		if(obj instanceof PaIntEConstraintParams) {
 			PaIntEConstraintParams other = (PaIntEConstraintParams) obj;
-			return a1==other.a1
-					&& a2==other.a2
-					&& b==other.b
-					&& c1==other.c1
-					&& c2==other.c2
-					&& d==other.d
-					&& alignment==other.alignment
-					&& activeMask==other.activeMask
+			return activeMask==other.activeMask
 					&& compact==other.compact;
 		}
 

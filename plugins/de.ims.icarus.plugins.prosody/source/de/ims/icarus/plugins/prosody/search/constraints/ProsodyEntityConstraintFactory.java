@@ -62,6 +62,8 @@ public class ProsodyEntityConstraintFactory extends AbstractConstraintFactory {
 
 	private static class ProsodyEntityConstraint extends DefaultConstraint {
 
+		private static final long serialVersionUID = 973937620040584641L;
+
 		public ProsodyEntityConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
@@ -78,6 +80,8 @@ public class ProsodyEntityConstraintFactory extends AbstractConstraintFactory {
 	}
 
 	private static class ProsodyEntityCIConstraint extends DefaultCaseInsensitiveConstraint {
+
+		private static final long serialVersionUID = 7476531782302636582L;
 
 		public ProsodyEntityCIConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);

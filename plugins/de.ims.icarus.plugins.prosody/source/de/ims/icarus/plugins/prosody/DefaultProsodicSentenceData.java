@@ -27,7 +27,6 @@ package de.ims.icarus.plugins.prosody;
 
 import java.lang.reflect.Array;
 
-import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceDocumentData;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
 
@@ -58,11 +57,8 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	@Override
-	public CoreferenceData clone() {
-		DefaultProsodicSentenceData result = new DefaultProsodicSentenceData(getDocument(), forms);
-		result.setProperties(properties);
-
-		return result;
+	public DefaultProsodicSentenceData clone() {
+		return (DefaultProsodicSentenceData)super.clone();
 	}
 
 	/**

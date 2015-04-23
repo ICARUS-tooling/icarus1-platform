@@ -50,7 +50,7 @@ import de.ims.icarus.util.annotation.Annotation;
  *
  */
 public class MutableDependencyData extends AbstractMutableSentenceData
-		implements DependencyConstants, AnnotatedSentenceData, DependencyData {
+		implements DependencyConstants, AnnotatedSentenceData, DependencyData, Cloneable {
 
 	private static final long serialVersionUID = 8905987553461570238L;
 
@@ -58,7 +58,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 
 	protected Annotation annotation = null; // TODO change to default value?
 
-	private List<DependencyDataEntry> items = new ArrayList<>();
+	private transient final List<DependencyDataEntry> items = new ArrayList<>();
 
 	private Map<String, Object> properties;
 

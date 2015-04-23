@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util;
@@ -34,24 +34,24 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
 
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public final class Exceptions {
-	
-	private static Map<String, ErrorFormatter> formatters;
+
+	private static volatile Map<String, ErrorFormatter> formatters;
 
 	private Exceptions() {
 	}
-	
+
 	public static void addFormatter(String throwableClassName, ErrorFormatter formatter) {
 		if(throwableClassName==null)
 			throw new NullPointerException("Invalid throwable class name"); //$NON-NLS-1$
 		if(formatter==null)
 			throw new NullPointerException("Invalid formatter"); //$NON-NLS-1$
-		
+
 		if(formatters==null) {
 			synchronized (Exceptions.class) {
 				if(formatters==null) {
@@ -59,28 +59,28 @@ public final class Exceptions {
 				}
 			}
 		}
-		
+
 		if(formatters.containsKey(throwableClassName))
 			throw new DuplicateIdentifierException("Formatter already registered for throwable class: "+throwableClassName); //$NON-NLS-1$
-		
+
 		formatters.put(throwableClassName, formatter);
 	}
-	
+
 	public static String getFormattedMessage(Throwable t) {
 		if(formatters==null || formatters.isEmpty()) {
 			return t.getMessage();
 		}
-		
+
 		String message = null;
 		ErrorFormatter formatter = formatters.get(t.getClass().getName());
 		if(formatter!=null) {
 			message = formatter.getMessage(t);
 		}
-		
+
 		if(message==null) {
 			message = t.getMessage();
 		}
-		
+
 		return message;
 	}
 
@@ -106,29 +106,29 @@ public final class Exceptions {
 			String name) {
 		Exceptions.testNullArgument(o, "o"); //$NON-NLS-1$
 		Exceptions.testNullArgument(clazz, "clazz"); //$NON-NLS-1$
-		
+
 		if (!clazz.isAssignableFrom(o.getClass()))
 			throw new IllegalArgumentException(String.format(
 					"Argument '%s' is not of required class '%s'", name, clazz //$NON-NLS-1$
 							.getName()));
 	}
-	
+
 	public static void testBounds(int value, int min, int max, String name) {
 		if(value<min || value>max)
 			throw new IllegalArgumentException(String.format(
 					"Argument '%s' is out of range [%d to %d]: %d",  //$NON-NLS-1$
 					name, min, max, value));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static <T extends Throwable> T getThrowableOfType(Throwable t, Class<T> clazz) {
 		if(t==null)
 			throw new NullPointerException("Invalid throwable"); //$NON-NLS-1$
-		
+
 		while(!clazz.isAssignableFrom(t.getClass()) && t.getCause()!=null) {
 			t = t.getCause();
 		}
-		
+
 		return clazz.isAssignableFrom(t.getClass()) ? (T) t : null;
 	}
 }

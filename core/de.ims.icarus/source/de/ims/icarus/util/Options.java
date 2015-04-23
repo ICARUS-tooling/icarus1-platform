@@ -203,7 +203,7 @@ public class Options extends HashMap<String, Object> {
 
 	@Override
 	public Options clone() {
-		return new Options(this);
+		return new Options(super.clone());
 	}
 
 	// Collection of commonly used option keys

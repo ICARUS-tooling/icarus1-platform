@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.table;
@@ -52,17 +52,17 @@ import de.ims.icarus.util.id.DuplicateIdentifierException;
  *
  */
 public class TableColumnManager extends DefaultTableColumnModel implements ChangeListener {
-	
+
 	private static final long serialVersionUID = -3540527402222543450L;
 
 	private DataSource dataSource;
-	
+
 	private List<String> availableColumns = new ArrayList<>();
 	private Map<String, TableColumn> columnLookup = new BiDiMap<>();
 	private List<String> visibleColumns = new ArrayList<>();
-	
-	private boolean ignoreChange = false; 
-	
+
+	private boolean ignoreChange = false;
+
 	public TableColumnManager(DataSource dataSource) {
 		setDataSource(dataSource);
 	}
@@ -70,71 +70,71 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	public TableColumnManager(ConfigRegistry registry, String path) {
 		if(path==null)
 			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
-		
+
 		if(registry==null) {
 			registry = ConfigRegistry.getGlobalRegistry();
 		}
-		
+
 		Handle handle = registry.getHandle(path);
 		if(handle==null)
 			throw new IllegalArgumentException("Unknown path: "+path); //$NON-NLS-1$
 
 		setDataSource(DataSourceFactory.getInstance().getConfigDataSource(handle, null));
 	}
-	
+
 	public void registerColumn(String id, TableColumn column) {
 		if(column==null)
 			throw new NullPointerException("Invalid column"); //$NON-NLS-1$
-		
+
 		if(columnLookup.containsKey(id))
 			throw new DuplicateIdentifierException("Column id already in use: "+id); //$NON-NLS-1$
-		if(columnLookup.containsValue(id))
-			throw new IllegalArgumentException("Column already in use: "+id); //$NON-NLS-1$
-		
+		if(columnLookup.containsValue(column))
+			throw new IllegalArgumentException("Column already in use: "+column); //$NON-NLS-1$
+
 		column.setIdentifier(id);
-		
+
 		columnLookup.put(id, column);
 		availableColumns.add(id);
 	}
-	
+
 	public void unregisterColumn(String id) {
 		if(id==null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
-		
+
 		TableColumn column = columnLookup.get(id);
 		if(column==null)
 			throw new IllegalArgumentException("Unknown column id: "+id); //$NON-NLS-1$
-		
+
 		columnLookup.remove(id);
-		availableColumns.remove(column);
+		availableColumns.remove(id);
 	}
-	
+
 	public List<String> getVisibleColumns() {
 		return new ArrayList<>(visibleColumns);
 	}
-	
+
 	public TableColumn getColumn(String id) {
 		if(id==null)
 			throw new NullPointerException("Invalid id"); //$NON-NLS-1$
-		
+
 		TableColumn column = columnLookup.get(id);
 		if(column==null)
 			throw new IllegalArgumentException("No column registered for id: "+id); //$NON-NLS-1$
-		
+
 		return column;
 	}
-	
+
 	public List<String> getAvailableColumns() {
 		return new ArrayList<>(availableColumns);
 	}
-	
+
 	/**
 	 * @return the dataSource
 	 */
 	public DataSource getDataSource() {
 		if(dataSource==null)
 			throw new IllegalStateException("No data source available"); //$NON-NLS-1$
-		
+
 		return dataSource;
 	}
 
@@ -144,25 +144,25 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	public void setDataSource(DataSource dataSource) {
 		if(dataSource==null)
 			throw new NullPointerException("Invalid data source"); //$NON-NLS-1$
-		
+
 		if(this.dataSource==dataSource) {
 			return;
 		}
-		
+
 		if(this.dataSource!=null) {
 			this.dataSource.removeChangeListener(this);
 		}
-		
+
 		this.dataSource = dataSource;
-		
+
 		this.dataSource.addChangeListener(this);
 	}
-	
+
 	private void rebuild() {
 		for(int i=getColumnCount()-1; i>-1; i--) {
 			removeColumn(getColumn(i));
 		}
-		
+
 		if(visibleColumns.isEmpty()) {
 			for(String id : availableColumns) {
 				addColumn(getColumn(id));
@@ -177,23 +177,23 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 	public void rebuild(String...ids) {
 		rebuild(CollectionUtils.asList(ids));
 	}
-	
+
 	public void rebuild(List<String> ids) {
 		if(ids==null)
 			throw new NullPointerException("Invalid ids"); //$NON-NLS-1$
-		
+
 		visibleColumns.clear();
-		
+
 		Set<String> availableIds = columnLookup.keySet();
 		for(String id : ids) {
 			if(!availableIds.contains(id)) {
 				LoggerFactory.warning(this, "Unknown column id: "+id); //$NON-NLS-1$
 				continue;
 			}
-			
+
 			visibleColumns.add(id);
 		}
-		
+
 		rebuild();
 	}
 
@@ -208,14 +208,14 @@ public class TableColumnManager extends DefaultTableColumnModel implements Chang
 		}
 
 		visibleColumns.clear();
-		
+
 		String info = (String) getDataSource().getData();
-		
+
 		if(info!=null && !info.isEmpty()) {
 			String[] ids = info.split(";"); //$NON-NLS-1$
 			CollectionUtils.feedItems(visibleColumns, ids);
 		}
-		
+
 		rebuild();
 	}
 }

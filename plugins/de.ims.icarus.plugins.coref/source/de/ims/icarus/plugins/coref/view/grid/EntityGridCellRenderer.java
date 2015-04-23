@@ -400,7 +400,7 @@ public class EntityGridCellRenderer extends JComponent implements TableCellRende
 
     @Override
     protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
-        if (propertyName == "font" || propertyName == "foreground") { //$NON-NLS-1$ //$NON-NLS-2$
+        if ("font".equals(propertyName) || "foreground".equals(propertyName)) { //$NON-NLS-1$ //$NON-NLS-2$
             super.firePropertyChange(propertyName, oldValue, newValue);
         }
     }

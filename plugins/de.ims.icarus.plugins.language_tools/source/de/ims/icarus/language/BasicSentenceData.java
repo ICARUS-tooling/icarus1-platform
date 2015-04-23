@@ -41,7 +41,7 @@ import de.ims.icarus.util.mem.Link;
  *
  */
 @XmlRootElement
-public class BasicSentenceData<P extends CompactProperties> implements SentenceData, LanguageConstants {
+public class BasicSentenceData<P extends CompactProperties> implements SentenceData, LanguageConstants, Cloneable {
 
 	private static final long serialVersionUID = 6042849879442946254L;
 
@@ -72,7 +72,7 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 
 	public void setForms(String[] forms) {
 		if(this.forms!=null)
-			throw new IllegalStateException("Form tokens already set");
+			throw new IllegalStateException("Form tokens already set"); //$NON-NLS-1$
 
 		this.forms = forms;
 	}
@@ -217,7 +217,11 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 
 	@Override
 	public SentenceData clone() {
-		return new BasicSentenceData<P>(this);
+		try {
+			return (SentenceData) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -225,7 +229,7 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 		return (P) (properties==null ? null : properties.clone());
 	}
 
-	protected static class Key {
+	protected static class Key implements Cloneable {
 		public String key;
 		public int index;
 

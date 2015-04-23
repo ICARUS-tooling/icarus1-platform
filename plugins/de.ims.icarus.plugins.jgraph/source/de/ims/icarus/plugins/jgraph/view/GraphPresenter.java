@@ -2456,8 +2456,7 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		protected GraphStyle style, previous;
 
 		public StyleChange(GraphStyle style) {
-			this.style = style;
-			this.previous = this.style;
+			this.previous = this.style = style;
 		}
 
 		/**
@@ -2477,9 +2476,9 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 
 			if(graphStyle!=null) {
 				graphStyle.install(GraphPresenter.this);
-			}
 
-			graph.setStylesheet(style.createStylesheet(GraphPresenter.this, createStyleOptions()));
+				graph.setStylesheet(graphStyle.createStylesheet(GraphPresenter.this, createStyleOptions()));
+			}
 
 			refreshAll();
 

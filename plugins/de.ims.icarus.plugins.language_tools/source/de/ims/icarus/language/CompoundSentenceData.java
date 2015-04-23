@@ -30,7 +30,7 @@ package de.ims.icarus.language;
  * @version $Id$
  *
  */
-public class CompoundSentenceData implements SentenceData {
+public class CompoundSentenceData implements SentenceData, Cloneable {
 
 	private static final long serialVersionUID = 4260253017719158901L;
 

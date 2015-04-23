@@ -109,7 +109,7 @@ public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFact
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public ProsodyWordPropertyIConstraint clone() {
 			return new ProsodyWordPropertyIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}

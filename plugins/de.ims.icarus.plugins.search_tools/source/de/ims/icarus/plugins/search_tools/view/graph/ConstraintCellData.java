@@ -51,7 +51,7 @@ import de.ims.icarus.search_tools.util.SearchUtils;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implements Serializable {
+public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -3036452029676803967L;
 
@@ -89,9 +89,6 @@ public abstract class ConstraintCellData<E extends ConstraintCellData<E>> implem
 			}
 		}
 	}
-
-	@Override
-	public abstract E clone();
 
 	public abstract void copyFrom(E source);
 

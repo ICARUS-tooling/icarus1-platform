@@ -75,4 +75,11 @@ public class DefaultCaseInsensitiveConstraint extends DefaultConstraint {
 		return lowercaseValue;
 	}
 
+	/**
+	 * @see de.ims.icarus.search_tools.standard.DefaultConstraint#clone()
+	 */
+	@Override
+	public DefaultCaseInsensitiveConstraint clone() {
+		return (DefaultCaseInsensitiveConstraint) super.clone();
+	}
 }

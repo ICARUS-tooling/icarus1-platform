@@ -33,6 +33,7 @@ import java.awt.RenderingHints;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,8 +61,8 @@ import de.ims.icarus.logging.LoggerFactory;
  */
 public class Grouping {
 
-	private static Map<Integer, Grouping> groups;
-	private static List<WeakReference<ChangeListener>> changeListeners;
+	private static volatile Map<Integer, Grouping> groups;
+	private static volatile List<WeakReference<ChangeListener>> changeListeners;
 	private static final ChangeEvent event = new ChangeEvent(new Object());
 
 	private static final Color defaultColor = Color.black;
@@ -71,7 +72,7 @@ public class Grouping {
 	private final int index;
 
 	private static final Object dummy = 0;
-	private static WeakHashMap<GroupingPainter, Object> painters;
+	private static volatile WeakHashMap<GroupingPainter, Object> painters;
 
 	private Grouping(int index) {
 		this.index = index;
@@ -82,18 +83,22 @@ public class Grouping {
 		setColor(c);
 	}
 
-	public static void addListener(ChangeListener listener) {
+	public static synchronized void addListener(ChangeListener listener) {
 		if(changeListeners==null) {
 			changeListeners = new ArrayList<>();
 		}
-
-		changeListeners.remove(listener);
 		changeListeners.add(new WeakReference<ChangeListener>(listener));
 	}
 
-	public static void removeListener(ChangeListener listener) {
+	public static synchronized void removeListener(ChangeListener listener) {
 		if(changeListeners!=null) {
-			changeListeners.remove(listener);
+
+			for(Iterator<WeakReference<ChangeListener>> it = changeListeners.iterator(); it.hasNext();) {
+				ChangeListener l = it.next().get();
+				if(l==null || l==listener) {
+					it.remove();
+				}
+			}
 		}
 	}
 

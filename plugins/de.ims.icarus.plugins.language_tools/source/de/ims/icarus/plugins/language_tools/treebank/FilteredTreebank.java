@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.language_tools.treebank;
@@ -43,24 +43,25 @@ import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.data.ContentType;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class FilteredTreebank extends AbstractTreebank implements DerivedTreebank {
-	
+
 	public static final String BASE_ID_PROPERTY = "FilteredTreebank::base_id"; //$NON-NLS-1$
-	
+
 	protected transient Treebank base;
 	protected String baseTreebankId;
-	
+
 	protected int[] filter;
-	
+
 	public FilteredTreebank() {
 		// no-op
 	}
-	
+
+	@Override
 	public Treebank getBase() {
 		if(base==null) {
 			if(baseTreebankId==null) {
@@ -69,26 +70,27 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 				base = TreebankRegistry.getInstance().getTreebank(baseTreebankId);
 			}
 		}
-		
+
 		return base;
 	}
-	
+
+	@Override
 	public void setBase(Treebank base) {
 		if(base==null)
 			throw new NullPointerException("Invalid base"); //$NON-NLS-1$
-		
+
 		if(base.equals(this.base)) {
 			return;
 		}
-		
+
 		if(base!=TreebankRegistry.DUMMY_TREEBANK) {
 			baseTreebankId = TreebankRegistry.getInstance().getDescriptor(base).getId();
 		} else {
 			baseTreebankId = null;
 		}
-		
+
 		this.base = base;
-		
+
 		eventSource.fireEvent(new EventObject(Events.CHANGED));
 	}
 
@@ -105,7 +107,7 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	@Override
 	public void load() throws Exception {
 		getBase().load();
-		
+
 		// TODO load filter from our location
 	}
 
@@ -113,14 +115,14 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	public int size() {
 		return filter==null ? 0 : filter.length;
 	}
-	
+
 	/**
 	 * @see de.ims.icarus.language.treebank.AbstractTreebank#saveState(de.ims.icarus.language.treebank.TreebankDescriptor)
 	 */
 	@Override
 	public void saveState(TreebankDescriptor descriptor) {
 		super.saveState(descriptor);
-		
+
 		// Save base treebank id in addition to default stuff
 		descriptor.getProperties().put(BASE_ID_PROPERTY, baseTreebankId);
 	}
@@ -131,11 +133,11 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	@Override
 	public void loadState(TreebankDescriptor descriptor) {
 		super.loadState(descriptor);
-		
+
 		// Load base treebank id and remove it from the properties map
 		baseTreebankId = (String) getProperty(BASE_ID_PROPERTY);
 		properties.remove(BASE_ID_PROPERTY);
-		
+
 		// Let te next getBase() call load the base treebank
 		base = null;
 	}
@@ -158,32 +160,32 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 		Exceptions.testNullArgument(filter, "filter"); //$NON-NLS-1$
 		if(this.filter==null || filter.length>this.filter.length)
 			throw new IllegalArgumentException(
-					String.format("Provided filter is too large: %d - only %d legal",  //$NON-NLS-1$
-							filter.length, this.filter.length));
-		
+					String.format("Provided filter is too large: %d",  //$NON-NLS-1$
+							filter.length));
+
 		int[] newFilter = new int[filter.length];
 		for(int i=0; i<filter.length; i++) {
 			newFilter[i] = this.filter[filter[i]];
 		}
-		
+
 		FilteredTreebank newTreebank = new FilteredTreebank();
 		newTreebank.setFilter(newFilter);
 		newTreebank.setBase(getBase());
-		
+
 		return newTreebank;
 	}
-	
+
 	public static FilteredTreebank filterTreebank(Treebank base, int[] filter) {
 		Exceptions.testNullArgument(base, "base"); //$NON-NLS-1$
 		Exceptions.testNullArgument(filter, "filter"); //$NON-NLS-1$
-		
+
 		if(base instanceof FilteredTreebank)
 			return ((FilteredTreebank)base).derive(filter);
 		else {
 			FilteredTreebank newTreebank = new FilteredTreebank();
 			newTreebank.setFilter(filter);
 			newTreebank.setBase(base);
-			
+
 			return newTreebank;
 		}
 	}
@@ -191,9 +193,9 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	@Override
 	public void free() {
 		eventSource.fireEvent(new EventObject(TreebankEvents.FREEING));
-		
+
 		filter = null;
-		
+
 		eventSource.fireEvent(new EventObject(TreebankEvents.FREED));
 	}
 
@@ -204,15 +206,18 @@ public class FilteredTreebank extends AbstractTreebank implements DerivedTreeban
 	public TreebankMetaData getMetaData() {
 		return getBase().getMetaData();
 	}
-	
+
+	@Override
 	public void addListener(String eventName, EventListener listener) {
 		getBase().addListener(eventName, listener);
 	}
 
+	@Override
 	public void removeListener(EventListener listener) {
 		getBase().removeListener(listener);
 	}
 
+	@Override
 	public void removeListener(EventListener listener, String eventName) {
 		getBase().removeListener(listener, eventName);
 	}

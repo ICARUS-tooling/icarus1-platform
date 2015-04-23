@@ -145,7 +145,7 @@ import de.ims.icarus.util.Exceptions;
  */
 public class Core {
 
-	private static Core core;
+	private static volatile Core core;
 	private static boolean debugActive = false;
 
 	public static void debugInit(String...args) {
@@ -176,25 +176,27 @@ public class Core {
 			if(core!=null)
 				throw new IllegalStateException("Core already started!"); //$NON-NLS-1$
 
-			core = new Core(args);
+			Core newCore = new Core(args);
+
+			core = newCore;
 
 			SplashWindow.setMaxProgress(7);
 
 			SplashWindow.setText("Collecting plug-ins"); //$NON-NLS-1$
 			SplashWindow.step();
 			// Collect plug-ins and verify integrity
-			core.collectPlugins();
+			newCore.collectPlugins();
 
 			SplashWindow.setText("Collecting properties"); //$NON-NLS-1$
 			SplashWindow.step();
 			// Collect properties defined by plug-ins
 			// (this might technically override system settings)
-			core.collectProperties();
+			newCore.collectProperties();
 
 			SplashWindow.setText("Launching core plug-in"); //$NON-NLS-1$
 			SplashWindow.step();
 			// Launch core plug-in
-			core.launchCorePlugin();
+			newCore.launchCorePlugin();
 
 		} catch(Throwable e) {
 			new CoreErrorDialog(e);

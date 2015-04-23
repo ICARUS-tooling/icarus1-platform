@@ -250,7 +250,7 @@ public final class UIUtil {
 	 */
 	public static final Border defaultContentBorder = new EmptyBorder(1, 3, 1, 3);
 
-	private static Map<String, Icon> blankIcons;
+	private static volatile Map<String, Icon> blankIcons;
 
 	public static Icon getBlankIcon(int width, int height) {
 		String key = width+"x"+height; //$NON-NLS-1$

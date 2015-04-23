@@ -51,6 +51,7 @@ import de.ims.icarus.util.strings.CharTableBuffer.Row;
 import de.ims.icarus.util.strings.CharTableBuffer.RowAction;
 import de.ims.icarus.util.strings.CharTableBuffer.RowFilter;
 import de.ims.icarus.util.strings.StringPrimitives;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**
@@ -201,7 +202,7 @@ public final class CONLL12Utils implements CorefConstants {
 			}
 
 			Cursor coref = row.getSplitCursor(row.getSplitCount()-1);
-			if(!coref.equals(HYPHEN)) {
+			if(!StringUtil.equals(coref, HYPHEN)) {
 				// Build spans
 				coref.split('|');
 				for(int j=0; j<coref.getSplitCount(); j++) {
@@ -289,7 +290,7 @@ public final class CONLL12Utils implements CorefConstants {
 	private static String get(Row row, int index, String def) {
 		Cursor cursor = row.getSplitCursor(index);
 		String s = EMPTY;
-		if(US.equals(cursor) || cursor.isEmpty()) {
+		if(cursor.isEmpty() || StringUtil.equals(cursor, US)) {
 			s = def;
 		} else {
 			s = cursor.toString();

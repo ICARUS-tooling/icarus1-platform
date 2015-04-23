@@ -45,7 +45,7 @@ import de.ims.icarus.search_tools.SearchOperator;
  *
  */
 @XmlRootElement(name="constraint")
-public class DefaultConstraint implements SearchConstraint {
+public class DefaultConstraint implements SearchConstraint, Cloneable {
 
 	private static final long serialVersionUID = 8086598627849516305L;
 
@@ -148,8 +148,14 @@ public class DefaultConstraint implements SearchConstraint {
 
 	@Override
 	public SearchConstraint clone() {
-		// Note that the 'active' state is not cloned!
-		return new DefaultConstraint(token, value, operator);
+		DefaultConstraint clonedConstraint = null;
+		try {
+			clonedConstraint = (DefaultConstraint) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException();
+		}
+		clonedConstraint.active = false;
+		return clonedConstraint;
 	}
 
 	@Override

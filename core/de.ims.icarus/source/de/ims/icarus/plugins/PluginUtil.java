@@ -105,9 +105,9 @@ public final class PluginUtil {
 	public static final String RESOURCES_KEY =
 			"de.ims.icarus.resources"; //$NON-NLS-1$
 
-	private static PluginRegistry pluginRegistry;
-	private static PathResolver pathResolver;
-	private static PluginManager pluginManager;
+	private static volatile PluginRegistry pluginRegistry;
+	private static volatile PathResolver pathResolver;
+	private static volatile PluginManager pluginManager;
 
 	private PluginUtil() {
 		// no-op
@@ -150,9 +150,9 @@ public final class PluginUtil {
 		throw new CloneNotSupportedException();
 	}
 
-	private static Map<PluginElement<?>, Identity> identityCache;
+	private static volatile Map<PluginElement<?>, Identity> identityCache;
 
-	private static Map<ExtensionPoint, Collection<Extension>> links;
+	private static volatile Map<ExtensionPoint, Collection<Extension>> links;
 
 	public static Identity getIdentity(PluginElement<?> element) {
 		if(element==null)
@@ -328,15 +328,19 @@ public final class PluginUtil {
 		ObjectFactory objectFactory = ObjectFactory.newInstance();
 		logger.info("Using object factory: "+objectFactory); //$NON-NLS-1$
 
-		pluginRegistry = objectFactory.createRegistry();
-		logger.info("Using plugin registry: "+pluginRegistry); //$NON-NLS-1$
+		PluginRegistry newPluginRegistry = objectFactory.createRegistry();
+		logger.info("Using plugin registry: "+newPluginRegistry); //$NON-NLS-1$
 
 		//pathResolver = objectFactory.createPathResolver();
-		pathResolver = new LibPathResolver();
-		logger.info("Using path resolver: "+pathResolver); //$NON-NLS-1$
+		PathResolver newPathResolver = new LibPathResolver();
+		logger.info("Using path resolver: "+newPathResolver); //$NON-NLS-1$
 
-		pluginManager = objectFactory.createManager(pluginRegistry, pathResolver);
-		logger.info("Using plugin manager: "+pluginManager); //$NON-NLS-1$
+		PluginManager newPluginManager = objectFactory.createManager(newPluginRegistry, newPathResolver);
+		logger.info("Using plugin manager: "+newPluginManager); //$NON-NLS-1$
+
+		pluginRegistry = newPluginRegistry;
+		pluginManager = newPluginManager;
+		pathResolver = newPathResolver;
 	}
 
 	public static void loadAttributes(PluginDescriptor descriptor) {
@@ -492,7 +496,7 @@ public final class PluginUtil {
 		return clazz.newInstance();
 	}
 
-	public static Object instantiate(Extension extension, Class[] signature, Object[] params) throws InstantiationException,
+	public static Object instantiate(Extension extension, Class<?>[] signature, Object[] params) throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
 		if(extension==null)
 			throw new NullPointerException("Invalid extension"); //$NON-NLS-1$

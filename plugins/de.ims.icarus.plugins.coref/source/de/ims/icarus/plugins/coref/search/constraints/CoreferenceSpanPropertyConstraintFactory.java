@@ -107,7 +107,7 @@ public class CoreferenceSpanPropertyConstraintFactory extends AbstractConstraint
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public CoreferenceSpanPropertyIConstraint clone() {
 			return new CoreferenceSpanPropertyIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}

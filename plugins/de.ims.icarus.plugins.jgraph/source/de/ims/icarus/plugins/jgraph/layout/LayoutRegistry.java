@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.jgraph.layout;
@@ -51,16 +51,16 @@ import de.ims.icarus.util.id.UnknownIdentifierException;
  *
  */
 public final class LayoutRegistry {
-	
-	private static LayoutRegistry instance;
-	
-	private Map<String, Extension> layouts = new LinkedHashMap<>();	
+
+	private static volatile LayoutRegistry instance;
+
+	private Map<String, Extension> layouts = new LinkedHashMap<>();
 	private Map<ContentType, Collection<Extension>> layoutCache;
-	
-	private Map<String, Extension> styles = new LinkedHashMap<>();	
+
+	private Map<String, Extension> styles = new LinkedHashMap<>();
 	private Map<ContentType, Collection<Extension>> styleCache;
-	
-	private Map<String, Extension> renderers = new LinkedHashMap<>();	
+
+	private Map<String, Extension> renderers = new LinkedHashMap<>();
 	private Map<ContentType, Collection<Extension>> rendererCache;
 
 	private LayoutRegistry() {
@@ -77,10 +77,10 @@ public final class LayoutRegistry {
 				}
 			}
 		}
-		
+
 		return instance;
 	}
-	
+
 	private void loadLayouts() {
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
 				.getPluginDescriptor(JGraphConstants.JGRAPH_PLUGIN_ID);
@@ -88,7 +88,7 @@ public final class LayoutRegistry {
 			layouts.put(extension.getId(), extension);
 		}
 	}
-	
+
 	private void loadStyles() {
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
 				.getPluginDescriptor(JGraphConstants.JGRAPH_PLUGIN_ID);
@@ -96,7 +96,7 @@ public final class LayoutRegistry {
 			styles.put(extension.getId(), extension);
 		}
 	}
-	
+
 	private void loadRenderers() {
 		PluginDescriptor descriptor = PluginUtil.getPluginRegistry()
 				.getPluginDescriptor(JGraphConstants.JGRAPH_PLUGIN_ID);
@@ -104,58 +104,58 @@ public final class LayoutRegistry {
 			renderers.put(extension.getId(), extension);
 		}
 	}
-	
+
 	public int availableLayoutsCount() {
 		return layouts.size();
 	}
-	
+
 	public Collection<Extension> availableLayouts() {
 		return Collections.unmodifiableCollection(layouts.values());
 	}
-	
+
 	public int availableStylesCount() {
 		return styles.size();
 	}
-	
+
 	public Collection<Extension> availableStyles() {
 		return Collections.unmodifiableCollection(styles.values());
 	}
-	
+
 	public int availableRenderersCount() {
 		return renderers.size();
 	}
-	
+
 	public Collection<Extension> availableRenderers() {
 		return Collections.unmodifiableCollection(renderers.values());
 	}
-	
+
 	public Extension getLayout(String id) {
 		Extension layout = layouts.get(id);
 		if(layout==null)
 			throw new UnknownIdentifierException("No such layout: "+id); //$NON-NLS-1$
-		
+
 		return layout;
 	}
-	
+
 	public Extension getStyle(String id) {
 		Extension style = styles.get(id);
 		if(style==null)
 			throw new UnknownIdentifierException("No such style: "+id); //$NON-NLS-1$
-		
+
 		return style;
 	}
-	
+
 	public Extension getRenderer(String id) {
 		Extension renderer = renderers.get(id);
 		if(renderer==null)
 			throw new UnknownIdentifierException("No such renderer: "+id); //$NON-NLS-1$
-		
+
 		return renderer;
 	}
-	
+
 	private Collection<Extension> findCompatible(ContentType type, Collection<Extension> available) {
 		Collection<Extension> compatible = new LinkedList<>();
-		
+
 		for(Extension extension : available) {
 			Collection<Extension.Parameter> params = extension.getParameters("contentType"); //$NON-NLS-1$
 			if(params.isEmpty()) {
@@ -171,23 +171,23 @@ public final class LayoutRegistry {
 				}
 			}
 		}
-		
+
 		return compatible;
 	}
-	
+
 	private Collection<Extension> getCached(ContentType type,
 			Map<ContentType, Collection<Extension>> cache,
 			Collection<Extension> available) {
-		
+
 		Collection<Extension> compatible = cache.get(type);
 		if(compatible==null) {
 			compatible = findCompatible(type, available);
 			cache.put(type, compatible);
 		}
-		
+
 		return compatible;
 	}
-	
+
 	/**
 	 * Searches the collection of registered {@code GraphLayout} extensions
 	 * for such that either declare the given {@code ContentType} as compatible
@@ -201,27 +201,27 @@ public final class LayoutRegistry {
 	public Collection<Extension> getCompatibleLayouts(ContentType type, boolean includeCompatibleTypes) {
 		if(type==null)
 			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
-		
+
 		List<ContentType> contentTypes = new ArrayList<>();
 		contentTypes.add(type);
 		if(includeCompatibleTypes) {
 			contentTypes.addAll(ContentTypeRegistry.getInstance()
 					.getCompatibleTypes(type));
 		}
-		
+
 		Set<Extension> compatibleLayouts = new LinkedHashSet<>();
 		if(layoutCache==null) {
 			layoutCache = new HashMap<>();
 		}
-		
+
 		for(ContentType contentType : contentTypes) {
 			compatibleLayouts.addAll(getCached(
 					contentType, layoutCache, layouts.values()));
 		}
-		
+
 		return compatibleLayouts;
 	}
-	
+
 	/**
 	 * Searches the collection of registered {@code GraphStyle} extensions
 	 * for such that either declare the given {@code ContentType} as compatible
@@ -235,27 +235,27 @@ public final class LayoutRegistry {
 	public Collection<Extension> getCompatibleStyles(ContentType type, boolean includeCompatibleTypes) {
 		if(type==null)
 			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
-		
+
 		List<ContentType> contentTypes = new ArrayList<>();
 		contentTypes.add(type);
 		if(includeCompatibleTypes) {
 			contentTypes.addAll(ContentTypeRegistry.getInstance()
 					.getCompatibleTypes(type));
 		}
-		
+
 		Set<Extension> compatibleStyles = new LinkedHashSet<>();
 		if(styleCache==null) {
 			styleCache = new HashMap<>();
 		}
-		
+
 		for(ContentType contentType : contentTypes) {
 			compatibleStyles.addAll(getCached(
 					contentType, styleCache, styles.values()));
 		}
-		
+
 		return compatibleStyles;
 	}
-	
+
 	/**
 	 * Searches the collection of registered {@code GraphRenderer} extensions
 	 * for such that either declare the given {@code ContentType} as compatible
@@ -269,24 +269,24 @@ public final class LayoutRegistry {
 	public Collection<Extension> getCompatibleRenderers(ContentType type, boolean includeCompatibleTypes) {
 		if(type==null)
 			throw new NullPointerException("Invalid type"); //$NON-NLS-1$
-		
+
 		List<ContentType> contentTypes = new ArrayList<>();
 		contentTypes.add(type);
 		if(includeCompatibleTypes) {
 			contentTypes.addAll(ContentTypeRegistry.getInstance()
 					.getCompatibleTypes(type));
 		}
-		
+
 		Set<Extension> compatibleRenderers = new LinkedHashSet<>();
 		if(rendererCache==null) {
 			rendererCache = new HashMap<>();
 		}
-		
+
 		for(ContentType contentType : contentTypes) {
 			compatibleRenderers.addAll(getCached(
 					contentType, rendererCache, renderers.values()));
 		}
-		
+
 		return compatibleRenderers;
 	}
 }

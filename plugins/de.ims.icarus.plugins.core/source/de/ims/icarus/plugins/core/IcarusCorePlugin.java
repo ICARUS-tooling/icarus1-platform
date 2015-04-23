@@ -230,7 +230,7 @@ public final class IcarusCorePlugin extends Plugin {
 			lafClassName = UIManager.getSystemLookAndFeelClassName();
 		} else {
 			Object lafValue = config.getValue("general.appearance.lookAndFeel"); //$NON-NLS-1$
-			if("DEFAULT_LAF".equals(lafClassName)) { //$NON-NLS-1$
+			if("DEFAULT_LAF".equals(lafValue)) { //$NON-NLS-1$
 				lafClassName = null;
 			} else if(lafValue instanceof String) {
 				lafClassName = (String)lafValue;

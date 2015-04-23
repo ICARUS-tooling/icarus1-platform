@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util;
@@ -31,21 +31,21 @@ package de.ims.icarus.util;
  *
  */
 public class DefaultWrapper<O extends Object> implements Wrapper<O> {
-	
+
 	private final O element;
-	
+
 	private final boolean forwardEquals;
 	private final boolean forwardHashCode;
-	
+
 
 	public DefaultWrapper(O element) {
 		this(element, false, false);
 	}
-	
+
 	public DefaultWrapper(O element, boolean forwardEquals, boolean forwardHashCode) {
 		if(element==null)
 			throw new NullPointerException("Invalid element"); //$NON-NLS-1$
-		
+
 		this.element = element;
 		this.forwardEquals = forwardEquals;
 		this.forwardHashCode = forwardHashCode;
@@ -72,7 +72,7 @@ public class DefaultWrapper<O extends Object> implements Wrapper<O> {
 			if(obj instanceof Wrapper) {
 				obj = ((Wrapper<?>)obj).get();
 			}
-			return element.equals(get());
+			return element.equals(obj);
 		}
 		return super.equals(obj);
 	}

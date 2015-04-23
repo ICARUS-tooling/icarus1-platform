@@ -110,8 +110,8 @@ public class ActionManager {
 	public static final String SMALL_SELECTED_ICON_KEY = "IcarusSmallSelectedIcon"; //$NON-NLS-1$
 	public static final String LARGE_SELECTED_ICON_KEY = "IcarusLargeSelectedIcon"; //$NON-NLS-1$
 
-	private ResourceDomain resourceDomain;
-	private IconRegistry iconRegistry;
+	private volatile ResourceDomain resourceDomain;
+	private volatile IconRegistry iconRegistry;
 
 	private final ActionManager parent;
 
@@ -123,13 +123,15 @@ public class ActionManager {
 	protected TIntObjectMap<ButtonGroup> groupMap;
 	protected Map<String, ActionAttributes> attributeMap;
 
-	private static ActionManager instance;
+	protected final Object lock = new Object();
+
+	private static volatile ActionManager instance;
 
 	public static ActionManager globalManager() {
 		if(instance==null) {
 			synchronized (ActionManager.class) {
 				if(instance==null) {
-					instance = new ActionManager(null, null, null);
+					ActionManager manager = new ActionManager(null, null, null);
 
 					URL actionLocation = ActionManager.class.getResource(
 							"default-actions.xml"); //$NON-NLS-1$
@@ -137,10 +139,12 @@ public class ActionManager {
 						throw new CorruptedStateException("Missing resources: default-actions.xml"); //$NON-NLS-1$
 
 					try {
-						instance.loadActions(actionLocation);
+						manager.loadActions(actionLocation);
 					} catch (IOException e) {
 						LoggerFactory.error(ActionManager.class, "Failed to load actions from file: "+actionLocation, e); //$NON-NLS-1$
 					}
+
+					instance = manager;
 				}
 			}
 		}
@@ -310,7 +314,7 @@ public class ActionManager {
 			actionMap = new HashMap<>();
 		}
 
-		synchronized (actionMap) {
+		synchronized (lock) {
 			if(actionMap.containsKey(id) && !isSilent())
 				throw new DuplicateIdentifierException("Duplicate action id: "+id); //$NON-NLS-1$
 
@@ -435,7 +439,7 @@ public class ActionManager {
 			actionSetMap = new HashMap<>();
 		}
 
-		synchronized (actionSetMap) {
+		synchronized (lock) {
 			if(actionSetMap.containsKey(id) && !isSilent())
 				throw new DuplicateIdentifierException("Duplicate action-set id: "+id); //$NON-NLS-1$
 
@@ -472,7 +476,7 @@ public class ActionManager {
 			actionListMap = new HashMap<>();
 		}
 
-		synchronized (actionListMap) {
+		synchronized (lock) {
 			if(actionListMap.containsKey(id) && !isSilent())
 				throw new DuplicateIdentifierException("Duplicate action-list id: "+id); //$NON-NLS-1$
 
@@ -492,10 +496,8 @@ public class ActionManager {
 
 		ButtonGroup group = groupMap.get(key);
 		if(group==null) {
-			if(group==null) {
-				group = new ButtonGroup();
-				groupMap.put(key, group);
-			}
+			group = new ButtonGroup();
+			groupMap.put(key, group);
 		}
 
 		return group;
@@ -1219,13 +1221,17 @@ public class ActionManager {
     private final static int COMMAND_INDEX = 11;
     private final static int TEMPLATE_INDEX = 12;
 
-    private static SAXParserFactory parserFactory;
-    private XmlActionHandler xmlHandler;
+    private static volatile SAXParserFactory parserFactory;
+    private volatile XmlActionHandler xmlHandler;
 
 	private void parseActions(InputStream stream) throws IOException {
-		if (parserFactory == null) {
-			parserFactory = SAXParserFactory.newInstance();
-			parserFactory.setValidating(true);
+		SAXParserFactory factory = parserFactory;
+
+		if (factory == null) {
+			factory = SAXParserFactory.newInstance();
+			factory.setValidating(true);
+
+			parserFactory = factory;
 		}
 
 		if (xmlHandler == null) {
@@ -1233,7 +1239,7 @@ public class ActionManager {
 		}
 
 		try {
-			SAXParser parser = parserFactory.newSAXParser();
+			SAXParser parser = factory.newSAXParser();
 			String dtdResource = getClass().getResource("").toString(); //$NON-NLS-1$
 
 			parser.parse(stream, xmlHandler, dtdResource);

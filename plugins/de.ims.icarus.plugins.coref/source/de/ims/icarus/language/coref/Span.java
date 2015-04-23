@@ -65,14 +65,17 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 
 	public static final String ROOT_ID = "ROOT"; //$NON-NLS-1$
 
-	private static Span sharedRoot;
+	private static volatile Span sharedRoot;
 
 	public static Span getROOT() {
-		if(sharedRoot==null) {
-			sharedRoot = new Span();
-			sharedRoot.setROOT(true);
+		Span result = sharedRoot;
+		if(result==null) {
+			result = new Span();
+			result.setROOT(true);
+
+			sharedRoot = result;
 		}
-		return sharedRoot;
+		return result;
 	}
 
 	protected Span(int beginIndex, int endIndex) {
@@ -188,7 +191,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 		}
 	}
 
-	private static Matcher matcher;
+	private static volatile Matcher matcher;
 
 	private static Matcher getMatcher(CharSequence s) {
 		if(matcher==null) {

@@ -62,7 +62,7 @@ import de.ims.icarus.util.id.UnknownIdentifierException;
  */
 public final class ContentTypeRegistry {
 
-	private static ContentTypeRegistry instance;
+	private static volatile ContentTypeRegistry instance;
 
 	/**
 	 * Maps content type ids to their instances.

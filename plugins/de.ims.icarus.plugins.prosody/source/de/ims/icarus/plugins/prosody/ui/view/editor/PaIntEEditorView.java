@@ -2003,11 +2003,11 @@ public class PaIntEEditorView extends View {
 		public void mouseWheelMoved(MouseWheelEvent e) {
 			if(e.getWheelRotation()<0) {
 				// Away from user => scroll right
-				if(slider.getValue()<slider.getMaximum()); {
+				if(slider.getValue()<slider.getMaximum()) {
 					slider.setValue(slider.getValue()+1);
 				}
 			} else {
-				if(slider.getValue()>slider.getMinimum()); {
+				if(slider.getValue()>slider.getMinimum()) {
 					slider.setValue(slider.getValue()-1);
 				}
 			}

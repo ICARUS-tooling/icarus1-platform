@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.graph;
@@ -45,7 +45,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 @XmlRootElement(name="edgeConstraints")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> {
+public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> implements Cloneable {
 
 	private static final long serialVersionUID = 3694619821568182574L;
 
@@ -67,9 +67,9 @@ public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> {
 	public ConstraintEdgeData(int size) {
 		constraints = new ArrayList<>(size);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData#copyFrom(de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData)
 	 */
 	@Override
@@ -88,7 +88,7 @@ public class ConstraintEdgeData extends ConstraintCellData<ConstraintEdgeData> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData#clone()
 	 */
 	@Override

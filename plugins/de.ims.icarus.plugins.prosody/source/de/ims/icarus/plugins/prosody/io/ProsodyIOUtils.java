@@ -136,7 +136,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		// no-op
 	}
 
-	private static final String HYPHEN = "-";  //$NON-NLS-1$
+	private static final Object HYPHEN = "-";  //$NON-NLS-1$
 	private static final String OBR = "("; //$NON-NLS-1$
 	private static final String CBR = ")"; //$NON-NLS-1$
 	private static final char PIPE = '|';
@@ -183,7 +183,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 
 	public static final String FORMAT_VERSION = "#version"; //$NON-NLS-1$
 
-	private static final String US = "_"; //$NON-NLS-1$
+	private static final Object US = "_"; //$NON-NLS-1$
 	private static final String DELIMITER = "\\s+"; //$NON-NLS-1$
 	private static final String EMPTY = ""; //$NON-NLS-1$
 

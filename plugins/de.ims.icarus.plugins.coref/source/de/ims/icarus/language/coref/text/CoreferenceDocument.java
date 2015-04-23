@@ -798,7 +798,7 @@ public class CoreferenceDocument extends BatchDocument {
 
 	protected static final ClusterAttributes emptyAttributes = new ClusterAttributes(-1, null);
 
-	protected static class ClusterAttributes {
+	protected static class ClusterAttributes implements Cloneable {
 		MutableAttributeSet superscript, subscript, content, filler;
 
 		final int clusterId;

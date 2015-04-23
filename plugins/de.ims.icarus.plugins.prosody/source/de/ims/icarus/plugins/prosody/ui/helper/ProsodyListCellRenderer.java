@@ -310,12 +310,12 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 				if(showCurvePreview) {
 					size.height += curveHeight;
 				}
+
+				sentenceInfo.setWidth(size.width);
 			} else {
 				curveHeight = 0;
 				textHeight = 0;
 			}
-
-			sentenceInfo.setWidth(size.width);
 
 			preferredSize = size;
 		}

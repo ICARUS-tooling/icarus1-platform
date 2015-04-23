@@ -107,7 +107,7 @@ public class CoreferenceWordPropertyConstraintFactory extends AbstractConstraint
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public CoreferenceWordPropertyIConstraint clone() {
 			return new CoreferenceWordPropertyIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}

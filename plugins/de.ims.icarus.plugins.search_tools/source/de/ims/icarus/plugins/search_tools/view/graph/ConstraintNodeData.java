@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.graph;
@@ -45,10 +45,10 @@ import de.ims.icarus.util.collections.CollectionUtils;
  */
 @XmlRootElement(name="nodeConstraints")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> {
+public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> implements Cloneable {
 
 	private static final long serialVersionUID = -5561783573729079886L;
-	
+
 	@XmlAttribute
 	private NodeType nodeType = NodeType.GENERAL;
 
@@ -67,9 +67,9 @@ public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> {
 	public ConstraintNodeData(int size) {
 		constraints = new ArrayList<>(size);
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData#copyFrom(de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData)
 	 */
 	@Override
@@ -79,7 +79,7 @@ public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> {
 		id = source.id;
 		constraints = SearchUtils.cloneConstraints(source.constraints);
 	}
-	
+
 	public void copyFrom(SearchNode source) {
 		negated = source.isNegated();
 		nodeType = source.getNodeType();
@@ -96,7 +96,7 @@ public class ConstraintNodeData extends ConstraintCellData<ConstraintNodeData> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.plugins.search_tools.view.graph.ConstraintCellData#clone()
 	 */
 	@Override

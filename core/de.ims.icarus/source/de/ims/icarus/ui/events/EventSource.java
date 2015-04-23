@@ -27,6 +27,7 @@ package de.ims.icarus.ui.events;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.SwingUtilities;
 
@@ -54,7 +55,7 @@ public class EventSource {
 	 */
 	protected Object eventSource;
 
-	protected transient volatile int deadListenerCount = 0;
+	protected transient AtomicInteger deadListenerCount = new AtomicInteger(0);
 
 	protected transient int deadListenerTreshold = 5;
 
@@ -205,18 +206,20 @@ public class EventSource {
 
 			int size = eventListeners.size();
 
+			int deadCount = 0;
+
 			for (int i = 0; i < size; i += 2) {
 				String listen = (String) eventListeners.get(i);
 				EventListener listener = (EventListener) eventListeners.get(i + 1);
 
 				if(listener==null) {
-					deadListenerCount++;
+					deadCount = deadListenerCount.incrementAndGet();
 				} else if (listen == null || listen.equals(event.getName())) {
 					listener.invoke(sender, event);
 				}
 			}
 
-			if(deadListenerCount>=deadListenerTreshold) {
+			if(deadCount>=deadListenerTreshold) {
 				clearEventListeners();
 			}
 		}
@@ -230,7 +233,7 @@ public class EventSource {
 			}
 		}
 
-		deadListenerCount = 0;
+		deadListenerCount.set(0);
 	}
 
 	public void fireEventEDT(final EventObject event, final Object sender) {

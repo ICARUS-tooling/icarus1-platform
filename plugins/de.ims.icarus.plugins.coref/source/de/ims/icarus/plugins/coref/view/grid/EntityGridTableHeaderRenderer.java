@@ -185,9 +185,9 @@ public class EntityGridTableHeaderRenderer extends JComponent implements TableCe
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
 
-		if(table!=null) {
+//		if(table!=null) {
 			isSelected |= table.getColumnModel().getSelectionModel().isSelectedIndex(column);
-		}
+//		}
 
 		EntityGridTableModel model = (EntityGridTableModel) table.getModel();
 		ErrorSummary summary = model.getErrorSummary(column);

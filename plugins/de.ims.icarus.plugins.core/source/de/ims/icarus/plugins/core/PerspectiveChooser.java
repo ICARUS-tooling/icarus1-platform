@@ -388,24 +388,28 @@ public class PerspectiveChooser {
 						imageCache.put(displayedPerspective, image);
 					}
 				}
-				// Wait for image to be fully loaded
-				int width;
-				while(image.getHeight(previewLabel)==-1
-						|| (width=image.getWidth(previewLabel))==-1);
 
-				image = image.getScaledInstance(
-							width>maxWidth ? maxWidth : -1,
-							-1, Image.SCALE_SMOOTH);
+				Dimension size = null;
+				if(image!=null) {
+					// Wait for image to be fully loaded
+					int width;
+					while(image.getHeight(previewLabel)==-1
+							|| (width=image.getWidth(previewLabel))==-1);
 
-				/*while((height=image.getHeight(preview))==-1
-						|| (width=image.getWidth(preview))==-1);*/
+					image = image.getScaledInstance(
+								width>maxWidth ? maxWidth : -1,
+								-1, Image.SCALE_SMOOTH);
 
-				Icon icon = new ImageIcon(image);
-				previewLabel.setIcon(icon);
+					/*while((height=image.getHeight(preview))==-1
+							|| (width=image.getWidth(preview))==-1);*/
+
+					Icon icon = new ImageIcon(image);
+					previewLabel.setIcon(icon);
+					size = new Dimension(icon.getIconWidth()+1, icon.getIconHeight()+1);
+				}
 				previewLabel.setText(null);
 				previewLabel.setVerticalAlignment(SwingConstants.TOP);
-				previewLabel.setPreferredSize(new Dimension(
-						icon.getIconWidth()+1, icon.getIconHeight()+1));
+				previewLabel.setPreferredSize(size);
 				previewLabel.setMinimumSize(previewLabel.getPreferredSize());
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.FINE,	"Unable to load preview-icon: "+param.valueAsString(), e); //$NON-NLS-1$

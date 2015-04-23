@@ -47,7 +47,7 @@ import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 public class ProsodyHighlighting extends BitmaskHighlighting {
 
 
-	private static ProsodyHighlighting instance;
+	private static volatile ProsodyHighlighting instance;
 
 	public static ProsodyHighlighting getInstance() {
 		// Most times this will be called from the event dispatch thread

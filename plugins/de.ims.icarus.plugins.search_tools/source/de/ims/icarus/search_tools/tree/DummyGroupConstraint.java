@@ -35,7 +35,7 @@ import de.ims.icarus.search_tools.standard.GroupCache;
  * @version $Id$
  *
  */
-public class DummyGroupConstraint implements SearchConstraint {
+public class DummyGroupConstraint implements SearchConstraint, Cloneable {
 
 	private static final long serialVersionUID = -1351042489767331758L;
 

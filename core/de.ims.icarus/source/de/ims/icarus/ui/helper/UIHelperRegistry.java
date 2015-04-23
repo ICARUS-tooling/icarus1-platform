@@ -49,7 +49,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  */
 public final class UIHelperRegistry {
 
-	private static UIHelperRegistry instance;
+	private static volatile UIHelperRegistry instance;
 
 	public static UIHelperRegistry globalRegistry() {
 		if(instance==null) {

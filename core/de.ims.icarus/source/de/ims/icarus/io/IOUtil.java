@@ -575,6 +575,11 @@ public final class IOUtil {
 			return false;
 		}
 
+		@Override
+		public int hashCode() {
+			return loadable.hashCode();
+		}
+
 		/**
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */

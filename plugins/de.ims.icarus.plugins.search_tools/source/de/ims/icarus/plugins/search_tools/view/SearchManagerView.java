@@ -1236,6 +1236,11 @@ public class SearchManagerView extends View {
 			}
 		}
 
+		@Override
+		public int hashCode() {
+			return writer.hashCode();
+		}
+
 		/**
 		 * @see java.lang.Object#equals(java.lang.Object)
 		 */

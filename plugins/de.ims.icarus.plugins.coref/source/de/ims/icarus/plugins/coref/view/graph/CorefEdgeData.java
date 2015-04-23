@@ -39,7 +39,7 @@ import de.ims.icarus.plugins.jgraph.cells.GraphEdge;
  */
 @XmlRootElement(name="coref-edge")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge {
+public class CorefEdgeData extends CorefCellData<Edge> implements GraphEdge, Cloneable {
 
 	private static final long serialVersionUID = 440883995135005413L;
 

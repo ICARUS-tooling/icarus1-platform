@@ -95,7 +95,7 @@ import de.ims.icarus.xml.jaxb.JAXBUtils;
  */
 public class TreebankRegistry {
 
-	private static TreebankRegistry instance;
+	private static volatile TreebankRegistry instance;
 
 	public static TreebankRegistry getInstance() {
 		if(instance==null) {

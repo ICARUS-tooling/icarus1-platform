@@ -32,7 +32,7 @@ import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
  * @version $Id$
  *
  */
-public class PaIntEHitBox {
+public class PaIntEHitBox implements Cloneable {
 
 	private double x, y;
 
@@ -88,7 +88,11 @@ public class PaIntEHitBox {
 
 	@Override
 	public PaIntEHitBox clone() {
-		return new PaIntEHitBox(this);
+		try {
+			return (PaIntEHitBox) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException();
+		}
 	}
 
 	/**

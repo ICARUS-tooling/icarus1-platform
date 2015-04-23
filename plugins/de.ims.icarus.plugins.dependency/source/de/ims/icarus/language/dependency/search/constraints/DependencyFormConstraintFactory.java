@@ -92,7 +92,7 @@ public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public DependencyFormCIConstraint clone() {
 			return new DependencyFormCIConstraint(getValue(), getOperator());
 		}
 	}

@@ -573,7 +573,7 @@ public class SampaValidationView extends View {
 
 		@Override
 		public int hashCode() {
-			int hc = word.hashCode()*sampaBlocks.hashCode();
+			int hc = word.hashCode()*Arrays.hashCode(sampaBlocks);
 
 			if(wordFile!=null) {
 				hc *= wordFile.hashCode()*wordFileLineNumber;

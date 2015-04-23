@@ -832,9 +832,9 @@ public class DefaultQueryParser {
 		if(SearchUtils.isEmpty(graph))
 			throw new IllegalArgumentException("Empty graph"); //$NON-NLS-1$
 
-		if(options==null) {
-			options = Options.emptyOptions;
-		}
+//		if(options==null) {
+//			options = Options.emptyOptions;
+//		}
 
 		reset();
 

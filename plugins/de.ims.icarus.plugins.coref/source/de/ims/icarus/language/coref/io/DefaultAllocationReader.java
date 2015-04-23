@@ -51,6 +51,7 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.strings.CharLineBuffer;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -133,7 +134,7 @@ public class DefaultAllocationReader implements AllocationReader {
 
 				// Read in properties
 				while(readLine()) {
-					if(buffer.equals(BEGIN_NODES)) {
+					if(StringUtil.equals(buffer, BEGIN_NODES)) {
 						break;
 					} else if(buffer.startsWith(COMMENT_PREFIX)) {
 						readProperty(allocation);
@@ -152,7 +153,7 @@ public class DefaultAllocationReader implements AllocationReader {
 				allocation.setEdgeSet(documentId, edgeSet);
 
 				// Check for closing declaration
-				if(!skipEmptyLines() || !buffer.equals(END_DOCUMENT))
+				if(!skipEmptyLines() || !StringUtil.equals(buffer, END_DOCUMENT))
 					throw new IllegalArgumentException(errMsg(String.format(
 							"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 							END_DOCUMENT, BEGIN_DOCUMENT, startLine)));
@@ -198,10 +199,10 @@ public class DefaultAllocationReader implements AllocationReader {
 		int beginLine = lineCount;
 
 		while(readLine()) {
-			if(buffer.equals(END_NODES)) {
+			if(StringUtil.equals(buffer, END_NODES)) {
 				closed = true;
 				break;
-			} else if(buffer.equals(BEGIN_NODES)) {
+			} else if(StringUtil.equals(buffer, BEGIN_NODES)) {
 				beginLine = lineCount;
 			} else if(buffer.startsWith(COMMENT_PREFIX)) {
 				readProperty(spanSet);
@@ -257,10 +258,10 @@ public class DefaultAllocationReader implements AllocationReader {
 		Set<Edge> lookup = new HashSet<>();
 
 		while(readLine()) {
-			if(buffer.equals(END_EDGES)) {
+			if(StringUtil.equals(buffer, END_EDGES)) {
 				closed = true;
 				break;
-			} else if(buffer.equals(BEGIN_EDGES)) {
+			} else if(StringUtil.equals(buffer, BEGIN_EDGES)) {
 				beginLine = lineCount;
 			} else if(buffer.startsWith(COMMENT_PREFIX)) {
 				readProperty(edgeSet);

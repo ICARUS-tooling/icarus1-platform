@@ -284,4 +284,9 @@ public class SearchWriter implements SearchXmlConstants {
 		}
 		return false;
 	}
+
+	@Override
+	public int hashCode() {
+		return search.hashCode();
+	}
 }

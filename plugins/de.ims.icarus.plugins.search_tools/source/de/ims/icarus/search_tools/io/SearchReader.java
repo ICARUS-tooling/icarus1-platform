@@ -78,6 +78,11 @@ public class SearchReader implements SearchXmlConstants {
 		this.path = path;
 	}
 
+	@Override
+	public int hashCode() {
+		return path.hashCode();
+	}
+
 	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */

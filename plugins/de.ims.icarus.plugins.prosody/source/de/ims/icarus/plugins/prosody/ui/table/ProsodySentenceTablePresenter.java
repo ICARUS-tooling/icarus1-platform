@@ -121,7 +121,6 @@ public class ProsodySentenceTablePresenter implements AWTPresenter.TableBasedPre
 	}
 
 	protected void refreshActions() {
-		ActionManager actionManager = getActionManager();
 
 		//TODO
 	}

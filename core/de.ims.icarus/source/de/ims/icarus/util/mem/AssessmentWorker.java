@@ -50,6 +50,11 @@ public class AssessmentWorker extends SwingWorker<MemoryFootprint, MemoryFootpri
 		this.root = root;
 	}
 
+	@Override
+	public int hashCode() {
+		return root.hashCode();
+	}
+
 	/**
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */

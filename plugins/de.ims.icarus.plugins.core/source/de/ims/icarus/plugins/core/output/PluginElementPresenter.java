@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core.output;
@@ -67,32 +67,32 @@ import de.ims.icarus.util.id.UnknownIdentifierException;
  *
  */
 public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> {
-	
+
 	private String templateName;
-	
-	private static Map<String, Template> templates;
-	private static Map<String, TemplateFiller> fillers;
-	
+
+	private static volatile Map<String, Template> templates;
+	private static volatile Map<String, TemplateFiller> fillers;
+
 	// We can use strong references to the data objects being
 	// cached since all members of the plugin framework are
 	// alive during the entire runtime of the application
-	private static LRUCache<Object, String> textCache;
-	
+	private static volatile LRUCache<Object, String> textCache;
+
 	private static final String emptyContent = "<html>{1}</html>"; //$NON-NLS-1$
 	private static final String htmlBegin = "<html>"; //$NON-NLS-1$
 	private static final String htmlEnd = "</html>"; //$NON-NLS-1$
 	private static final String headBegin = "<head>"; //$NON-NLS-1$
 	private static final String headEnd = "</head>"; //$NON-NLS-1$
 	private static final String baseDef = "<base href='{1}' />"; //$NON-NLS-1$
-	
-	private static URL baseURL;
+
+	private static volatile URL baseURL;
 
 	/**
-	 * 
+	 *
 	 */
 	public PluginElementPresenter() {
 	}
-	
+
 	private Template getTemplate(String name) {
 		if(name==null) {
 			return null;
@@ -100,26 +100,26 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		if(templates==null) {
 			templates = new HashMap<>();
 		}
-		
+
 		Template template = templates.get(name);
-		
+
 		if(template==null) {
 			template = loadTemplate(name);
 			templates.put(name, template);
 		}
-		
+
 		return template;
 	}
-	
+
 	public static boolean supportsData(Object data) {
 		return getTemplateName(data)!=null;
 	}
-	
+
 	private static String getTemplateName(Object data) {
 		if(data==null) {
 			return null;
 		}
-		
+
 		if(data instanceof PluginDescriptor) {
 			return "plugin-descriptor"; //$NON-NLS-1$
 		} else if(data instanceof PluginFragment) {
@@ -137,16 +137,16 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		} else if(data instanceof Documentable) {
 			return "documentable"; //$NON-NLS-1$
 		}
-		
+
 		return null;
 	}
-	
+
 	private Template loadTemplate(String name) {
 		if(name==null)
 			throw new NullPointerException("Invalid template file name"); //$NON-NLS-1$
-		
+
 		name = name+".tpl"; //$NON-NLS-1$
-		
+
 		URL url = PluginElementPresenter.class.getResource(name);
 		if(url==null) {
 			LoggerFactory.log(this, Level.SEVERE, "Cannot find template file: "+name); //$NON-NLS-1$
@@ -154,18 +154,18 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		}
 		String templateData = null;
 		Template template = null;
-		
+
 		try {
 			templateData = IOUtil.readStream(url.openStream(), IOUtil.UTF8_ENCODING);
 			template = Template.compile(templateData, null);
 		} catch (IOException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to read template data from resource: "+url, e); //$NON-NLS-1$
 		} catch (MalformedTemplateException e) {
-			LoggerFactory.log(this, Level.SEVERE, 
+			LoggerFactory.log(this, Level.SEVERE,
 					"Malformed template data in resource: "+url, e); //$NON-NLS-1$
 		}
-		
+
 		return template;
 	}
 
@@ -185,147 +185,153 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			throws UnsupportedPresentationDataException {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		
+
 		if(data==presentedData) {
 			return;
 		}
-		
+
 		String templateName = getTemplateName(data);
 		if(templateName==null) {
 			throw new UnsupportedPresentationDataException("Cannot present data: "+data); //$NON-NLS-1$
 		}
-		
+
 		if(options==null) {
 			options = Options.emptyOptions;
 		}
-		
+
 		presentedData = data;
 		this.options = options;
 		this.templateName = templateName;
-		
+
 		if(contentPane!=null) {
 			refresh();
 		}
 	}
-	
+
 	@Override
 	protected String getDefaultText() {
-		return ResourceManager.format(emptyContent, 
+		return ResourceManager.format(emptyContent,
 				ResourceManager.getInstance().get("plugins.core.outputView.emptyContent")); //$NON-NLS-1$;
 	}
-	
+
 	private String getUnsupportedText() {
-		return ResourceManager.format(emptyContent, 
+		return ResourceManager.format(emptyContent,
 				ResourceManager.getInstance().get("plugins.core.outputView.unsupportedContent")); //$NON-NLS-1$;
 	}
-	
+
 	private String getCachedText(Object data) {
 		if(textCache==null) {
 			return null;
 		}
-		
+
 		return textCache.get(data);
 	}
-	
+
 	private void cacheText(Object data, String text) {
 		if(textCache==null) {
 			// Make cache size affordable
 			// TODO leave size at 10 or increase to 20 or 50?
 			textCache = new LRUCache<>(10);
 		}
-		
+
 		textCache.put(data, text);
 	}
-	
+
 	private static URL getBaseURL() {
-		if(baseURL==null) {
+		URL result = baseURL;
+		if(result==null) {
 			URL jarLocation = PluginElementPresenter.class.getProtectionDomain()
 					.getCodeSource().getLocation();
-			
+
 			try {
-				baseURL = new URL(jarLocation, "de/ims/icarus/plugins/core/icons/"); //$NON-NLS-1$
+				result = new URL(jarLocation, "de/ims/icarus/plugins/core/icons/"); //$NON-NLS-1$
 			} catch (MalformedURLException e) {
 				LoggerFactory.log(PluginElementPresenter.class, Level.SEVERE, "Failed to create base URL for icons folder at jar: "+jarLocation, e); //$NON-NLS-1$
 			}
-			
+
 			LoggerFactory.log(PluginElementPresenter.class, Level.FINE, "New base url for plugin element presenter html templates:\n"+baseURL); //$NON-NLS-1$
+
+			baseURL = result;
 		}
-		return baseURL;
+		return result;
 	}
-	
+
 	private TemplateFiller getFiller(String name) {
 		if(name==null) {
 			return null;
 		}
-		if(fillers==null) {
-			fillers = new HashMap<>();
-			
+		Map<String, TemplateFiller> result = fillers;
+		if(result==null) {
+			result = new HashMap<>();
+
 			// Add default fillers
-			fillers.put("plugin-descriptor", new PluginDescriptorFiller()); //$NON-NLS-1$
-			fillers.put("plugin-fragment", new PluginFragmentFiller()); //$NON-NLS-1$
-			fillers.put("extension", new ExtensionFiller()); //$NON-NLS-1$
-			fillers.put("extension-point", new ExtensionPointFiller()); //$NON-NLS-1$
-			fillers.put("library", new LibraryFiller()); //$NON-NLS-1$
-			fillers.put("parameter", new ParameterFiller()); //$NON-NLS-1$
-			fillers.put("parameter-definition", new ParameterDefinitionFiller()); //$NON-NLS-1$
-			fillers.put("documentable", new DocumentableFiller()); //$NON-NLS-1$
+			result.put("plugin-descriptor", new PluginDescriptorFiller()); //$NON-NLS-1$
+			result.put("plugin-fragment", new PluginFragmentFiller()); //$NON-NLS-1$
+			result.put("extension", new ExtensionFiller()); //$NON-NLS-1$
+			result.put("extension-point", new ExtensionPointFiller()); //$NON-NLS-1$
+			result.put("library", new LibraryFiller()); //$NON-NLS-1$
+			result.put("parameter", new ParameterFiller()); //$NON-NLS-1$
+			result.put("parameter-definition", new ParameterDefinitionFiller()); //$NON-NLS-1$
+			result.put("documentable", new DocumentableFiller()); //$NON-NLS-1$
+
+			fillers = result;
 		}
-		
-		return fillers.get(name);
+
+		return result.get(name);
 	}
-	
+
 	@Override
 	protected void refresh() {
 		if(contentPane==null) {
 			return;
 		}
-		
+
 		Object data = presentedData;
-		
+
 		// Just show default message if nothing is there to display
 		if(data==null) {
 			contentPane.setText(getDefaultText());
 			return;
 		}
-		
+
 		// Look for cached text first
 		String cachedText = getCachedText(data);
 		if(cachedText!=null) {
 			contentPane.setText(cachedText);
 			return;
 		}
-		
+
 		Template template = getTemplate(templateName);
 		TemplateFiller filler = getFiller(templateName);
 		if(template==null || filler==null) {
 			contentPane.setText(getUnsupportedText());
 			return;
 		}
-		
+
 		template.clear();
-		
+
 		StringBuilder sb = new StringBuilder(1000);
-		
+
 		sb.append(htmlBegin);
 		sb.append(headBegin).append(ResourceManager.format(baseDef, getBaseURL())).append(headEnd);
 		filler.fillTemplate(template, data, options);
 		template.appendText(sb);
 		sb.append(htmlEnd);
-		
+
 		String text = sb.toString();
 		contentPane.setText(text);
 		// FIXME sometimes scrollPane jumps to the bottom after setText() with new content
-		
+
 		// Do not cache every little stuff
 		if(text.length()>1000) {
 			cacheText(data, text);
 		}
 	}
-	
+
 	private static String getId(Identity obj) {
 		return obj==null ? NONE : obj.getId();
 	}
-	
+
 	private static void fillCacheEmpty(SubTemplateCache cache, String...fields) {
 		if(cache==null) {
 			return;
@@ -335,7 +341,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		}
 		cache.commit();
 	}
-	
+
 	private static void fillDocumentable(Template template, Documentable<?> documentable) {
 		template.setValue("captionDocumentation", ResourceManager.getInstance().get("plugins.core.outputView.captions.documentation")); //$NON-NLS-1$ //$NON-NLS-2$
 		template.setValue("captionReferences", ResourceManager.getInstance().get("plugins.core.outputView.captions.references")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -360,13 +366,13 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				}
 			}
 		}
-		
+
 		if(doc==null || index==0) {
 			template.setValue("documentation", NONE);	 //$NON-NLS-1$
 			fillCacheEmpty(cache, "index", "reference");		 //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
-	
+
 	private static String listIds(Collection<? extends Identity> items) {
 		if(items==null || items.isEmpty()) {
 			return NONE;
@@ -380,8 +386,8 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		}
 		return sb.toString();
 	}
-	
-	private static void fillPluginElement(Template template, PluginElement<?> element) {		
+
+	private static void fillPluginElement(Template template, PluginElement<?> element) {
 		// General stuff
 		template.setValue("captionId", ResourceManager.getInstance().get("plugins.core.outputView.captions.id")); //$NON-NLS-1$ //$NON-NLS-2$
 		template.setValue("id", element.getId()); //$NON-NLS-1$
@@ -389,22 +395,22 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 		template.setValue("declaringPlugin", getId(element.getDeclaringPluginDescriptor())); //$NON-NLS-1$
 		template.setValue("captionDeclaringFragment", ResourceManager.getInstance().get("plugins.core.outputView.captions.declaringFragment")); //$NON-NLS-1$ //$NON-NLS-2$
 		template.setValue("declaringFragment", getId(element.getDeclaringPluginFragment())); //$NON-NLS-1$
-		
+
 		// Documentation
 		if(element instanceof Documentable) {
 			fillDocumentable(template, (Documentable<?>)element);
 		}
 	}
-	
+
 	private interface TemplateFiller {
 		void fillTemplate(Template template, Object data, Options options);
 	}
-	
+
 	private static class ExtensionPointFiller implements TemplateFiller {
-		
-		private static String declaringPointTxt = 
+
+		private static String declaringPointTxt =
 				"<img src='ext_point_obj.gif' />&nbsp;{1}<br><img src='plugin_obj.gif' />&nbsp;{2}"; //$NON-NLS-1$
-		
+
 		/**
 		 * @see de.ims.icarus.plugins.core.output.PluginElementPresenter.TemplateFiller#fillTemplate(de.ims.icarus.ui.view.Template, java.lang.Object, de.ims.icarus.util.Options)
 		 */
@@ -414,10 +420,10 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Caption
 			template.setValue("caption", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.extensionPoint")); //$NON-NLS-1$
-					
+
 			// Defaults
 			fillPluginElement(template, extensionPoint);
-			
+
 			// Relation
 			template.setValue("captionMultiplicity", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.multiplicity")); //$NON-NLS-1$
@@ -450,7 +456,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "multiplicity", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
-			
+
 			// Inherited Parameter definitions
 			// captions set so far: captionId, captionMultiplicity, captionDocumentation
 			template.setValue("captionInheritedParameterDefinitions", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -466,7 +472,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				count++;
 				cache.setValue("id", getId(def)); //$NON-NLS-1$
 				cache.setValue("multiplicity", noneOrNonempty(def.getMultiplicity())); //$NON-NLS-1$
-				String declaringPoint = ResourceManager.format(declaringPointTxt, 
+				String declaringPoint = ResourceManager.format(declaringPointTxt,
 						getId(def.getDeclaringExtensionPoint()),
 						getId(def.getDeclaringPluginDescriptor()));
 				cache.setRawValue("declaringPoint", declaringPoint); //$NON-NLS-1$
@@ -481,7 +487,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "multiplicity", "declaringPoint", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
-			
+
 			// Connected extensions
 			template.setValue("captionConnectedExtensions", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.connectedExtensions")); //$NON-NLS-1$
@@ -501,16 +507,16 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			}
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "declaringPlugin", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}			
+			}
 		}
-		
+
 	}
-	
+
 	private static class PluginDescriptorFiller implements TemplateFiller {
 
-		private static String extPointAncestryText = 
+		private static String extPointAncestryText =
 				"<img src='ext_point_obj.gif' />&nbsp;{1}<br><img src='plugin_obj.gif' />&nbsp;{2}"; //$NON-NLS-1$
-		private static String extensionTargetText = 
+		private static String extensionTargetText =
 				"<img src='ext_point_obj.gif' />&nbsp;{1}<br><img src='plugin_obj.gif' />&nbsp;{2}"; //$NON-NLS-1$
 
 		/**
@@ -522,23 +528,23 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Caption
 			template.setValue("caption", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.pluginDescriptor")); //$NON-NLS-1$
-			
+
 			fillDocumentable(template, descriptor);
 
 			// General
 			template.setValue("captionId", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.id")); //$NON-NLS-1$ 
+					"plugins.core.outputView.captions.id")); //$NON-NLS-1$
 			template.setValue("id", descriptor.getId()); //$NON-NLS-1$
 			template.setValue("captionVersion", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.version")); //$NON-NLS-1$ 
+					"plugins.core.outputView.captions.version")); //$NON-NLS-1$
 			template.setValue("version", noneOrNonempty(descriptor.getVersion())); //$NON-NLS-1$
 			template.setValue("captionVendor", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.vendor")); //$NON-NLS-1$  
+					"plugins.core.outputView.captions.vendor")); //$NON-NLS-1$
 			template.setValue("vendor", noneOrNonempty(descriptor.getVendor())); //$NON-NLS-1$
 			template.setValue("captionLocation", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.location")); //$NON-NLS-1$
 			template.setValue("location", noneOrNonempty(descriptor.getLocation())); //$NON-NLS-1$
-			
+
 			// Attributes
 			// captions set so far: captionId, captionDocumentation
 			template.setValue("captionAttributes", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -562,7 +568,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "value", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
-			
+
 			// Prerequisites
 			// captions set so far: captionId, captionVersion, captionDocumentation
 			template.setValue("captionPrerequisites", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -593,7 +599,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "version", "matchingRule", "optional", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}
-			
+
 			// Fragments
 			// captions set so far: captionId, captionPluginVersion, captionMatchingRule, captionDocumentation
 			template.setValue("captionFragments", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -616,9 +622,9 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			}
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "version", "pluginVersion",  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						"matchingRule", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ 
+						"matchingRule", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			
+
 			// Extensions
 			// captions set so far: captionId, captionDocumentation
 			template.setValue("captionExtensions", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -630,7 +636,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			for(Extension extension : descriptor.getExtensions()) {
 				count++;
 				cache.setValue("id", getId(extension)); //$NON-NLS-1$
-				String target = ResourceManager.format(extensionTargetText, 
+				String target = ResourceManager.format(extensionTargetText,
 						noneOrNonempty(extension.getExtendedPointId()),
 						noneOrNonempty(extension.getExtendedPluginId()));
 				cache.setRawValue("target", target); //$NON-NLS-1$
@@ -643,9 +649,9 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				cache.commit();
 			}
 			if(count==0) {
-				fillCacheEmpty(cache, "id", "target", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				fillCacheEmpty(cache, "id", "target", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
-			
+
 			// Extension-points
 			// captions set so far: captionId, captionDocumentation
 			template.setValue("captionExtensionPoints", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -663,7 +669,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				cache.setValue("id", getId(extensionPoint)); //$NON-NLS-1$
 				String ancestry = NONE;
 				if(extensionPoint.getParentExtensionPointId()!=null) {
-					ancestry = ResourceManager.format(extPointAncestryText, 
+					ancestry = ResourceManager.format(extPointAncestryText,
 							noneOrNonempty(extensionPoint.getParentExtensionPointId()),
 							noneOrNonempty(extensionPoint.getParentPluginId()));
 				}
@@ -679,20 +685,20 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				cache.commit();
 			}
 			if(count==0) {
-				fillCacheEmpty(cache, "id", "ancestry", "multiplicity", "connectedExtensions", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
+				fillCacheEmpty(cache, "id", "ancestry", "multiplicity", "connectedExtensions", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	private static class ExtensionFiller implements TemplateFiller {
-		
+
 		private void feedParameter(Extension.Parameter param, SubTemplateCache cache) {
 			cache.setValue("id", getId(param)); //$NON-NLS-1$
 			cache.setValue("parentParameter", getId(param.getSuperParameter())); //$NON-NLS-1$
 			cache.setValue("value", noneOrNonempty(param.rawValue())); //$NON-NLS-1$
-			
+
 			Documentation<?> doc = param.getDocumentation();
 			if(doc==null) {
 				cache.setValue("documentation", NONE); //$NON-NLS-1$
@@ -700,7 +706,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				cache.setValue("documentation", noneOrNonempty(doc.getText())); //$NON-NLS-1$
 			}
 			cache.commit();
-			
+
 			for(Extension.Parameter subParam : param.getSubParameters()) {
 				feedParameter(subParam, cache);
 			}
@@ -715,10 +721,10 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Caption
 			template.setValue("caption", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.extension")); //$NON-NLS-1$
-					
+
 			// Defaults
 			fillPluginElement(template, extension);
-			
+
 			// Target stuff
 			template.setValue("captionTargetPoint", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.targetPoint")); //$NON-NLS-1$
@@ -726,7 +732,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			template.setValue("captionTargetPlugin", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.targetPlugin")); //$NON-NLS-1$
 			template.setValue("targetPlugin", noneOrNonempty(extension.getExtendedPluginId())); //$NON-NLS-1$
-			
+
 			// Parameters
 			// captions set so far: captionId, captionDocumentation
 			template.setValue("captionParameters", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -745,9 +751,9 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				fillCacheEmpty(cache, "id", "multiplicity", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
-		
+
 	}
-	
+
 	private static class ParameterFiller implements TemplateFiller {
 
 		/**
@@ -759,33 +765,33 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Caption
 			template.setValue("caption", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.parameter")); //$NON-NLS-1$
-					
+
 			// Defaults
 			fillPluginElement(template, param);
-			
+
 			// Declaring extension
 			template.setValue("captionDeclaringExtension", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.declaringExtension")); //$NON-NLS-1$
 			template.setValue("declaringExtension", getId(param.getDeclaringExtension())); //$NON-NLS-1$
-			
+
 			// Declaring extension-point
 			template.setValue("captionDeclaringExtensionPoint", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.declaringExtensionPoint")); //$NON-NLS-1$
 			template.setValue("declaringExtensionPoint", getId(param.getDefinition().getDeclaringExtensionPoint())); //$NON-NLS-1$
-			
+
 			// Value
 			template.setValue("captionValue", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.value")); //$NON-NLS-1$
 			template.setValue("value", noneOrNonempty(param.rawValue())); //$NON-NLS-1$
-			
+
 			// Type
 			template.setValue("captionType", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.type")); //$NON-NLS-1$
 			template.setValue("type", noneOrNonempty(param.getDefinition().getType())); //$NON-NLS-1$
 		}
-		
+
 	}
-	
+
 	private static class ParameterDefinitionFiller implements TemplateFiller {
 
 		/**
@@ -797,23 +803,23 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Caption
 			template.setValue("caption", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.parameterDefinition")); //$NON-NLS-1$
-					
+
 			// Defaults
 			fillPluginElement(template, def);
-			
+
 			// Declaring extension-point
 			template.setValue("captionDeclaringExtensionPoint", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.declaringExtensionPoint")); //$NON-NLS-1$
 			template.setValue("declaringExtensionPoint", getId(def.getDeclaringExtensionPoint())); //$NON-NLS-1$
-			
+
 			// Relation
 			template.setValue("captionMultiplicity", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.multiplicity")); //$NON-NLS-1$
 			template.setValue("multiplicity", noneOrNonempty(def.getMultiplicity())); //$NON-NLS-1$
 		}
-		
+
 	}
-	
+
 	private static class LibraryFiller implements TemplateFiller {
 
 		/**
@@ -825,10 +831,10 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Caption
 			template.setValue("caption", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.library")); //$NON-NLS-1$
-			
+
 			// Defaults
 			fillPluginElement(template, library);
-			
+
 			// Version
 			template.setValue("captionVersion", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.version")); //$NON-NLS-1$
@@ -853,14 +859,14 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				fillCacheEmpty(cache, "index", "path"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
-		
+
 	}
-	
+
 	private static class PluginFragmentFiller implements TemplateFiller {
 
-		private static String extPointAncestryText = 
+		private static String extPointAncestryText =
 				"<img src='ext_point_obj.gif' />&nbsp;{1}<br><img src='plugin_obj.gif' />&nbsp;{2}"; //$NON-NLS-1$
-		private static String extensionTargetText = 
+		private static String extensionTargetText =
 				"<img src='ext_point_obj.gif' />&nbsp;{1}<br><img src='plugin_obj.gif' />&nbsp;{2}"; //$NON-NLS-1$
 
 		/**
@@ -873,27 +879,27 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			// Caption
 			template.setValue("caption", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.pluginFragment")); //$NON-NLS-1$
-			
+
 			fillDocumentable(template, fragment);
 
 			// General
 			template.setValue("captionId", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.id")); //$NON-NLS-1$ 
+					"plugins.core.outputView.captions.id")); //$NON-NLS-1$
 			template.setValue("id", fragment.getId()); //$NON-NLS-1$
 			template.setValue("captionVersion", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.version")); //$NON-NLS-1$ 
+					"plugins.core.outputView.captions.version")); //$NON-NLS-1$
 			template.setValue("version", noneOrNonempty(fragment.getVersion())); //$NON-NLS-1$
 			template.setValue("captionVendor", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.vendor")); //$NON-NLS-1$  
+					"plugins.core.outputView.captions.vendor")); //$NON-NLS-1$
 			template.setValue("vendor", noneOrNonempty(fragment.getVendor())); //$NON-NLS-1$
 			template.setValue("captionPlugin", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.plugin")); //$NON-NLS-1$  
+					"plugins.core.outputView.captions.plugin")); //$NON-NLS-1$
 			template.setValue("plugin", noneOrNonempty(fragment.getPluginId())); //$NON-NLS-1$
 			template.setValue("captionPluginVersion", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.pluginVersion")); //$NON-NLS-1$ 
+					"plugins.core.outputView.captions.pluginVersion")); //$NON-NLS-1$
 			template.setValue("pluginVersion", noneOrNonempty(fragment.getPluginVersion())); //$NON-NLS-1$
 			template.setValue("captionmatchingRule", ResourceManager.getInstance().get( //$NON-NLS-1$
-					"plugins.core.outputView.captions.matchingRule")); //$NON-NLS-1$  
+					"plugins.core.outputView.captions.matchingRule")); //$NON-NLS-1$
 			template.setValue("matchingRule", noneOrNonempty(fragment.getMatchingRule())); //$NON-NLS-1$
 			template.setValue("captionLocation", ResourceManager.getInstance().get( //$NON-NLS-1$
 					"plugins.core.outputView.captions.location")); //$NON-NLS-1$
@@ -925,7 +931,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "value", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
-			
+
 			// Prerequisites
 			// captions set so far: captionId, captionVersion, captionDocumentation
 			template.setValue("captionPrerequisites", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -959,7 +965,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			if(count==0) {
 				fillCacheEmpty(cache, "id", "version", "matchingRule", "optional", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}
-			
+
 			// Extensions
 			// captions set so far: captionId, captionDocumentation
 			template.setValue("captionExtensions", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -974,7 +980,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				}
 				count++;
 				cache.setValue("id", getId(extension)); //$NON-NLS-1$
-				String target = ResourceManager.format(extensionTargetText, 
+				String target = ResourceManager.format(extensionTargetText,
 						noneOrNonempty(extension.getExtendedPointId()),
 						noneOrNonempty(extension.getExtendedPluginId()));
 				cache.setRawValue("target", target); //$NON-NLS-1$
@@ -987,9 +993,9 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				cache.commit();
 			}
 			if(count==0) {
-				fillCacheEmpty(cache, "id", "target", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				fillCacheEmpty(cache, "id", "target", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
-			
+
 			// Extension-points
 			// captions set so far: captionId, captionDocumentation
 			template.setValue("captionExtensionPoints", ResourceManager.getInstance().get( //$NON-NLS-1$
@@ -1010,7 +1016,7 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				cache.setValue("id", getId(extensionPoint)); //$NON-NLS-1$
 				String ancestry = NONE;
 				if(extensionPoint.getParentExtensionPointId()!=null) {
-					ancestry = ResourceManager.format(extPointAncestryText, 
+					ancestry = ResourceManager.format(extPointAncestryText,
 							noneOrNonempty(extensionPoint.getParentExtensionPointId()),
 							noneOrNonempty(extensionPoint.getParentPluginId()));
 				}
@@ -1026,12 +1032,12 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 				cache.commit();
 			}
 			if(count==0) {
-				fillCacheEmpty(cache, "id", "ancestry", "multiplicity", "connectedExtensions", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
+				fillCacheEmpty(cache, "id", "ancestry", "multiplicity", "connectedExtensions", "documentation"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}
 		}
-		
+
 	}
-	
+
 	private static class DocumentableFiller implements TemplateFiller {
 
 		/**
@@ -1042,6 +1048,6 @@ public class PluginElementPresenter extends AbstractEditorPanePresenter<Object> 
 			Documentable<?> documentable = (Documentable<?>) data;
 			fillDocumentable(template, documentable);
 		}
-		
+
 	}
 }

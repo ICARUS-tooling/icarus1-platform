@@ -39,7 +39,8 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> implements CoreferenceData, CorefConstants, LanguageConstants {
+public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> implements CoreferenceData,
+		CorefConstants, LanguageConstants {
 
 	private static final long serialVersionUID = 1641469565583964051L;
 
@@ -72,11 +73,8 @@ public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> i
 	}
 
 	@Override
-	public CoreferenceData clone() {
-		DefaultCoreferenceData clone = new DefaultCoreferenceData(document, forms);
-		clone.setProperties(cloneProperties());
-
-		return clone;
+	public DefaultCoreferenceData clone() {
+		return (DefaultCoreferenceData) super.clone();
 	}
 
 	@Override

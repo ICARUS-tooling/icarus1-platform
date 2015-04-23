@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.tree;
@@ -37,69 +37,70 @@ import de.ims.icarus.search_tools.SearchNode;
  *
  */
 public class TransitiveMatcher extends Matcher {
-	
-	protected Stack<IndexIterator> cache = new Stack<>(); 
-	
+
+	protected Stack<IndexIterator> iteratorCache = new Stack<>();
+
 	protected boolean matched = false;
 
 	public TransitiveMatcher(SearchNode node, SearchEdge edge) {
 		super(node, edge);
 	}
-	
+
 	@Override
 	protected void innerClose() {
-		cache.clear();
+		iteratorCache.clear();
 	}
-	
+
 	protected IndexIterator newIterator() {
-		IndexIterator iterator = cache.isEmpty() ? null : cache.pop();
-		
+		IndexIterator iterator = iteratorCache.isEmpty() ? null : iteratorCache.pop();
+
 		if(iterator==null) {
 			iterator = indexIterator.clone();
 		}
-		
+
 		return iterator;
 	}
-	
+
 	protected void recycleIterator(IndexIterator iterator) {
-		cache.push(iterator);
+		iteratorCache.push(iterator);
 	}
 
 	@Override
-	public boolean matches() {						
+	public boolean matches() {
 		int parentAllocation = parent.getAllocation();
-		
+
+		//FIXME switch to the isLegalIndex(int) method  and traverse space instead of premature restriction
 		int minIndex = getMinIndex();
 		int maxIndex = getMaxIndex();
-		
+
 		matched = false;
-		
+
 		if(minIndex<=maxIndex) {
 			search(parentAllocation, minIndex, maxIndex);
 		}
-		
+
 		// Return scope to parent node
 		targetTree.viewNode(parentAllocation);
-		
-		// If unsuccessful and part of a disjunction let the 
+
+		// If unsuccessful and part of a disjunction let the
 		// alternate matcher have a try.
 		if(!matched && alternate!=null) {
 			matched = alternate.matches();
 		}
-		
+
 		return matched;
 	}
-	
+
 	protected void search(int index, int minIndex, int maxIndex) {
-		
+
 		targetTree.viewNode(index);
 		indexIterator.setMax(targetTree.getEdgeCount()-1);
-		
+
 		// Early return in case of unfruitful path
 		if(!indexIterator.hasNext()) {
 			return;
 		}
-		
+
 		while(indexIterator.hasNext()) {
 			targetTree.viewNode(index);
 			targetTree.viewChild(indexIterator.next());
@@ -109,7 +110,7 @@ public class TransitiveMatcher extends Matcher {
 					|| targetTree.getNodeIndex()>maxIndex) {
 				continue;
 			}
-			
+
 			// Honor locked nodes that are allocated to other matchers!
 			if(targetTree.isNodeLocked()) {
 				continue;
@@ -119,18 +120,18 @@ public class TransitiveMatcher extends Matcher {
 			if(!matchesType()) {
 				continue;
 			}
-			
-			// Check for structural constraints 
+
+			// Check for structural constraints
 			if(targetTree.getDescendantCount()<descendantCount
 					|| targetTree.getHeight()<height) {
 				continue;
 			}
-			
+
 			// Check for required number of children
 			if(targetTree.getEdgeCount()<childCount) {
 				continue;
 			}
-			
+
 			// Check if the current node is a potential match
 			if(!matchesConstraints()) {
 				continue;
@@ -139,7 +140,7 @@ public class TransitiveMatcher extends Matcher {
 			// Lock allocation
 			allocate();
 
-			// Search for child matchers that serve as exclusions			
+			// Search for child matchers that serve as exclusions
 			if(!matchesExclusions()) {
 				// Delegate further search to the next matcher
 				// or otherwise commit current match
@@ -148,14 +149,14 @@ public class TransitiveMatcher extends Matcher {
 
 			// Release lock
 			deallocate();
-			
+
 			if(isDone()) {
 				return;
 			}
 		}
-		
+
 		targetTree.lockNode(index);
-		
+
 		// Continue recursive
 		targetTree.viewNode(index);
 		IndexIterator iterator = newIterator();
@@ -167,12 +168,12 @@ public class TransitiveMatcher extends Matcher {
 				break;
 			}
 		}
-		
+
 		targetTree.unlockNode(index);
-		
+
 		recycleIterator(iterator);
 	}
-	
+
 	protected boolean isDone() {
 		return matched && (exclusionMember || !exhaustive);
 	}

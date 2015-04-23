@@ -39,7 +39,7 @@ import de.ims.icarus.util.mem.HeapMember;
  *
  */
 @HeapMember
-public class EdgeSet extends CorefListMember<Edge> {
+public class EdgeSet extends CorefListMember<Edge> implements Cloneable {
 
 	public EdgeSet() {
 		// no-op

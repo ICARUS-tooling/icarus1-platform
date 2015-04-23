@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.search;
@@ -48,24 +48,24 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class CoreferenceDocumentSetTargetSelector 
+public class CoreferenceDocumentSetTargetSelector
 		implements SearchTargetSelector, ActionListener {
 
 	protected JPanel contentPanel;
 	protected FormBuilder formBuilder;
 	protected DefaultComboBoxModel<Object> allocationModel;
-	
+
 	protected static final Object dummyEntry = "-"; //$NON-NLS-1$
-	
+
 	public CoreferenceDocumentSetTargetSelector() {
 		// no-op
 	}
-	
+
 	protected void ensureUI() {
 		if(contentPanel==null) {
 			contentPanel = new JPanel();
 			formBuilder = FormBuilder.newLocalizingBuilder(contentPanel);
-			
+
 			ComboBoxModel<?> model = new ComboBoxListWrapper<>(
 					CoreferenceRegistry.getInstance().getDocumentSetListModel());
 			ChoiceFormEntry entry = new ChoiceFormEntry(
@@ -73,13 +73,13 @@ public class CoreferenceDocumentSetTargetSelector
 					model);
 			entry.getComboBox().addActionListener(this);
 			formBuilder.addEntry("documentSet", entry); //$NON-NLS-1$
-			
+
 			allocationModel = new DefaultComboBoxModel<Object>();
 			entry = new ChoiceFormEntry(
 					"plugins.coref.labels.allocation",  //$NON-NLS-1$
 					allocationModel);
 			formBuilder.addEntry("allocation", entry); //$NON-NLS-1$
-			
+
 			formBuilder.buildForm();
 			formBuilder.pack();
 		}
@@ -93,10 +93,10 @@ public class CoreferenceDocumentSetTargetSelector
 		ensureUI();
 		DocumentSetDescriptor documentSet = (DocumentSetDescriptor) formBuilder.getValue("documentSet"); //$NON-NLS-1$
 		Object allocation = formBuilder.getValue("allocation"); //$NON-NLS-1$
-		if(dummyEntry==allocation) {
+		if(dummyEntry.equals(allocation)) {
 			allocation = null;
 		}
-		
+
 		return new CoreferenceDocumentSearchTarget(
 				documentSet, (AllocationDescriptor) allocation);
 	}
@@ -107,9 +107,9 @@ public class CoreferenceDocumentSetTargetSelector
 	@Override
 	public void setSelectedItem(Object item) {
 		ensureUI();
-		
+
 		CoreferenceDocumentSearchTarget target = (CoreferenceDocumentSearchTarget) item;
-		
+
 		formBuilder.setValue("documentSet", target.getDocumentSet()); //$NON-NLS-1$
 		Object allocation = target.getAllocation();
 		if(allocation==null) {
@@ -152,11 +152,11 @@ public class CoreferenceDocumentSetTargetSelector
 		DocumentSetDescriptor documentSet = (DocumentSetDescriptor) formBuilder.getValue("documentSet"); //$NON-NLS-1$
 		allocationModel.removeAllElements();
 		allocationModel.addElement(dummyEntry);
-		
+
 		if(documentSet==null) {
 			return;
 		}
-		
+
 		for(int i=0; i<documentSet.size(); i++) {
 			allocationModel.addElement(documentSet.get(i));
 		}

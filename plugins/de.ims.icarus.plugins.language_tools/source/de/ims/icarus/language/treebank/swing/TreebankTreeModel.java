@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.treebank.swing;
@@ -44,18 +44,18 @@ import de.ims.icarus.ui.tree.AbstractTreeModel;
 import de.ims.icarus.util.cache.LRUCache;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class TreebankTreeModel extends AbstractTreeModel implements EventListener {
-	
+
 	protected Extension[] extensions;
 	protected LRUCache<Extension, Treebank[]> cache = new LRUCache<>(20);
-	
-	private static TreebankTreeModel sharedInstance;
-	
+
+	private static volatile TreebankTreeModel sharedInstance;
+
 	/**
 	 * @return the sharedInstance
 	 */
@@ -71,17 +71,17 @@ public class TreebankTreeModel extends AbstractTreeModel implements EventListene
 	}
 
 	public TreebankTreeModel() {
-		
+
 		if(extensions==null) {
 			List<Extension> availableExtensions = new ArrayList<>(
 					TreebankRegistry.getInstance().availableTypes());
 			Collections.sort(availableExtensions, PluginUtil.IDENTITY_COMPARATOR);
 			extensions = availableExtensions.toArray(new Extension[availableExtensions.size()]);
 		}
-		
+
 		TreebankRegistry.getInstance().addListener(null, this);
 	}
-	
+
 	protected Treebank[] getTreebanks(Extension extension) {
 		Treebank[] treebanks = null;
 		treebanks = cache.get(extension);
@@ -91,7 +91,7 @@ public class TreebankTreeModel extends AbstractTreeModel implements EventListene
 			treebanks = instances.toArray(new Treebank[instances.size()]);
 			cache.put(extension, treebanks);
 		}
-		
+
 		return treebanks;
 	}
 
@@ -114,7 +114,7 @@ public class TreebankTreeModel extends AbstractTreeModel implements EventListene
 	 */
 	@Override
 	public int getChildCount(Object parent) {
-		int childCount = 0; 
+		int childCount = 0;
 		if(parent==root) {
 			childCount = extensions.length;
 		} else if(parent instanceof Extension) {
@@ -142,9 +142,9 @@ public class TreebankTreeModel extends AbstractTreeModel implements EventListene
 		if(parent==null || child==null) {
 			return -1;
 		}
-		
+
 		Object[] children = null;
-		
+
 		if(parent==root) {
 			children = extensions;
 		} else if(parent instanceof Extension) {
@@ -152,18 +152,18 @@ public class TreebankTreeModel extends AbstractTreeModel implements EventListene
 		} else {
 			return -1;
 		}
-		
+
 		return indexOf(children, child);
 	}
-	
+
 	protected int indexOf(Object[] children, Object child) {
-		
+
 		for(int i = children.length-1; i>-1; i--) {
 			if(children[i].equals(child)) {
 				return i;
 			}
 		}
-		
+
 		return -1;
 	}
 	/**
@@ -197,24 +197,24 @@ public class TreebankTreeModel extends AbstractTreeModel implements EventListene
 				children = newChildren;
 			}
 			cache.put(extension, children);
-			
+
 			fireTreeStructureChanged(parentPath);
 			break;
-		
+
 		case Events.REMOVED:
 			children = cache.get(extension);
 			if(children!=null && children.length>0) {
 				int childIndex = indexOf(children, treebank);
 				Treebank[] newChildren = new Treebank[children.length-1];
 				System.arraycopy(children, 0, newChildren, 0, childIndex);
-				System.arraycopy(children, childIndex+1, newChildren, 
+				System.arraycopy(children, childIndex+1, newChildren,
 						childIndex, newChildren.length-childIndex);
 				cache.put(extension, newChildren);
 			}
-			
+
 			fireTreeStructureChanged(parentPath);
 			break;
-			
+
 		case Events.CHANGED:
 			children = getTreebanks(extension);
 			int childIndex = indexOf(children, treebank);
@@ -222,5 +222,5 @@ public class TreebankTreeModel extends AbstractTreeModel implements EventListene
 			break;
 		}
 	}
-	
+
 }

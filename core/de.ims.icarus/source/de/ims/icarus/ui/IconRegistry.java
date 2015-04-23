@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui;
@@ -44,33 +44,35 @@ import de.ims.icarus.util.Exceptions;
 
 
 /**
- * @author Markus Gärtner 
+ * @author Markus Gärtner
  * @version $Id$
  *
  */
 public final class IconRegistry {
 
 	private final Map<String, Icon> icons = new HashMap<>();
-	
+
 	private final List<Entry<ClassLoader, String>> loaders = new ArrayList<>();
-	
+
 	private final IconRegistry parent;
-	
-	private static IconRegistry globalRegistry;
+
+	private static volatile IconRegistry globalRegistry;
 
 	public static IconRegistry getGlobalRegistry() {
 		if(globalRegistry==null) {
 			synchronized (IconRegistry.class) {
 				if(globalRegistry==null) {
-					globalRegistry= new IconRegistry(null);
-					globalRegistry.addSearchPath("de/ims/icarus/ui/icons/"); //$NON-NLS-1$
+					IconRegistry newGlobalRegistry= new IconRegistry(null);
+					newGlobalRegistry.addSearchPath("de/ims/icarus/ui/icons/"); //$NON-NLS-1$
+
+					globalRegistry = newGlobalRegistry;
 				}
 			}
 		}
-		
+
 		return globalRegistry;
 	}
-	
+
 	public static IconRegistry newRegistry(IconRegistry parent) {
 		// TODO maybe force globalRegistry to be fallback parent?
 		return new IconRegistry(parent);
@@ -79,12 +81,12 @@ public final class IconRegistry {
 	private IconRegistry(IconRegistry parent) {
 		this.parent = parent;
 	}
-	
+
 	// prevent multiple deserialization
 	private Object readResolve() throws ObjectStreamException {
 		return getGlobalRegistry();
 	}
-	
+
 	// prevent cloning
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
@@ -93,34 +95,34 @@ public final class IconRegistry {
 
 	private Icon loadIcon(String name) {
 		Icon icon = null;
-		
+
 		synchronized (loaders) {
 			for(Entry<ClassLoader, String> entry : loaders) {
 				try {
 					String prefix = entry.getValue();
 					ClassLoader loader = entry.getKey();
-					
+
 					// apply prefix
 					String path = prefix+name;
-					
+
 					// try to locate resource
 					URL location = loader.getResource(path);
-					
+
 					// create new icon
 					if(location!=null) {
 						icon = new ImageIcon(location);
 					}
-					
+
 					if(icon!=null) {
 						break;
 					}
-					
+
 				} catch(Exception e) {
 					LoggerFactory.log(this, Level.SEVERE, "Error while loading icon: "+name, e); //$NON-NLS-1$
 				}
 			}
 		}
-		
+
 		// Save icon for future calls or delegate search
 		// to parent which will save loaded icons in its own
 		// map so that calls to lookupIcon(String) will search
@@ -130,26 +132,26 @@ public final class IconRegistry {
 		} else if(parent!=null) {
 			icon = parent.loadIcon(name);
 		}
-		
+
 		return icon;
 	}
-	
+
 	public void addSearchPath(String prefix) {
 		addSearchPath(null, prefix);
 	}
-	
+
 	public void addSearchPath(ClassLoader loader, String prefix) {
 		if(loader==null && prefix==null)
 			throw new IllegalArgumentException("Either loader or prefix has to be defined!"); //$NON-NLS-1$
-		
+
 		if(loader==null)
 			loader = Core.class.getClassLoader();
-		
+
 		if(prefix==null)
 			prefix = ""; //$NON-NLS-1$
-		
+
 		synchronized (loaders) {
-			
+
 			// check for duplicates
 			for(int i=0; i<loaders.size(); i++) {
 				Entry<ClassLoader, String> entry = loaders.get(i);
@@ -157,14 +159,14 @@ public final class IconRegistry {
 					return;
 				}
 			}
-			
+
 			// not present yet -> add new entry
-			Entry<ClassLoader, String> entry = 
+			Entry<ClassLoader, String> entry =
 					new AbstractMap.SimpleEntry<ClassLoader, String>(loader, prefix);
 			loaders.add(entry);
 		}
 	}
-	
+
 	public void removeSearchPath(ClassLoader loader, String prefix) {
 		Exceptions.testNullArgument(loader, "loader"); //$NON-NLS-1$
 		if(prefix==null)
@@ -180,30 +182,30 @@ public final class IconRegistry {
 			}
 		}
 	}
-	
+
 	private Icon lookupIcon(String name) {
 		Icon icon = icons.get(name);
-		
+
 		if(icon==null && parent!=null)
 			icon = parent.lookupIcon(name);
-		
+
 		return icon;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param name
 	 * @return
 	 */
 	public Icon getIcon(String name) {
 		Exceptions.testNullArgument(name, "name"); //$NON-NLS-1$
-		
+
 		Icon icon = lookupIcon(name);
-		
+
 		if(icon==null) {
 			icon = loadIcon(name);
 		}
-		
+
 		return icon;
 	}
 }

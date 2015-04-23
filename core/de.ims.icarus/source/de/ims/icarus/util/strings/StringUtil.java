@@ -486,7 +486,7 @@ public final class StringUtil {
 		return obj.toString();
 	}
 
-	private static Pattern indexPattern;
+	private static volatile Pattern indexPattern;
 
 	public static String getBaseName(String name) {
 		if(indexPattern==null) {

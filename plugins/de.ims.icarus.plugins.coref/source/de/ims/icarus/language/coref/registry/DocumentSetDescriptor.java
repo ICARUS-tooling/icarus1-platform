@@ -398,7 +398,7 @@ public class DocumentSetDescriptor implements Loadable,
 		return allocations.isEmpty() ? -1 : allocations.indexOf(allocation);
 	}
 
-	private static ContentType allocationDescriptorContentType;
+	private static volatile ContentType allocationDescriptorContentType;
 	public static ContentType getEntryType() {
 		if(allocationDescriptorContentType==null) {
 			synchronized (DocumentSetDescriptor.class) {

@@ -593,7 +593,7 @@ public class MatcherBuilder {
 		return clones;
 	}
 
-	protected static class TreeNode {
+	protected static class TreeNode implements Cloneable {
 		protected SearchEdge searchEdge;
 		protected SearchNode searchNode;
 

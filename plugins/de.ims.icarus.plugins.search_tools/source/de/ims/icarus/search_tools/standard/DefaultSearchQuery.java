@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
@@ -41,34 +41,34 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class DefaultSearchQuery implements SearchQuery {
-	
+public class DefaultSearchQuery implements SearchQuery, Cloneable {
+
 	protected SearchGraph graph;
 	protected String query;
-	
+
 	protected Map<String, Object> properties;
-	
+
 	protected DefaultQueryParser parser;
 	protected final ContentType contentType;
 
 	public DefaultSearchQuery(ContentType contentType) {
 		if(contentType==null)
 			throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
-		
+
 		this.contentType = contentType;
-		
+
 		graph = new DefaultSearchGraph();
 		query = ""; //$NON-NLS-1$
 	}
-	
+
 	protected DefaultQueryParser createParser() throws Exception {
 		ConstraintContext context = SearchManager.getInstance().getConstraintContext(getContentType());
 		if(context==null)
 			throw new IllegalStateException("Unable to fetch constraint-context for content-type: "+getContentType().getId()); //$NON-NLS-1$
-		
+
 		return new DefaultQueryParser(context, null);
 	}
-	
+
 	public final ContentType getContentType() {
 		return contentType;
 	}
@@ -81,13 +81,13 @@ public class DefaultSearchQuery implements SearchQuery {
 			throws UnsupportedFormatException {
 		if(query==null)
 			throw new NullPointerException("Invalid query"); //$NON-NLS-1$
-		
+
 		if(this.query!=null && this.query.equals(query)) {
 			return;
 		}
-		
+
 		this.query = query;
-		
+
 		try {
 			queryToGraph();
 		} catch (Exception e) {
@@ -95,30 +95,30 @@ public class DefaultSearchQuery implements SearchQuery {
 					"Error while parsing query", e); //$NON-NLS-1$
 		}
 	}
-	
+
 	protected void graphToQuery() throws Exception {
 		if(graph==null) {
 			query = null;
 			return;
 		}
-		
+
 		if(parser==null) {
 			parser = createParser();
 		}
-		
+
 		query = parser.toQuery(graph, null);
 	}
-	
+
 	protected void queryToGraph() throws Exception {
 		if(query==null) {
 			graph = null;
 			return;
 		}
-		
+
 		if(parser==null) {
 			parser = createParser();
 		}
-		
+
 		graph = parser.parseQuery(query, null);
 	}
 
@@ -138,7 +138,7 @@ public class DefaultSearchQuery implements SearchQuery {
 		if(properties==null) {
 			properties = new HashMap<>();
 		}
-		
+
 		properties.put(key, value);
 	}
 
@@ -165,13 +165,13 @@ public class DefaultSearchQuery implements SearchQuery {
 	public void setSearchGraph(SearchGraph graph) throws UnsupportedFormatException {
 		if(graph==null)
 			throw new NullPointerException("Invalid graph"); //$NON-NLS-1$
-		
+
 		if(this.graph!=null && this.graph.equals(graph)) {
 			return;
 		}
-		
+
 		this.graph = graph;
-		
+
 		try {
 			graphToQuery();
 		} catch (Exception e) {
@@ -186,11 +186,11 @@ public class DefaultSearchQuery implements SearchQuery {
 		clone.graph = graph.clone();
 		clone.query = query;
 		clone.parser = parser;
-		
+
 		if(properties!=null) {
 			clone.properties = new HashMap<>(properties);
 		}
-		
+
 		return clone;
 	}
 

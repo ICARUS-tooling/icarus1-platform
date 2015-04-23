@@ -586,7 +586,10 @@ public class TreebankExplorerView extends View {
 				Desktop desktop = Desktop.getDesktop();
 				if(location.isLocal()) {
 					// Open local treebanks in the default explorer
-					desktop.open(location.getLocalPath().getParent().toFile());
+					Path path = location.getLocalPath().getParent();
+					if(path!=null) {
+						desktop.open(path.toFile());
+					}
 				} else {
 					// Use the systems browser for remote treebanks
 					desktop.browse(location.getURL().toURI());

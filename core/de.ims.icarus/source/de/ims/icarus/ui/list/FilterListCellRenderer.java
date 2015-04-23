@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.list;
@@ -44,7 +44,7 @@ public class FilterListCellRenderer extends JCheckBox implements ListCellRendere
 	public FilterListCellRenderer() {
 		setBorderPaintedFlat(true);
 	}
-	
+
 	protected String getTextForValue(int index, Boolean value) {
 		return null;
 	}
@@ -56,13 +56,13 @@ public class FilterListCellRenderer extends JCheckBox implements ListCellRendere
 	public Component getListCellRendererComponent(
 			JList<? extends Boolean> list, Boolean value, int index,
 			boolean isSelected, boolean cellHasFocus) {
-		
+
 		setForeground(list.getForeground());
 		setBackground(list.getBackground());
-		
+
 		setSelected(value);
 		setText(getTextForValue(index, value));
-		
+
 		return this;
 	}
 
@@ -94,7 +94,7 @@ public class FilterListCellRenderer extends JCheckBox implements ListCellRendere
 	@Override
 	protected void firePropertyChange(String propertyName, Object oldValue,
 			Object newValue) {
-		if (propertyName == "text" || propertyName == "font") { //$NON-NLS-1$ //$NON-NLS-2$
+		if ("text".equals(propertyName) || "font".equals(propertyName)) { //$NON-NLS-1$ //$NON-NLS-2$
 			super.firePropertyChange(propertyName, oldValue, newValue);
 		}
 	}

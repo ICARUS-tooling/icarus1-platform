@@ -108,7 +108,7 @@ public class CoreferenceHeadPropertyConstraintFactory extends AbstractConstraint
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public CoreferenceHeadPropertyIConstraint clone() {
 			return new CoreferenceHeadPropertyIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}

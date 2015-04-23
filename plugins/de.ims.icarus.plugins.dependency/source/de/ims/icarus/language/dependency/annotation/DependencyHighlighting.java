@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency.annotation;
@@ -42,9 +42,9 @@ import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
  *
  */
 public class DependencyHighlighting extends BitmaskHighlighting {
-	
-	private static DependencyHighlighting instance;
-	
+
+	private static volatile DependencyHighlighting instance;
+
 	public static DependencyHighlighting getInstance() {
 		// Most times this will be called from the event dispatch thread
 		// so we do not need to care much about synchronization.
@@ -53,13 +53,13 @@ public class DependencyHighlighting extends BitmaskHighlighting {
 		if(instance==null) {
 			instance = new DependencyHighlighting();
 		}
-		
+
 		return instance;
 	}
 
 	public DependencyHighlighting() {
 		super(DEFAULT_BLOCK_SIZE); // Use default block size of 5 digits
-		
+
 		// Register tokens
 		registerToken("form", true, new Color(2807039)); //$NON-NLS-1$
 		registerToken("lemma", true, new Color(2807039)); //$NON-NLS-1$
@@ -70,22 +70,22 @@ public class DependencyHighlighting extends BitmaskHighlighting {
 		registerToken("distance", false, new Color(14748812)); //$NON-NLS-1$
 		registerToken("direction", false, new Color(10789924)); //$NON-NLS-1$
 	}
-	
+
 	protected ConfigListener configListener;
-	
+
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.search_tools.annotation.BitmaskHighlighting#loadConfig()
 	 */
 	@Override
 	public synchronized void loadConfig() {
-		
+
 		ConfigRegistry config = ConfigRegistry.getGlobalRegistry();
 		Handle group = config.getHandle("plugins.dependency.highlighting"); //$NON-NLS-1$
-		
+
 		if(configListener==null) {
 			configListener = new ConfigListener() {
-				
+
 				@Override
 				public void invoke(ConfigRegistry sender, ConfigEvent event) {
 					loadConfig();
@@ -93,13 +93,13 @@ public class DependencyHighlighting extends BitmaskHighlighting {
 			};
 			config.addGroupListener(group, configListener);
 		}
-		
+
 		List<String> tokens = new ArrayList<>(tokenColors.keySet());
 		for(String token : tokens) {
 			Color col = new Color(config.getInteger(config.getChildHandle(group, token+"Highlight"))); //$NON-NLS-1$
 			tokenColors.put(token, col);
 		}
-		
+
 		transitiveHighlightColor = new Color(config.getInteger(config.getChildHandle(group, "transitiveHighlight"))); //$NON-NLS-1$
 		nodeHighlightColor = new Color(config.getInteger(config.getChildHandle(group, "nodeHighlight"))); //$NON-NLS-1$
 		edgeHighlightColor = new Color(config.getInteger(config.getChildHandle(group, "edgeHighlight"))); //$NON-NLS-1$

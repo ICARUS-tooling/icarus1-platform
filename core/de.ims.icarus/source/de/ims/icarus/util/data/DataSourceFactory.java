@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util.data;
@@ -46,9 +46,9 @@ import de.ims.icarus.config.ConfigRegistry.Handle;
  *
  */
 public final class DataSourceFactory {
-	
-	private static DataSourceFactory instance;
-	
+
+	private static volatile DataSourceFactory instance;
+
 	public static DataSourceFactory getInstance() {
 		if(instance==null) {
 			synchronized (DataSourceFactory.class) {
@@ -59,76 +59,76 @@ public final class DataSourceFactory {
 		}
 		return instance;
 	}
-	
+
 	private Map<Object, Reference<DataSource>> cache;
-	
+
 	private DataSourceFactory() {
 		// no-op
 	}
-	
+
 	private DataSource getCachedSource(Object key) {
 		if(cache==null) {
 			return null;
 		}
-		
+
 		Reference<DataSource> ref = cache.get(key);
 		return ref==null ? null : ref.get();
 	}
-	
+
 	private void cacheSource(Object key, DataSource dataSource) {
 		if(cache==null) {
 			cache = new HashMap<>();
 			cache = Collections.synchronizedMap(cache);
 		}
-		
+
 		Reference<DataSource> ref = new WeakReference<DataSource>(dataSource);
 		cache.put(key, ref);
 	}
-	
+
 	public DataSource getConfigDataSource(Handle handle, ChangeListener listener) {
 		if(handle==null)
 			throw new NullPointerException("Invalid handle"); //$NON-NLS-1$
-				
+
 		DataSource dataSource = getCachedSource(handle);
 		if(dataSource==null) {
 			dataSource = new ConfigDataSource(handle);
 			cacheSource(handle, dataSource);
 		}
-		
+
 		if(listener!=null) {
 			dataSource.addChangeListener(listener);
 		}
-		
+
 		return dataSource;
 	}
-	
+
 	public DataSource getConfigDataSource(ConfigRegistry registry, String path, ChangeListener listener) {
 		if(path==null)
 			throw new NullPointerException("Invalid path"); //$NON-NLS-1$
-		
+
 		if(registry==null) {
 			registry = ConfigRegistry.getGlobalRegistry();
 		}
-		
+
 		Handle handle = registry.getHandle(path);
 		if(handle==null)
 			throw new IllegalArgumentException("Unknown config path: "+path); //$NON-NLS-1$
-		
+
 		return getConfigDataSource(handle, listener);
 	}
 
 	public DataSource getConfigDataSource(String path, ChangeListener listener) {
 		return getConfigDataSource(null, path, listener);
 	}
-	
+
 	@SuppressWarnings("unused")
 	private class DelegatingDataSource extends AbstractDataSource implements ChangeListener {
-		
+
 		private final DataSource source;
 
 		DelegatingDataSource(DataSource source) {
 			this.source = source;
-			
+
 			new OwnedChangeListener(this, source);
 		}
 
@@ -155,9 +155,9 @@ public final class DataSourceFactory {
 		public void setData(Object value) {
 			source.setData(value);
 		}
-		
+
 	}
-	
+
 	private static class OwnedChangeListener implements ChangeListener {
 		private final Reference<DataSource> owner;
 		private final DataSource target;
@@ -166,7 +166,7 @@ public final class DataSourceFactory {
 				DataSource target) {
 			this.owner = new WeakReference<>(owner);
 			this.target = target;
-			
+
 			target.addChangeListener(this);
 		}
 
@@ -180,7 +180,7 @@ public final class DataSourceFactory {
 				target.removeChangeListener(this);
 				return;
 			}
-			
+
 			if(dataSource instanceof ChangeListener) {
 				((ChangeListener)dataSource).stateChanged(e);
 			}
@@ -188,12 +188,12 @@ public final class DataSourceFactory {
 	}
 
 	private class ConfigDataSource extends AbstractDataSource {
-		
+
 		private final Handle handle;
 
 		ConfigDataSource(Handle handle) {
 			this.handle = handle;
-			
+
 			new OwnedConfigListener(this);
 		}
 
@@ -215,12 +215,12 @@ public final class DataSourceFactory {
 			registry.setValue(handle, value);
 		}
 	}
-	
+
 	private class OwnedConfigListener implements ConfigListener {
-		
+
 		private final Handle handle;
 		private final Reference<ConfigDataSource> owner;
-		
+
 		OwnedConfigListener(ConfigDataSource owner) {
 			this.owner = new WeakReference<>(owner);
 			handle = owner.handle;
@@ -236,7 +236,7 @@ public final class DataSourceFactory {
 				ConfigRegistry registry = handle.getSource();
 				registry.removeListener(this);
 			}
-			
+
 			if(event.getHandle()==handle) {
 				dataSource.fireDataChanged();
 			}

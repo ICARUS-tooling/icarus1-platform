@@ -492,7 +492,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 
 	@Override
 	public void uninstall(Object target) {
-		target = null;
+		parent = null;
 	}
 
 	/**

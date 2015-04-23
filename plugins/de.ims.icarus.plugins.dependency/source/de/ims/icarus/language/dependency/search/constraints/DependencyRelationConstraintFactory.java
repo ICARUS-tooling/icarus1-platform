@@ -73,8 +73,8 @@ public class DependencyRelationConstraintFactory extends AbstractConstraintFacto
 		}
 
 		@Override
-		public SearchConstraint clone() {
-			return new DependencyRelationConstraint(getValue(), getOperator());
+		public DependencyRelationConstraint clone() {
+			return (DependencyRelationConstraint) super.clone();
 		}
 	}
 
@@ -93,7 +93,7 @@ public class DependencyRelationConstraintFactory extends AbstractConstraintFacto
 
 		@Override
 		public DependencyRelationCIConstraint clone() {
-			return new DependencyRelationCIConstraint(getValue(), getOperator());
+			return (DependencyRelationCIConstraint) super.clone();
 		}
 	}
 }

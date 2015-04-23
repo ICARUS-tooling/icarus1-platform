@@ -42,7 +42,7 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
  */
 @XmlRootElement(name="painte")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PaIntEParams implements Serializable {
+public class PaIntEParams implements Serializable, Cloneable {
 
 	public static final double DEFAULT_ALIGNMENT = 3.6;
 
@@ -296,11 +296,14 @@ public class PaIntEParams implements Serializable {
 	public void setAlignment(double alignment) {
 		this.alignment = alignment;
 	}
+
 	@Override
 	public PaIntEParams clone() {
-		PaIntEParams params = new PaIntEParams();
-		params.setParams(this);
-		return params;
+		try {
+			return (PaIntEParams) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException();
+		}
 	}
 //	/**
 //	 * @param minX the minX to set

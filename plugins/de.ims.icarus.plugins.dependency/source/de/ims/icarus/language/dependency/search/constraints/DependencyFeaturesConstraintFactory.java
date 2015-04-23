@@ -106,7 +106,7 @@ public class DependencyFeaturesConstraintFactory extends AbstractConstraintFacto
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public DependencyFeaturesCIConstraint clone() {
 			return new DependencyFeaturesCIConstraint(getValue(), getOperator());
 		}
 	}

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.view;
@@ -45,19 +45,19 @@ import javax.swing.SwingConstants;
  *
  */
 public class TextRenderer {
-	
+
 	private Font font;
 	private Rectangle bounds;
 	private int lineSpacing = 3;
 	private boolean antiAliasing = true;
 	private boolean verticalStretch = false;
-	
+
 	private List<Line> lines;
-	
+
 	private LineBuffer buffer;
-	
-	private static Component dummyComponent;
-	
+
+	private static volatile Component dummyComponent;
+
 	@SuppressWarnings("serial")
 	private static Component getDummyComponent() {
 		if(dummyComponent==null) {
@@ -75,80 +75,80 @@ public class TextRenderer {
 	public TextRenderer() {
 		// no-op
 	}
-	
+
 	public Rectangle getBounds() {
 		recalc();
 		return bounds;
 	}
-	
+
 	private void recalc() {
 		if(bounds!=null) {
 			Rectangle r = new Rectangle();
-			
+
 			if(lines!=null && !lines.isEmpty()) {
 				for(Line line : lines) {
 					r.height += line.getTotalHeight();
 					r.width = Math.max(r.width, line.getTotalWidth());
 				}
 			}
-						
+
 			bounds = r;
 		}
 	}
-	
+
 	public void paint(Graphics gr, int x, int y, int width, int height) {
 		if(lines==null || lines.isEmpty()) {
 			return;
-		}		
-	
+		}
+
 		Graphics2D g = (Graphics2D) gr.create();
 		if(font!=null) {
 			g.setFont(font);
 		}
 		if(antiAliasing) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 					RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
+			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
 					RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		}
-		
+
 		Rectangle clip = g.getClipBounds();
 		Rectangle lineBounds = new Rectangle(getBounds());
-		
+
 		int lineHeight = -1;
 		if(verticalStretch) {
-			int totalHeight = lineBounds.height - (lines.size()-1)*lineSpacing; 
+			int totalHeight = lineBounds.height - (lines.size()-1)*lineSpacing;
 			lineHeight = totalHeight / lines.size();
 		}
-		
+
 		for(int i=0; i<lines.size(); i++) {
 			Line line = lines.get(i);
-			
+
 			// Shift to current line origin
 			lineBounds.x = x;
 			lineBounds.y = y;
-			
+
 			// Apply spacing
 			if(i>0) {
 				lineBounds.y += lineSpacing;
 			}
-			
+
 			// Determine current line height
 			lineBounds.height = Math.max(lineHeight, line.getTotalHeight());
-			
+
 			// Not in clipping area -> end rendering
 			// FIXME there seemed to be a bug in the clipping area used by
 			// jgraph canvas renderers, needs further investigation
 			if(clip!=null && !clip.intersects(lineBounds)) {
 				break;
 			}
-			
+
 			line.paint(g, lineBounds.x, lineBounds.y, lineBounds.width, lineBounds.height);
-			
+
 			// Increment line origin (ONLY y)
 			y += lineBounds.height;
 		}
-		
+
 		g.dispose();
 	}
 
@@ -185,47 +185,47 @@ public class TextRenderer {
 		this.lineSpacing = lineSpacing;
 		bounds = null;
 	}
-	
+
 	public void addBlock(Block block) {
 		feedBlock(block, false);
 	}
-	
+
 	public void newLine() {
 		feedBlock(null, true);
 	}
-	
+
 	public void addText(String text) {
 		feedBlock(new TextBlock(text, null, null, -1, -1), false);
 	}
-	
+
 	public void addText(String text, Color color) {
 		feedBlock(new TextBlock(text, null, color, -1, -1), false);
 	}
-	
+
 	public void addText(String text, Font font) {
 		feedBlock(new TextBlock(text, font, null, -1, -1), false);
 	}
-	
+
 	public void addText(String text, Font font, Color color) {
 		feedBlock(new TextBlock(text, font, color, -1, -1), false);
 	}
-	
+
 	public void addText(String text, Font font, Color color, int width, int height) {
 		feedBlock(new TextBlock(text, font, color, width, height), false);
 	}
-	
+
 	public void addSpace(int width, int height) {
 		feedBlock(new EmptyBlock(width, height), false);
 	}
-	
+
 	public void addIcon(Icon icon) {
 		feedBlock(new ImageBlock(icon, -1, -1), false);
 	}
-	
+
 	public void addIcon(Icon icon, int width, int height) {
 		feedBlock(new ImageBlock(icon, width, height), false);
 	}
-	
+
 	private void addLine(Line line) {
 		if(line==null) {
 			return;
@@ -236,38 +236,38 @@ public class TextRenderer {
 		lines.add(line);
 		bounds = null;
 	}
-	
+
 	private void feedBlock(Block block, boolean wrap) {
 		if(buffer==null) {
 			buffer = new LineBuffer();
 		}
-		
+
 		if(block!=null) {
 			buffer.addBlock(block);
 		}
-		
+
 		if(wrap) {
 			addLine(buffer.toLine());
 		}
 	}
-	
+
 	private class LineBuffer {
 		int width = 0;
 		int height = 0;
-		
+
 		List<Block> blocks;
-		
+
 		void addBlock(Block block) {
 			if(blocks==null) {
 				blocks = new LinkedList<>();
 			}
-			
+
 			blocks.add(block);
-			
+
 			width += block.getWidth();
 			height = Math.max(height, block.getHeight());
 		}
-		
+
 		@SuppressWarnings("unused")
 		public int getWidth() {
 			return width;
@@ -284,38 +284,38 @@ public class TextRenderer {
 				blocks.clear();
 			}
 		}
-		
+
 		Line toLine() {
 			Line line = null;
 			if(blocks!=null && !blocks.isEmpty()) {
 				line = new Line(blocks.toArray(new Block[blocks.size()]));
 			}
-			
+
 			reset();
-			
+
 			return line;
 		}
 	}
-	
+
 	private class Line {
 		final Block[] blocks;
 		int[] widths;
 		int[] heights;
-		
+
 		int totalWidth;
 		int totalHeight;
-		
+
 		int alignment;
-		
+
 		Line(Block[] blocks) {
 			this.blocks = blocks;
 		}
-		
+
 		private void recalc() {
 			if(widths==null) {
 				totalHeight = 0;
 				totalWidth = 0;
-				
+
 				widths = new int[blocks.length];
 				heights = new int[blocks.length];
 				// Calculate required space for our line
@@ -323,71 +323,71 @@ public class TextRenderer {
 					Block b = blocks[i];
 					widths[i] = b.getWidth();
 					heights[i] = b.getHeight();
-					
+
 					totalWidth += widths[i];
 					totalHeight = Math.max(totalHeight, heights[i]);
 				}
 			}
 		}
-		
+
 		int getTotalHeight() {
 			recalc();
-			
+
 			return totalHeight;
 		}
-		
+
 		int getTotalWidth() {
 			recalc();
-			
+
 			return totalWidth;
 		}
 
 		void paint(Graphics g, int x, int y, int width, int height) {
 			recalc();
-			
+
 			// Skip rendering if we have no vertical space left
 			if(totalHeight>height) {
 				return;
 			}
-			
+
 			// Only bother with alignment if we fit into the provided 'bounds'
 			if(totalWidth < width) {
 				// Centered
-				if(alignment==SwingConstants.CENTER 
-						|| alignment==SwingConstants.NORTH 
+				if(alignment==SwingConstants.CENTER
+						|| alignment==SwingConstants.NORTH
 						|| alignment==SwingConstants.SOUTH) {
 					// Shift everything to the center
 					x += (width-totalWidth)*0.5;
 				}
 				// Right aligned
-				else if(alignment==SwingConstants.EAST 
+				else if(alignment==SwingConstants.EAST
 						|| alignment==SwingConstants.NORTH_EAST
 						|| alignment==SwingConstants.SOUTH_EAST) {
 					x = x+width-totalWidth;
 				}
 			}
-			
+
 			if(totalHeight<height) {
 				// Centered
-				if(alignment==SwingConstants.CENTER 
-						|| alignment==SwingConstants.EAST 
+				if(alignment==SwingConstants.CENTER
+						|| alignment==SwingConstants.EAST
 						|| alignment==SwingConstants.WEST) {
 					// Shift everything to the center
 					y += (height-totalHeight)*0.5;
 				}
 				// Bottom aligned
-				else if(alignment==SwingConstants.SOUTH 
+				else if(alignment==SwingConstants.SOUTH
 						|| alignment==SwingConstants.SOUTH_EAST
 						|| alignment==SwingConstants.SOUTH_WEST) {
 					y = y+height-totalHeight;
 				}
 			}
-			
+
 			// Render all blocks
 			for(int i=0; i<blocks.length; i++) {
 				Block b = blocks[i];
 				b.paint(g, x, y, widths[i], heights[i]);
-				
+
 				x += widths[i];
 			}
 		}
@@ -398,9 +398,9 @@ public class TextRenderer {
 		int getHeight();
 		void paint(Graphics g, int x, int y, int width, int height);
 	}
-	
+
 	private class EmptyBlock implements Block {
-		
+
 		private final int height, width;
 
 		/**
@@ -435,16 +435,16 @@ public class TextRenderer {
 		public void paint(Graphics g, int x, int y, int width, int height) {
 			// no-op
 		}
-		
+
 	}
-	
+
 	private class TextBlock implements Block {
-		
+
 		private String text;
 		private Font font;
 		private Color color;
 		private int width, height;
-		
+
 		TextBlock(String text, Font font, Color color, int width, int height) {
 			this.text = text;
 			this.font = font;
@@ -494,7 +494,7 @@ public class TextRenderer {
 		public void paint(Graphics g, int x, int y, int width, int height) {
 			Font f = null;
 			Color c = null;
-			
+
 			if(font!=null) {
 				f = g.getFont();
 				g.setFont(font);
@@ -503,21 +503,21 @@ public class TextRenderer {
 				c = g.getColor();
 				g.setColor(color);
 			}
-			
+
 			g.drawString(text, x, y);
-			
-			
+
+
 			if(f!=null) {
 				g.setFont(f);
 			}
 			if(c!=null) {
 				g.setColor(c);
 			}
-		}		
+		}
 	}
-	
+
 	private class ImageBlock implements Block {
-		
+
 		private Icon icon;
 		private int width, height;
 
@@ -541,7 +541,7 @@ public class TextRenderer {
 		public void paint(Graphics g, int x, int y, int w, int h) {
 			int iwidth = icon.getIconWidth();
 			int iheight = icon.getIconHeight();
-			
+
 			if(iwidth<w) {
 				x+= (w-iwidth)*0.5;
 			}
@@ -549,9 +549,9 @@ public class TextRenderer {
 			if(iheight<h) {
 				y+= (h-iheight)*0.5;
 			}
-			
+
 			icon.paintIcon(getDummyComponent(), g, x, y);
 		}
-		
+
 	}
 }

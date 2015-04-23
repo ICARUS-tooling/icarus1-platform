@@ -1344,18 +1344,20 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 			WordInfo wordInfo = getWordInfo();
 
-			yAxis.setMinValue(Math.min(50, (int)wordInfo.getSentenceInfo().getMinD()));
-			yAxis.setMaxValue(Math.max(200, (int)wordInfo.getSentenceInfo().getMaxD()));
-
 			TextSource pattern = config.sentencePattern;
 			textArea.setFont(config.sentenceFont);
 
 			Dimension size = new Dimension();
 
 			if(wordInfo!=null) {
+				SentenceInfo sentenceInfo = wordInfo.getSentenceInfo();
+
+				yAxis.setMinValue(Math.min(50, (int)sentenceInfo.getMinD()));
+				yAxis.setMaxValue(Math.max(200, (int)sentenceInfo.getMaxD()));
+
 				FontMetrics fm = getFontMetrics(config.sentenceFont);
 
-				ProsodicSentenceData sentence = wordInfo.getSentenceInfo().getSentence();
+				ProsodicSentenceData sentence = sentenceInfo.getSentence();
 
 				Dimension areaSize = new Dimension();
 				int width = 0;
@@ -1403,11 +1405,11 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 				size.height += fm.getHeight()*lineCount
 						+ textArea.getTopInsets() +textArea.getBottomInsets()
 						+ config.graphHeight + 3*config.graphSpacing + fm.getHeight();
+
+				border.setLineColor((Color) wordInfo.getProperty(COL_KEY));
+
+				wordInfo.setWidth(size.width);
 			}
-
-			border.setLineColor((Color) wordInfo.getProperty(COL_KEY));
-
-			wordInfo.setWidth(size.width);
 
 			preferredSize = size;
 		}

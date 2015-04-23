@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core;
@@ -50,15 +50,15 @@ import de.ims.icarus.logging.LoggerFactory;
  *
  */
 public final class ShutdownDialog {
-	
+
 	private JProgressBar progressBar;
 	private JDialog dialog;
 	private JLabel label;
-	
-	private static ShutdownDialog instance;
-	
+
+	private static volatile ShutdownDialog instance;
+
 	private boolean shutdownStarted = false;
-	
+
 	public static ShutdownDialog getDialog() {
 		if(instance==null) {
 			synchronized (ShutdownDialog.class) {
@@ -67,7 +67,7 @@ public final class ShutdownDialog {
 				}
 			}
 		}
-		
+
 		return instance;
 	}
 
@@ -76,10 +76,10 @@ public final class ShutdownDialog {
 	}
 
 	public synchronized void shutdown() {
-		
+
 		if(!SwingUtilities.isEventDispatchThread()) {
 			SwingUtilities.invokeLater(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					shutdown();
@@ -87,50 +87,50 @@ public final class ShutdownDialog {
 			});
 			return;
 		}
-		
+
 		if(shutdownStarted) {
 			return;
 		}
 		shutdownStarted = true;
-		
+
 		// Build panel
-		
+
 		dialog = new JDialog();
 		dialog.setIconImages(Core.getIconImages());
 		dialog.setModalityType(ModalityType.APPLICATION_MODAL);
-		
+
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(false);
 		progressBar.setBorder(new EmptyBorder(5, 15, 10, 15));
 		progressBar.setPreferredSize(new Dimension(250, 20));
-		
+
 		label = new JLabel();
 		label.setHorizontalAlignment(SwingConstants.LEFT);
 		label.setVerticalAlignment(SwingConstants.BOTTOM);
 		label.setBorder(new EmptyBorder(10, 15, 1, 15));
 		label.setPreferredSize(new Dimension(250, 100));
-		
+
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.add(label, BorderLayout.CENTER);
 		panel.add(progressBar, BorderLayout.SOUTH);
-		
+
 		dialog.add(progressBar);
 		dialog.pack();
 		dialog.setLocationRelativeTo(null);
 
 		NamedRunnable[] hooks = Core.getCore().getShutdownHooks();
 		progressBar.setMaximum(hooks.length);
-		
+
 		// Dispatch worker
 		new ShutdownWorker(hooks).execute();
-		
+
 		dialog.setVisible(true);
 	}
-	
+
 	private class ShutdownWorker extends SwingWorker<Object, String> {
-		
+
 		private final NamedRunnable[] hooks;
-		
+
 		ShutdownWorker(NamedRunnable[] hooks) {
 			this.hooks = hooks;
 		}
@@ -140,17 +140,17 @@ public final class ShutdownDialog {
 		 */
 		@Override
 		protected Object doInBackground() throws Exception {
-			
+
 			for(NamedRunnable hook : hooks) {
 				try {
 					publish(hook.getName());
 					hook.run();
 				} catch(Exception e) {
-					LoggerFactory.log(this, Level.SEVERE, 
+					LoggerFactory.log(this, Level.SEVERE,
 							"Failed to execute shutdown hook: "+hook.getName(), e); //$NON-NLS-1$
 				}
 			}
-			
+
 			return null;
 		}
 
@@ -159,10 +159,10 @@ public final class ShutdownDialog {
 			if(chunks==null || chunks.isEmpty()) {
 				return;
 			}
-			
+
 			String text = chunks.get(chunks.size()-1);
 			int steps = chunks.size();
-			
+
 			label.setText(text);
 			progressBar.setValue(progressBar.getValue()+steps);
 		}
@@ -174,20 +174,20 @@ public final class ShutdownDialog {
 				get();
 			} catch(Exception e) {
 				success = false;
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to execute all shutdown hooks", e); //$NON-NLS-1$
 			}
-			
+
 			try {
 				FrameManager.getInstance().shutdown();
 			} catch(Exception e) {
 				success = false;
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to shutdown frame manager", e); //$NON-NLS-1$
 			}
-			
+
 			System.exit(success ? 0 : 1);
 		}
-		
+
 	}
 }

@@ -89,7 +89,7 @@ public class ConfigRegistry implements ConfigConstants {
 
 	private boolean eventsEnabled = true;
 
-	private static ConfigRegistry globalRegistry;
+	private static volatile ConfigRegistry globalRegistry;
 
 	public static ConfigRegistry getGlobalRegistry() {
 		if(globalRegistry==null) {

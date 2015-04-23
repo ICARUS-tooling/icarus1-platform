@@ -93,7 +93,7 @@ public class DependencyPosConstraintFactory extends AbstractConstraintFactory {
 
 		@Override
 		public DependencyPosCIConstraint clone() {
-			return new DependencyPosCIConstraint(getValue(), getOperator());
+			return (DependencyPosCIConstraint) super.clone();
 		}
 	}
 }

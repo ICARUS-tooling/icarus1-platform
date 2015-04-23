@@ -321,6 +321,10 @@ public class DefaultOutputView extends View implements ManagementConstants {
 		 */
 		public void setPresentedObject(Object presentedObject, Options options) {
 
+			if(options==null) {
+				options = Options.emptyOptions;
+			}
+
 			// Show info for empty content data
 			if(presentedObject==null) {
 				String infoText = ResourceManager.getInstance().get(
@@ -344,10 +348,6 @@ public class DefaultOutputView extends View implements ManagementConstants {
 				this.presentedObject = presentedObject;
 				this.options = options;
 				this.presenter = presenter;
-
-				if(this.options==null) {
-					this.options = Options.emptyOptions;
-				}
 
 				try {
 					presenter.present(presentedObject, options);

@@ -409,7 +409,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 		}
 	}
 
-	private static class Key {
+	private static class Key implements Cloneable {
 		final int[] indices;
 
 		public Key(int size) {

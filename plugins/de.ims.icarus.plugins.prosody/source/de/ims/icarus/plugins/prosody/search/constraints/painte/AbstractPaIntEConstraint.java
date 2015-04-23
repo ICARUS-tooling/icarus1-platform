@@ -57,7 +57,7 @@ public abstract class AbstractPaIntEConstraint extends BoundedSyllableConstraint
 		super.setValue(value);
 
 		String s = (String)value;
-		if(s!=null && !LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
+		if(!LanguageConstants.DATA_UNDEFINED_LABEL.equals(s)) {
 			if(constraintParams==null) {
 				constraintParams = new PaIntEConstraintParams();
 			}

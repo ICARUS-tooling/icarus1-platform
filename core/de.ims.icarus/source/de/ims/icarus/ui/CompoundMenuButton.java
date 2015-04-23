@@ -47,7 +47,7 @@ public class CompoundMenuButton extends JButton {
 	
 	protected PropertyChangeListener actionPropertyChangeListener;
 	
-	protected ActionListener actionListener = new ActionListener() {
+	protected ActionListener compoundActionListener = new ActionListener() {
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -61,7 +61,7 @@ public class CompoundMenuButton extends JButton {
 		}
 	};
 	
-	protected ChangeListener changeListener = new ChangeListener() {
+	protected ChangeListener compoundChangeListener = new ChangeListener() {
 		
 		protected boolean isStateAdjusting = false;
 
@@ -120,7 +120,7 @@ public class CompoundMenuButton extends JButton {
 		orientation = orientationValue;
 		
 		openButton = this.new OpenMenuButton();
-		openButton.addChangeListener(changeListener);
+		openButton.addChangeListener(compoundChangeListener);
 		openButton.addMouseListener(mouseListener);
 
 		menu = new JPopupMenu();
@@ -129,8 +129,8 @@ public class CompoundMenuButton extends JButton {
 		setFocusPainted(false);
 		setHideActionText(true);
 		
-		addActionListener(actionListener);
-		addChangeListener(changeListener);
+		addActionListener(compoundActionListener);
+		addChangeListener(compoundChangeListener);
 				
 		setActions(actions);
 		setSelectedAction(selectedIndex);
@@ -144,7 +144,7 @@ public class CompoundMenuButton extends JButton {
 		for(Action action : actions) {
 			 item = menu.add(action);
 			 //item.setHideActionText(true);
-			 item.addActionListener(actionListener);
+			 item.addActionListener(compoundActionListener);
 		}
 		
 		openButton.setEnabled(isEnabled() && getActionCount()>0);

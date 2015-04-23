@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.xml;
@@ -39,16 +39,16 @@ import javax.xml.stream.XMLStreamReader;
  *
  */
 public final class StAXUtil {
-	
+
 	private static final Object lock = new Object();
-	
-	private static XMLInputFactory inputFactory;
-	private static XMLOutputFactory outputFactory;
+
+	private static volatile XMLInputFactory inputFactory;
+	private static volatile XMLOutputFactory outputFactory;
 
 	private StAXUtil() {
 		// no-op
 	}
-	
+
 	public static XMLInputFactory getSharedInputFactory() {
 		if(inputFactory==null) {
 			synchronized (lock) {
@@ -59,7 +59,7 @@ public final class StAXUtil {
 		}
 		return inputFactory;
 	}
-	
+
 	public static XMLOutputFactory getSharedOutputFactory() {
 		if(outputFactory==null) {
 			synchronized (lock) {
@@ -70,13 +70,13 @@ public final class StAXUtil {
 		}
 		return outputFactory;
 	}
-	
+
 	public static String errorText(XMLStreamReader reader) {
 		Location location = reader.getLocation();
 		return "ParseError at [row,col]:["+location.getLineNumber()+","+ //$NON-NLS-1$ //$NON-NLS-2$
         	location.getColumnNumber()+"]"; //$NON-NLS-1$
 	}
-	
+
 	public static String errorText(XMLStreamReader reader, String msg) {
 		Location location = reader.getLocation();
 		return "ParseError at [row,col]:["+location.getLineNumber()+","+ //$NON-NLS-1$ //$NON-NLS-2$

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.standard;
@@ -45,19 +45,19 @@ import de.ims.icarus.search_tools.SearchNode;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="searchGraph")
-public class DefaultSearchGraph implements SearchGraph {
-	
+public class DefaultSearchGraph implements SearchGraph, Cloneable {
+
 	@XmlAttribute
 	private int rootOperator = OPERATOR_CONJUNCTION;
-	
+
 	@XmlElement
 	@XmlJavaTypeAdapter(value=NodeAdapter.class)
 	private SearchNode[] nodes;
-	
+
 	@XmlElement
 	@XmlJavaTypeAdapter(value=EdgeAdapter.class)
 	private SearchEdge[] edges;
-	
+
 	@XmlElement
 	@XmlIDREF
 	@XmlJavaTypeAdapter(value=NodeAdapter.class)
@@ -111,7 +111,8 @@ public class DefaultSearchGraph implements SearchGraph {
 	public void setRootOperator(int rootOperator) {
 		this.rootOperator = rootOperator;
 	}
-	
+
+	@Override
 	public SearchGraph clone() {
 		DefaultSearchGraph graph = new DefaultSearchGraph();
 		graph.rootOperator = rootOperator;

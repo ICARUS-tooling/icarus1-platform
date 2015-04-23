@@ -129,7 +129,7 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public ProsodySyllablePropertyCIConstraint clone() {
 			return new ProsodySyllablePropertyCIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}

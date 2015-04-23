@@ -212,7 +212,9 @@ public abstract class AbstractParallelSearch extends Search {
 
 	protected void awaitItem() throws InterruptedException {
 		synchronized (notifer) {
-			notifer.wait();
+			while(hasUnprocessedItems() && pendingItems.isEmpty()) {
+				notifer.wait();
+			}
 		}
 	}
 

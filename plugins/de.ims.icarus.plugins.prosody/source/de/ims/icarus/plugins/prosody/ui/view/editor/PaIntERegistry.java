@@ -82,9 +82,9 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 				result = instance;
 
 				if (result == null) {
-					instance = new PaIntERegistry();
-					instance.init();
-					result = instance;
+					result = new PaIntERegistry();
+					result.init();
+					instance = result;
 				}
 			}
 		}
@@ -472,7 +472,7 @@ public class PaIntERegistry implements Interner<PaIntEParamsWrapper> {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex!=1 && columnIndex!=1 && columnIndex!=3;
+			return columnIndex!=1 && columnIndex!=2 && columnIndex!=3;
 		}
 
 		@Override

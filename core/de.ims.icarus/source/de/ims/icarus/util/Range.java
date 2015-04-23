@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.util;
@@ -30,8 +30,8 @@ package de.ims.icarus.util;
  * @version $Id$
  *
  */
-public class Range {
-	
+public class Range implements Cloneable {
+
 	private int start = 0, end = 1;
 
 	public Range() {
@@ -49,18 +49,18 @@ public class Range {
 	public Range(Range source) {
 		setRange(source);
 	}
-	
+
 	public void setRange(int start, int end) {
 		if(start>end)
 			throw new IllegalArgumentException(String.format("Invalid range arguments: %d - %d", start, end)); //$NON-NLS-1$
 		this.start = start;
 		this.end = end;
 	}
-	
+
 	public void setRange(Range source) {
 		if(source==null)
 			throw new NullPointerException("Invalid range"); //$NON-NLS-1$
-		
+
 		start = source.getStart();
 		end = source.getEnd();
 	}

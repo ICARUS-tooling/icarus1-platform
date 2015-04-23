@@ -92,7 +92,7 @@ public class DependencyLemmaConstraintFactory extends AbstractConstraintFactory 
 		}
 
 		@Override
-		public SearchConstraint clone() {
+		public DependencyLemmaCIConstraint clone() {
 			return new DependencyLemmaCIConstraint(getValue(), getOperator());
 		}
 	}

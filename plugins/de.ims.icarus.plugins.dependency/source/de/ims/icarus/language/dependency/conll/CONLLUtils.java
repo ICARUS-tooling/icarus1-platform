@@ -33,6 +33,7 @@ import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
 import de.ims.icarus.util.strings.StringPrimitives;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -82,7 +83,7 @@ public class CONLLUtils {
 
 	private final static int COL_LIMIT06 = 8;
 
-	private static final String US = "_"; //$NON-NLS-1$
+	private static final Object US = "_"; //$NON-NLS-1$
 	private static final String DELIMITER = "\\s+"; //$NON-NLS-1$
 	private static final String EMPTY = ""; //$NON-NLS-1$
 
@@ -311,7 +312,7 @@ public class CONLLUtils {
 
 		int value = LanguageConstants.DATA_UNDEFINED_VALUE;
 
-		if(!US.equals(cursor) && !cursor.isEmpty()) {
+		if(!StringUtil.equals(cursor, US) && !cursor.isEmpty()) {
 			value = StringPrimitives.parseInt(cursor)-1;
 		}
 
@@ -323,7 +324,7 @@ public class CONLLUtils {
 	private static String get(Row row, int index, String def) {
 		Cursor cursor = row.getSplitCursor(index);
 		String s = EMPTY;
-		if(US.equals(cursor) || cursor.isEmpty()) {
+		if(StringUtil.equals(cursor, US) || cursor.isEmpty()) {
 			s = def;
 		} else {
 			s = cursor.toString();

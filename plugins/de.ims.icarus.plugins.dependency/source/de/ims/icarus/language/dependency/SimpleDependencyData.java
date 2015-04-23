@@ -168,7 +168,7 @@ public class SimpleDependencyData extends BasicSentenceData<CompactProperties> i
 
 	@Override
 	public SimpleDependencyData clone() {
-		return new SimpleDependencyData(this);
+		return (SimpleDependencyData) super.clone();
 	}
 
 	@Override

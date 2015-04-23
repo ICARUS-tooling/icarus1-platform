@@ -90,7 +90,7 @@ public final class SearchManager {
 	private static Map<String, Matcher> matcherCache = Collections.synchronizedMap(
 			new WeakHashMap<String, Matcher>());
 
-	private static SearchManager instance;
+	private static volatile SearchManager instance;
 
 	public static SearchManager getInstance() {
 		if(instance==null) {
@@ -235,7 +235,7 @@ public final class SearchManager {
 		return operator==DefaultSearchOperator.GROUPING;
 	}
 
-	private static Collection<Extension> availableResultExportHandlers;
+	private static volatile Collection<Extension> availableResultExportHandlers;
 
 	public static Collection<Extension> getResultExportHandlers(SearchResult searchResult) {
 		if (searchResult == null)
@@ -548,6 +548,11 @@ public final class SearchManager {
 				return search == ((LoadTargetJob)obj).search;
 			}
 			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return search.hashCode();
 		}
 
 		/**

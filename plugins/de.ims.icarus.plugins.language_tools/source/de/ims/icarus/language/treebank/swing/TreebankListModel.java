@@ -75,7 +75,7 @@ public class TreebankListModel extends AbstractListModel<Treebank>
 
 	public void setExcludes(Treebank...excludes) {
 		Filter filter = null;
-		if(excludes!=null && excludes.length>=0) {
+		if(excludes!=null && excludes.length>0) {
 			filter = new ExclusionFilter((Object[]) excludes);
 		}
 		setFilter(filter);

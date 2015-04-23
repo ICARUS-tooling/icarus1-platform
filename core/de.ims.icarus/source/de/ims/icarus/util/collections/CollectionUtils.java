@@ -27,6 +27,10 @@ package de.ims.icarus.util.collections;
 
 import gnu.trove.TLongCollection;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -761,16 +765,27 @@ public final class CollectionUtils {
     static class UnmodifiableCollection<E> implements Collection<E>, Serializable {
         private static final long serialVersionUID = 1820017752578914078L;
 
-        final Reference<Collection<? extends E>> ref;
+        transient Reference<?> ref;
 
         UnmodifiableCollection(Collection<? extends E> c) {
             if (c==null)
                 throw new NullPointerException();
-            this.ref = new WeakReference<Collection<? extends E>>(c);
+            this.ref = new WeakReference<Collection<?>>(c);
         }
 
-        public Collection<? extends E> ref() {
-        	return ref.get();
+        @SuppressWarnings("unchecked")
+		public Collection<? extends E> ref() {
+        	return (Collection<? extends E>) ref.get();
+        }
+
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        	Collection<?> c = (Collection<?>) in.readObject();
+        	ref = new WeakReference<>(c);
+        }
+
+        private void writeObject(ObjectOutputStream out) throws IOException {
+        	Collection<? extends E> c = ref();
+        	out.writeObject(c);
         }
 
         @Override
@@ -869,7 +884,8 @@ public final class CollectionUtils {
 
         UnmodifiableSet(Set<? extends E> s)     {super(s);}
 
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
 		public Set<? extends E> ref() {
         	return (Set<? extends E>) ref.get();
         }
@@ -972,7 +988,8 @@ public final class CollectionUtils {
             super(list);
         }
 
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
 		public List<? extends E> ref() {
         	return (List<? extends E>) ref.get();
         }
@@ -1142,7 +1159,7 @@ public final class CollectionUtils {
     private static class UnmodifiableMap<K,V> implements Map<K,V>, Serializable {
         private static final long serialVersionUID = -1034234728574286014L;
 
-        private final Reference<Map<? extends K, ? extends V>> ref;
+        private transient Reference<?> ref;
 
         UnmodifiableMap(Map<? extends K, ? extends V> m) {
             if (m==null)
@@ -1150,8 +1167,25 @@ public final class CollectionUtils {
             this.ref = new WeakReference<Map<? extends K,? extends V>>(m);
         }
 
-        public Map<? extends K, ? extends V> ref() {
-        	return ref.get();
+        @SuppressWarnings("unused")
+		private void readObjectNoData() throws ObjectStreamException {
+        	ref = new WeakReference<>(null);
+        }
+
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        	@SuppressWarnings("unchecked")
+        	Map<? extends K, ? extends V> m = (Map<? extends K, ? extends V>) in.readObject();
+        	ref = new WeakReference<>(m);
+        }
+
+        private void writeObject(ObjectOutputStream out) throws IOException {
+        	Map<? extends K, ? extends V> m = ref();
+        	out.writeObject(m);
+        }
+
+        @SuppressWarnings("unchecked")
+		public Map<? extends K, ? extends V> ref() {
+        	return (Map<? extends K, ? extends V>) ref.get();
         }
 
         @Override

@@ -993,11 +993,11 @@ public class SentencePanel extends JPanel{
 				}
 
 				size.width = width;
+
+				sentenceInfo.setWidth(size.width);
 			} else {
 				curveHeight = 0;
 			}
-
-			sentenceInfo.setWidth(size.width);
 
 			preferredSize = size;
 		}

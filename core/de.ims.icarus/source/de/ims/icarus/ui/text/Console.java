@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.text;
@@ -34,34 +34,34 @@ import java.io.PrintStream;
  *
  */
 public class Console {
-	
+
 	private static final PrintStream defaultOut = System.out;
 	private static final PrintStream defaultErr = System.err;
-	
+
 	private BatchDocument errDoc;
 	private BatchDocument outDoc;
-	
+
 	private DocumentStream errStream;
 	private DocumentStream outStream;
-	
+
 	private boolean mergeStreams = true;
-	
-	private static LineLimitingDocumentListener lineLimiter;
-	
+
+	private static volatile LineLimitingDocumentListener lineLimiter;
+
 	private static int lineLimit = 200;
-	
+
 	public static void setLineLimit(int limit) {
 		if(limit<100)
 			throw new IllegalArgumentException("Line limit must not be less than 100"); //$NON-NLS-1$
-		
+
 		lineLimit = limit;
 		if(lineLimiter!=null) {
 			lineLimiter.setLineLimit(lineLimit);
 		}
 	}
-	
-	private static Console instance;
-	
+
+	private static volatile Console instance;
+
 	public static Console getInstance() {
 		if (instance==null) {
 			synchronized (Console.class) {
@@ -70,19 +70,19 @@ public class Console {
 				}
 			}
 		}
-		
+
 		return instance;
 	}
 
 	private Console() {
 		// no-op
 	}
-	
+
 	private static LineLimitingDocumentListener getLineLimiter() {
 		if(lineLimiter==null) {
 			lineLimiter = new LineLimitingDocumentListener(lineLimit);
 		}
-		
+
 		return lineLimiter;
 	}
 
@@ -90,17 +90,17 @@ public class Console {
 		if(outStream!=null || outDoc==null) {
 			return;
 		}
-		
+
 		outStream = new DocumentStream(outDoc, defaultOut);
 		System.setOut(new PrintStream(outStream, true));
 	}
-	
+
 	public synchronized BatchDocument getOutputDocument() {
 		if(outDoc==null) {
 			outDoc = new BatchDocument();
 			outDoc.addDocumentListener(getLineLimiter());
 			redirectOut();
-			
+
 			if(isMergeStreams()) {
 				redirectErr();
 				if(errStream!=null) {
@@ -108,7 +108,7 @@ public class Console {
 				}
 			}
 		}
-		
+
 		return outDoc;
 	}
 
@@ -117,21 +117,21 @@ public class Console {
 		if(errStream!=null || doc==null) {
 			return;
 		}
-		
+
 		errStream = new DocumentStream(doc, defaultErr, Color.red);
 		System.setErr(new PrintStream(errStream, true));
 	}
-	
+
 	public synchronized BatchDocument getErrorDocument() {
 		if(errDoc==null) {
 			errDoc = new BatchDocument();
 			errDoc.addDocumentListener(getLineLimiter());
-			
+
 			if(!isMergeStreams()) {
 				redirectErr();
 			}
 		}
-		
+
 		return errDoc;
 	}
 
@@ -143,16 +143,16 @@ public class Console {
 		if(mergeStreams==this.mergeStreams) {
 			return;
 		}
-		
+
 		this.mergeStreams = mergeStreams;
-		
+
 		if(outDoc==null || errDoc==null) {
 			return;
 		}
-		
+
 		redirectOut();
 		redirectErr();
-		
+
 		if(mergeStreams) {
 			errStream.setDocument(outDoc);
 		} else {

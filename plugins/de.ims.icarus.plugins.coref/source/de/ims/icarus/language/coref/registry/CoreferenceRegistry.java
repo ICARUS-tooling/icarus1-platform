@@ -83,7 +83,7 @@ import de.ims.icarus.xml.jaxb.JAXBUtils;
  */
 public final class CoreferenceRegistry {
 
-	private static CoreferenceRegistry instance;
+	private static volatile CoreferenceRegistry instance;
 
 	public static CoreferenceRegistry getInstance() {
 		if(instance==null) {
@@ -107,7 +107,7 @@ public final class CoreferenceRegistry {
 	private Map<String, AllocationDescriptor> allocationMap;
 	private Map<CoreferenceAllocation, AllocationDescriptor> allocationLookup;
 
-	private DocumentSetListModel documentListModel;
+	private volatile DocumentSetListModel documentListModel;
 
 	private final Extension defaultAllocatinReaderExtension;
 	private final Extension defaultDocumentReaderExtension;
@@ -204,7 +204,7 @@ public final class CoreferenceRegistry {
 
 	public DocumentSetDescriptor getDocumentSetByName(String name) {
 		if (name == null)
-			throw new NullPointerException("Invalid name");
+			throw new NullPointerException("Invalid name"); //$NON-NLS-1$
 
 		for(DocumentSetDescriptor descriptor : documentSetList) {
 			if(name.equals(descriptor.getName())) {

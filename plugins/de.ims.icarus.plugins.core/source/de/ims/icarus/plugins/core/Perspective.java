@@ -516,11 +516,11 @@ public abstract class Perspective implements Identifiable {
 			}
 			if(container!=null) {
 				activateView(container);
-			}
 
-			View view = container.getView();
-			if(view!=null) {
-				view.focusView();
+				View view = container.getView();
+				if(view!=null) {
+					view.focusView();
+				}
 			}
 		}
 	};

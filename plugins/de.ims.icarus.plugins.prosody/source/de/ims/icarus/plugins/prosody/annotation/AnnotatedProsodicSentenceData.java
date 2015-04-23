@@ -39,7 +39,7 @@ import de.ims.icarus.util.annotation.Annotation;
  * @version $Id$
  *
  */
-public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, AnnotatedSentenceData, Wrapper<ProsodicSentenceData> {
+public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, AnnotatedSentenceData, Wrapper<ProsodicSentenceData>, Cloneable {
 
 	private static final long serialVersionUID = -8819152695167807937L;
 
@@ -60,7 +60,11 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 
 	@Override
 	public AnnotatedProsodicSentenceData clone() {
-		return new AnnotatedProsodicSentenceData(source, annotation);
+		try {
+			return (AnnotatedProsodicSentenceData) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException();
+		}
 	}
 
 	/**

@@ -89,7 +89,7 @@ public final class TaskManager {
 
 	private TaskObserver taskObserver = new TaskObserver();
 
-	private static TaskManager instance;
+	private static volatile TaskManager instance;
 
 	public static TaskManager getInstance() {
 		if(instance==null) {

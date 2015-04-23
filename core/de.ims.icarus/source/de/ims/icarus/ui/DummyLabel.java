@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui;
@@ -31,7 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -87,7 +87,7 @@ public class DummyLabel extends JLabel {
 	@Override
 	protected void firePropertyChange(String propertyName, Object oldValue,
 			Object newValue) {
-		if (propertyName == "text" || propertyName == "font") { //$NON-NLS-1$ //$NON-NLS-2$
+		if ("text".equals(propertyName) || "font".equals(propertyName)) { //$NON-NLS-1$ //$NON-NLS-2$
 			super.firePropertyChange(propertyName, oldValue, newValue);
 		}
 	}

@@ -114,7 +114,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 
 	protected CoreferenceDocumentAnnotationManager annotationManager;
 
-	private static ActionManager sharedActionManager;
+	private static volatile ActionManager sharedActionManager;
 
 	protected static final String configPath = "plugins.coref.appearance.text"; //$NON-NLS-1$
 
@@ -362,7 +362,7 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 
 	@Override
 	public void uninstall(Object target) {
-		target = null;
+		parent = null;
 	}
 
 	protected CoreferenceDocument getDocument() {
@@ -977,6 +977,11 @@ public abstract class AbstractCoreferenceTextPresenter implements AWTPresenter,
 				return owner()==other.owner() && document==other.document;
 			}
 			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return owner().hashCode() * document.hashCode();
 		}
 
 		private Object owner() {

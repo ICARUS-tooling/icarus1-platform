@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 import javax.swing.DefaultComboBoxModel;
@@ -590,9 +589,9 @@ public class MatetoolsParserInputView extends TextInputView {
 			} catch(InterruptedException | CancellationException e) {
 				// ignore
 			} catch (Throwable e) {
-				if(e instanceof ExecutionException) {
-					e = e.getCause();
-				}
+//				if(e instanceof ExecutionException) {
+//					e = e.getCause();
+//				}
 				LoggerFactory.log(this, Level.SEVERE,
 						"Unexpected exception while obtaining final pipeline computation result", e); //$NON-NLS-1$
 				UIUtil.beep();

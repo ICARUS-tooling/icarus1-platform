@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.properties;
@@ -90,68 +90,68 @@ import de.ims.icarus.util.Range;
  *
  */
 public class PropertyInfoDialog extends JFrame {
-	
+
 	private static final long serialVersionUID = 8546718818512715746L;
-	
+
 	protected JLabel header;
 	protected JToggleButton togglePinButton;
 	protected JButton reloadButton;
 	protected JButton clearButton;
-	
+
 	protected FormBuilder formBuilder;
 	protected DefaultComboBoxModel<Object> allocationModel;
-	
+
 	protected static final Object dummyEntry = "Default Allocation"; //$NON-NLS-1$
-	
+
 	protected PropertyPanel sentencePanel;
 	protected PropertyPanel spanPanel;
 	protected PropertyPanel edgePanel;
-	
+
 	protected Handler handler;
 	protected SwingWorker<?, ?> task;
-	
+
 	protected JProgressBar progressBar;
-	
-	private static Map<Object, Counter> cache;
-	
+
+	private static volatile Map<Object, Counter> cache;
+
 	private static Reference<PropertyInfoDialog> instance;
-	
+
 	public static synchronized void showDialog() {
 		showDialog(null);
 	}
-	
+
 	public static synchronized void showDialog(Options options) {
 		PropertyInfoDialog dialog = null;
-		
+
 		if(instance!=null) {
 			dialog = instance.get();
 		}
-		
+
 		if(dialog==null) {
 			dialog = new PropertyInfoDialog();
 			instance = new WeakReference<PropertyInfoDialog>(dialog);
 			UIUtil.centerComponent(dialog);
 		}
-		
+
 		dialog.setSelectedItems(options);
 		dialog.setVisible(true);
 	}
-	
+
 	protected synchronized static Counter getCachedCounter(Object item) {
 		if(item==null)
 			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
-		
+
 		return cache==null ? null : cache.get(item);
 	}
-	
+
 	protected synchronized static void cacheCounter(Object item, Counter counter) {
 		if(item==null)
 			throw new NullPointerException("Invalid item"); //$NON-NLS-1$
-		
+
 		if(counter==null || counter.isEmpty()) {
 			return;
 		}
-		
+
 		if(cache==null) {
 			synchronized (PropertyInfoDialog.class) {
 				if(cache==null) {
@@ -159,67 +159,67 @@ public class PropertyInfoDialog extends JFrame {
 				}
 			}
 		}
-		
+
 		cache.put(item, counter);
 	}
-	
+
 	protected static void releaseCache(Object item) {
 		if(cache==null || item==null) {
 			return;
 		}
-		
+
 		cache.remove(item);
 	}
 
 	public PropertyInfoDialog() {
 		setIconImages(Core.getIconImages());
-		
+
 		init();
 	}
-	
+
 	public void setSelectedItems(Options options) {
 		if(options==null) {
 			return;
 		}
-		
+
 		Object documentSet = options.get("documentSet"); //$NON-NLS-1$
 		if(documentSet instanceof DocumentSetDescriptor) {
 			formBuilder.setValue("documentSet", documentSet); //$NON-NLS-1$
 		}
-		
+
 		Object allocation = options.get("allocation"); //$NON-NLS-1$
 		if(allocation instanceof AllocationDescriptor) {
 			formBuilder.setValue("allocation", allocation); //$NON-NLS-1$
 		}
 	}
-	
+
 	protected void init() {
-		
+
 		ResourceManager rm = ResourceManager.getInstance();
-		
+
 		header = new JLabel();
 		header.setFont(header.getFont().deriveFont(Font.BOLD, 18F));
 		header.setHorizontalAlignment(SwingConstants.LEFT);
 		header.setBorder(UIUtil.defaultContentBorder);
-		
+
 		togglePinButton = new JToggleButton();
 		togglePinButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("pinned_ovr.gif")); //$NON-NLS-1$
 		togglePinButton.addActionListener(getHandler());
 		UIUtil.resizeComponent(togglePinButton, 20, 20);
 		togglePinButton.setFocusable(false);
 		togglePinButton.setHideActionText(true);
-		rm.getGlobalDomain().prepareComponent(togglePinButton, 
+		rm.getGlobalDomain().prepareComponent(togglePinButton,
 				null,
 				"plugins.coref.propertyInfoDialog.pinWindowAction.description"); //$NON-NLS-1$
 		rm.getGlobalDomain().addComponent(togglePinButton);
-		
+
 		reloadButton = new JButton();
 		reloadButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("refresh.gif")); //$NON-NLS-1$
 		reloadButton.addActionListener(getHandler());
 		UIUtil.resizeComponent(reloadButton, 20, 20);
 		reloadButton.setFocusable(false);
 		reloadButton.setHideActionText(true);
-		rm.getGlobalDomain().prepareComponent(reloadButton, 
+		rm.getGlobalDomain().prepareComponent(reloadButton,
 				null,
 				"plugins.coref.propertyInfoDialog.refreshAction.description"); //$NON-NLS-1$
 		rm.getGlobalDomain().addComponent(reloadButton);
@@ -227,7 +227,7 @@ public class PropertyInfoDialog extends JFrame {
 		JPanel formPanel = new JPanel();
 		formPanel.setBorder(UIUtil.topLineBorder);
 		formBuilder = FormBuilder.newLocalizingBuilder(formPanel);
-		
+
 		ComboBoxModel<?> model = new ComboBoxListWrapper<>(
 				CoreferenceRegistry.getInstance().getDocumentSetListModel());
 		ChoiceFormEntry entry = new ChoiceFormEntry(
@@ -235,32 +235,32 @@ public class PropertyInfoDialog extends JFrame {
 				model);
 		entry.getComboBox().addActionListener(getHandler());
 		formBuilder.addEntry("documentSet", entry); //$NON-NLS-1$
-		
+
 		allocationModel = new DefaultComboBoxModel<Object>();
 		entry = new ChoiceFormEntry(
 				"plugins.coref.labels.allocation",  //$NON-NLS-1$
 				allocationModel);
 		formBuilder.addEntry("allocation", entry); //$NON-NLS-1$
-		
+
 		formBuilder.buildForm();
 		formBuilder.pack();
-		
+
 		sentencePanel = new PropertyPanel("plugins.coref.labels.sentences"); //$NON-NLS-1$
 		spanPanel = new PropertyPanel("plugins.coref.labels.spans"); //$NON-NLS-1$
 		edgePanel = new PropertyPanel("plugins.coref.labels.edges"); //$NON-NLS-1$
-		
+
 		progressBar = new JProgressBar();
-		
+
 		JPanel panel = new JPanel(new GridBagLayout());
-		
+
 		// Header
 		panel.add(header, GridBagUtil.makeGbcHN(0, 0, 1, 1));
 		panel.add(reloadButton, GridBagUtil.makeGbc(1, 0));
 		panel.add(togglePinButton, GridBagUtil.makeGbc(2, 0));
-		
+
 		// Selection
 		panel.add(formPanel, GridBagUtil.makeGbcHN(0, 1, 3, 1));
-		
+
 		// Outlines
 		panel.add(sentencePanel, GridBagUtil.makeGbcHN(0, 2, 3, 1));
 		panel.add(sentencePanel.getContentArea(), GridBagUtil.makeGbcRN(0, 3, 3, 1));
@@ -268,84 +268,84 @@ public class PropertyInfoDialog extends JFrame {
 		panel.add(spanPanel.getContentArea(), GridBagUtil.makeGbcRN(0, 5, 3, 1));
 		panel.add(edgePanel, GridBagUtil.makeGbcHN(0, 6, 3, 1));
 		panel.add(edgePanel.getContentArea(), GridBagUtil.makeGbcRN(0, 7, 3, 1));
-		
+
 		// Progress
 		panel.add(progressBar, GridBagUtil.makeGbcH(0, 8, 3, 1));
-		
+
 		add(panel);
-		
+
 		setSize(300, 450);
-		
+
 		ResourceManager.getInstance().getGlobalDomain().addFrame(
 				this, "plugins.coref.propertyInfoDialog.titel"); //$NON-NLS-1$
 		FrameManager.getInstance().registerWindow(this);
 	}
-	
+
 	protected void publishData(Object data) {
 		if(data==null) {
 			return;
 		}
-		
+
 		String str = data.toString();
 		if(str==null || str.trim().isEmpty()) {
 			return;
 		}
-		
+
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		if(clipboard==null) {
 			return;
 		}
-		
+
 		Transferable t = new StringSelection(str);
-		
+
 		clipboard.setContents(t, getHandler());
 	}
-	
+
 	protected Handler getHandler() {
 		if(handler==null) {
 			handler = new Handler();
 		}
 		return handler;
 	}
-	
+
 	protected void refreshButtons() {
 		reloadButton.setEnabled(task==null);
 	}
-	
+
 	public synchronized void reload() {
 		if(task!=null) {
 			return;
 		}
-		
+
 		DocumentSetDescriptor documentSet = (DocumentSetDescriptor) formBuilder.getValue("documentSet"); //$NON-NLS-1$
 		Object alloc = formBuilder.getValue("allocation"); //$NON-NLS-1$
 		AllocationDescriptor  allocation = alloc==dummyEntry ? null : (AllocationDescriptor)alloc;
-		
+
 		if(documentSet==null) {
 			return;
 		}
-		
+
 		task = new CountTask(documentSet, allocation);
-		
+
 		TaskManager.getInstance().schedule(task, TaskPriority.DEFAULT, true);
-		
+
 		refreshButtons();
 	}
-	
+
 	protected synchronized void countFinished(Counter sentenceCounter,
 			Counter spanCounter, Counter edgeCounter) {
-		
+
 		task = null;
-		
+
 		sentencePanel.reload(sentenceCounter);
 		spanPanel.reload(spanCounter);
 		edgePanel.reload(edgeCounter);
-		
+
 		refreshButtons();
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -357,16 +357,16 @@ public class PropertyInfoDialog extends JFrame {
 			if(!SwingUtilities.isLeftMouseButton(e) || e.getClickCount()!=2) {
 				return;
 			}
-			
+
 			JTable table = (JTable) e.getSource();
 			int row = table.rowAtPoint(e.getPoint());
 			//XXX switched to static column so the entire row acts as source for the property name
 			int col = 1;
-			
+
 			if(row==-1 || col==-1) {
 				return;
 			}
-			
+
 			Object data = table.getValueAt(row, col);
 			publishData(data);
 		}
@@ -386,7 +386,7 @@ public class PropertyInfoDialog extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource()==togglePinButton) {
 				setAlwaysOnTop(togglePinButton.isSelected());
-			} else if(e.getSource()==reloadButton) { 
+			} else if(e.getSource()==reloadButton) {
 				reload();
 			} else {
 				DocumentSetDescriptor documentSet = (DocumentSetDescriptor) formBuilder.getValue("documentSet"); //$NON-NLS-1$
@@ -397,9 +397,9 @@ public class PropertyInfoDialog extends JFrame {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	protected static class PropertyTableModel extends CounterTableModel {
 
 		private static final long serialVersionUID = -7952452998284531824L;
@@ -432,9 +432,9 @@ public class PropertyInfoDialog extends JFrame {
 			return false;
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author Markus Gärtner
 	 * @version $Id$
 	 *
@@ -442,58 +442,58 @@ public class PropertyInfoDialog extends JFrame {
 	protected class PropertyPanel extends JPanel implements ActionListener {
 
 		private static final long serialVersionUID = 4013252444101192150L;
-		
+
 		protected JLabel header;
 		protected JTable table;
 		protected PropertyTableModel model;
 		protected JToggleButton toggleButton;
 		protected JScrollPane scrollPane;
-		
+
 		public PropertyPanel(String key) {
-			
+
 			header = new JLabel();
 			header.setFont(header.getFont().deriveFont(14F));
 			ResourceManager.getInstance().getGlobalDomain().prepareComponent(header, key, null);
 			ResourceManager.getInstance().getGlobalDomain().addComponent(header);
-			
+
 			model = new PropertyTableModel();
 			table = new JTable(model);
 			table.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
 			table.setAutoCreateRowSorter(true);
 			table.addMouseListener(getHandler());
 			table.setBorder(UIUtil.emptyBorder);
-			
+
 			/*JList<String> rowHeader = new JList<>(new TableIndexListModel(model));
 			TableRowHeaderRenderer headerRenderer = new TableRowHeaderRenderer(rowHeader, table);
 			rowHeader.setCellRenderer(headerRenderer);*/
-			
+
 			scrollPane = new JScrollPane(table);
 			//scrollPane.setRowHeaderView(rowHeader);
 			scrollPane.setBorder(UIUtil.emptyBorder);
-			
+
 			toggleButton = new JToggleButton();
 			toggleButton.setIcon(IconRegistry.getGlobalRegistry().getIcon("up.gif")); //$NON-NLS-1$
 			toggleButton.setSelectedIcon(IconRegistry.getGlobalRegistry().getIcon("down.gif")); //$NON-NLS-1$
 			toggleButton.addActionListener(this);
 			toggleButton.setFocusable(false);
 			UIUtil.resizeComponent(toggleButton, 20, 20);
-			
-			setLayout(new GridBagLayout());	
-			
+
+			setLayout(new GridBagLayout());
+
 			// Header area
 			add(header, GridBagUtil.makeGbcHN(0, 0, 1, 1));
 			add(toggleButton, GridBagUtil.makeGbcN(1, 0, 1, 1));
-			
+
 			// Content area
 			//add(scrollPane, GridBagUtil.makeGbcRN(0, 1, 2, 1));
-			
+
 			setBorder(UIUtil.topLineBorder);
 		}
-		
+
 		public void reload(Counter counter) {
 			model.setCounter(counter);
 		}
-		
+
 		public JComponent getContentArea() {
 			return scrollPane;
 		}
@@ -508,17 +508,17 @@ public class PropertyInfoDialog extends JFrame {
 			PropertyInfoDialog.this.repaint();
 		}
 	}
-	
+
 	protected class CountTask extends SwingWorker<Options, Object> {
-		
+
 		private final DocumentSetDescriptor documentSet;
 		private AllocationDescriptor allocation;
-				
+
 		public CountTask(DocumentSetDescriptor documentSet,
 				AllocationDescriptor allocation) {
 			if(documentSet==null)
 				throw new IllegalArgumentException("Ivalid document set"); //$NON-NLS-1$
-			
+
 			this.documentSet = documentSet;
 			this.allocation = allocation;
 		}
@@ -532,14 +532,24 @@ public class PropertyInfoDialog extends JFrame {
 			return false;
 		}
 
+		@Override
+		public int hashCode() {
+			int hash = documentSet.hashCode();
+			if(allocation!=null) {
+				hash *= allocation.hashCode();
+			}
+
+			return hash;
+		}
+
 		/**
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
 		@Override
 		protected Options doInBackground() throws Exception {
-			
+
 			Options result = new Options();
-			
+
 			// Load document set if required
 			if(!documentSet.isLoaded()) {
 				try {
@@ -552,7 +562,7 @@ public class PropertyInfoDialog extends JFrame {
 					publish(false);
 				}
 			}
-			
+
 			// Load allocation if required
 			if(allocation!=null && !allocation.isLoaded()) {
 				try {
@@ -565,7 +575,7 @@ public class PropertyInfoDialog extends JFrame {
 					publish(false);
 				}
 			}
-			
+
 			// Count sentence properties
 			Counter sentenceCounter = getCachedCounter(documentSet.getId());
 			if(sentenceCounter==null) {
@@ -579,13 +589,13 @@ public class PropertyInfoDialog extends JFrame {
 				publish(false);
 			}
 			result.put("sentenceCounter", sentenceCounter); //$NON-NLS-1$
-			
+
 			// Process allocation if available
 			if(allocation!=null) {
 				CoreferenceAllocation alloc = allocation.get();
 				String[] documentIds = alloc.getDocumentIds();
 				publish(new Range(documentIds.length), 0, true);
-				
+
 				// Count span properties
 				Counter spanCounter = getCachedCounter(allocation.getId()+"_spans"); //$NON-NLS-1$
 				if(spanCounter==null) {
@@ -599,7 +609,7 @@ public class PropertyInfoDialog extends JFrame {
 					}
 				}
 				result.put("spanCounter", spanCounter); //$NON-NLS-1$
-				
+
 				// Count edge properties
 				Counter edgeCounter = getCachedCounter(allocation.getId()+"_edges"); //$NON-NLS-1$
 				if(edgeCounter==null) {
@@ -616,13 +626,13 @@ public class PropertyInfoDialog extends JFrame {
 
 				publish(false);
 			}
-			
+
 			return result;
 		}
-		
+
 		private void load(Loadable loadable) throws Exception {
 			while(loadable.isLoading());
-			
+
 			if(!loadable.isLoaded()) {
 				loadable.load();
 			}
@@ -648,17 +658,17 @@ public class PropertyInfoDialog extends JFrame {
 			Counter sentenceCounter = null;
 			Counter spanCounter = null;
 			Counter edgeCounter = null;
-			
+
 			try {
 				Options result = get();
 				if(result==null) {
 					return;
 				}
-				
+
 				sentenceCounter = (Counter) result.get("sentenceCounter"); //$NON-NLS-1$
 				spanCounter = (Counter) result.get("spanCounter"); //$NON-NLS-1$
 				edgeCounter = (Counter) result.get("edgeCounter"); //$NON-NLS-1$
-				
+
 				cacheCounter(documentSet.getId(), sentenceCounter);
 				if(allocation!=null) {
 					cacheCounter(allocation.getId()+"_spans", spanCounter); //$NON-NLS-1$
@@ -668,15 +678,15 @@ public class PropertyInfoDialog extends JFrame {
 				// ignore
 			} catch (Exception e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to count properties for document set: "+documentSet.getName(), e); //$NON-NLS-1$
-				
+
 				Core.getCore().handleThrowable(e);
 			} finally {
 				progressBar.setVisible(false);
 				progressBar.setIndeterminate(false);
-				
+
 				countFinished(sentenceCounter, spanCounter, edgeCounter);
 			}
 		}
-		
+
 	}
 }

@@ -79,7 +79,7 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 		if(idMap==null) {
 			idMap = new HashMap<>();
 		}
-		if(idMap.containsKey(data.getDocumentIndex()))
+		if(idMap.containsKey(data.getId()))
 			throw new DuplicateIdentifierException("Duplicate document id: "+data.getDocumentIndex()); //$NON-NLS-1$
 		idMap.put(data.getId(), data);
 

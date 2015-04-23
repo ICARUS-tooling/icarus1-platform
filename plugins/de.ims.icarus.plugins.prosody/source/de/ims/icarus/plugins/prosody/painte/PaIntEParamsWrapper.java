@@ -39,12 +39,12 @@ import de.ims.icarus.util.id.Identity;
 
 @XmlRootElement(name="painte-wrapper")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Serializable {
+public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Serializable, Cloneable {
 
 	private static final long serialVersionUID = -2036008698457220647L;
 
 	@XmlElement(name="params")
-	private final PaIntEParams params;
+	private PaIntEParams params;
 	@XmlElement(name="label", required=true)
 	private String label;
 	@XmlElement(name="description", required=false)
@@ -182,6 +182,14 @@ public class PaIntEParamsWrapper implements Wrapper<PaIntEParams>, Identity, Ser
 
 	@Override
 	public PaIntEParamsWrapper clone() {
-		return new PaIntEParamsWrapper(params.clone(), label, description);
+		PaIntEParamsWrapper newWrapper = null;
+		try {
+			newWrapper = (PaIntEParamsWrapper) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new IllegalStateException();
+		}
+		newWrapper.params = params.clone();
+
+		return newWrapper;
 	}
 }

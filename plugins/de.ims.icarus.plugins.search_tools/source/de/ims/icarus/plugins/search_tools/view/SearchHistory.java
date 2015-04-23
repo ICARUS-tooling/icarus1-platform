@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view;
@@ -50,17 +50,17 @@ import de.ims.icarus.search_tools.util.SearchUtils;
  *
  */
 public class SearchHistory extends AbstractListModel<SearchDescriptor> {
-	
+
 	private static final long serialVersionUID = -9128957062735086417L;
-	
+
 	private List<SearchDescriptor> descriptors;
-	
+
 	private Handler handler;
-	
+
 	private Timer timer;
-	
-	private static SearchHistory sharedInstance;
-	
+
+	private static volatile SearchHistory sharedInstance;
+
 	public static SearchHistory getSharedInstance() {
 		if(sharedInstance==null) {
 			synchronized (SearchHistory.class) {
@@ -69,21 +69,21 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 				}
 			}
 		}
-		
+
 		return sharedInstance;
 	}
 
 	public SearchHistory() {
 		// no-op
 	}
-	
+
 	private Handler getHandler() {
 		if(handler==null) {
 			handler = new Handler();
 		}
 		return handler;
 	}
-	
+
 	private Timer getTimer() {
 		if(timer==null) {
 			timer = new Timer(500, getHandler());
@@ -112,41 +112,41 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
 		if(descriptor.getSearch()==null)
 			throw new IllegalArgumentException("Missing search object on descriptor: "+descriptor); //$NON-NLS-1$
-		
+
 		if(descriptors==null) {
 			descriptors = new ArrayList<>();
 		}
-		
+
 		int index = descriptors.size();
-		
+
 		descriptors.add(descriptor);
-		
+
 		descriptor.getSearch().addPropertyChangeListener("state", getHandler()); //$NON-NLS-1$
-		
+
 		fireIntervalAdded(this, index, index);
-		
+
 		Timer timer = getTimer();
 		if(!timer.isRunning()) {
 			timer.start();
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private void diffWithLast() {
 		if(descriptors==null || descriptors.size()<2) {
 			return;
 		}
-		
+
 		SearchResult resultA = descriptors.get(descriptors.size()-2).getSearchResult();
 		SearchResult resultB = descriptors.get(descriptors.size()-1).getSearchResult();
-		
-		if(resultA==null || !resultA.isFinal() 
+
+		if(resultA==null || !resultA.isFinal()
 				|| resultB==null || !resultB.isFinal()) {
 			return;
 		}
-		
+
 		Collection<ResultEntry> diff = SearchUtils.diffResults(resultA, resultB);
-		
+
 		if(diff==null || diff.isEmpty()) {
 			System.out.println("No diff"); //$NON-NLS-1$
 		} else {
@@ -154,57 +154,57 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 			System.out.println(Arrays.toString(diff.toArray()));
 		}
 	}
-	
+
 	public void removeSearch(SearchDescriptor descriptor) {
 		if(descriptor==null)
 			throw new NullPointerException("Invalid descriptor"); //$NON-NLS-1$
-		
+
 		if(descriptors==null) {
 			return;
 		}
-		
+
 		int index = descriptors.indexOf(descriptor);
 		if(index==-1) {
 			return;
 		}
-		
+
 		descriptors.remove(index);
-		
+
 		descriptor.getSearch().removePropertyChangeListener(getHandler());
-		
+
 		fireIntervalRemoved(this, index, index);
 	}
-	
+
 	public void clear() {
 		if(descriptors==null || descriptors.isEmpty()) {
 			return;
 		}
-		
+
 		int index = descriptors.size()-1;
-		
+
 		for(SearchDescriptor descriptor : descriptors) {
 			descriptor.getSearch().removePropertyChangeListener(getHandler());
 		}
-		
+
 		descriptors.clear();
-		
+
 		fireIntervalRemoved(this, 0, index);
 	}
-	
+
 	private int indexofSearch(Search search) {
 		if(descriptors==null || descriptors.isEmpty()) {
 			return -1;
 		}
-		
+
 		for(int i=0; i<descriptors.size(); i++) {
 			if(descriptors.get(i).getSearch()==search) {
 				return i;
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	private class Handler implements PropertyChangeListener, ActionListener {
 
 		/**
@@ -212,7 +212,7 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 		 */
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			
+
 			Search search = (Search) evt.getSource();
 			int index = indexofSearch(search);
 			if(index==-1) {
@@ -220,9 +220,9 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 			} else {
 				fireContentsChanged(SearchHistory.this, index, index);
 			}
-			
+
 			/*SwingUtilities.invokeLater(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					diffWithLast();
@@ -238,11 +238,11 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 			if(descriptors==null) {
 				return;
 			}
-			
+
 			boolean needsRefresh = false;
 			int index0 = Integer.MAX_VALUE;
 			int index1 = 0;
-			
+
 			for(int i=0; i<descriptors.size(); i++) {
 				if(descriptors.get(i).isActive()) {
 					needsRefresh = true;
@@ -250,7 +250,7 @@ public class SearchHistory extends AbstractListModel<SearchDescriptor> {
 					index1 = Math.max(index1, i);
 				}
 			}
-			
+
 			if(needsRefresh) {
 				fireContentsChanged(SearchHistory.this, index0, index1);
 			} else {

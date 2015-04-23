@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.language_tools.treebank;
@@ -59,45 +59,45 @@ import de.ims.icarus.util.location.Locations;
 public abstract class BasicTreebankEditor implements Editor<Treebank> {
 
 	protected JPanel contentPanel;
-	
+
 	protected FormBuilder formBuilder;
-	
+
 	protected Treebank treebank;
-	
+
 	protected Handler handler;
-	
+
 	private int ignoreTreebankEvents = 0;
-	
+
 	protected BasicTreebankEditor() {
 		// no-op
 	}
-	
+
 	protected final void setIgnoreTreebankEvents(boolean ignore) {
 		if(ignore)
 			ignoreTreebankEvents++;
 		else
 			ignoreTreebankEvents--;
 	}
-	
+
 	protected final boolean isIgnoreTreebankEvents() {
 		return ignoreTreebankEvents>0;
 	}
-	
+
 	protected final void resetIgnoreTreebankEvents() {
 		ignoreTreebankEvents = 0;
 	}
-	
+
 	protected Handler createHandler() {
 		return new Handler();
 	}
-	
+
 	protected void initForm() {
 		formBuilder.addInputFormEntry("name", "labels.name"); //$NON-NLS-1$ //$NON-NLS-2$
 		formBuilder.addLocationFormEntry("location", "labels.location"); //$NON-NLS-1$ //$NON-NLS-2$
 		formBuilder.addPropertiesFormEntry("properties") //$NON-NLS-1$
 			.setLabel("labels.properties").setPropertyFilter(handler); //$NON-NLS-1$
 	}
-	
+
 	protected String getTreebankName() {
 		return treebank==null ? "<undefined>" : treebank.getName(); //$NON-NLS-1$
 	}
@@ -117,11 +117,11 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 			handler = createHandler();
 			TreebankRegistry.getInstance().addListener(Events.REMOVED, handler);
 			TreebankRegistry.getInstance().addListener(Events.CHANGED, handler);
-			
+
 			initForm();
-			
+
 			formBuilder.buildForm();
-			
+
 			resetEdit();
 		}
 		return contentPanel;
@@ -135,9 +135,9 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		if(this.treebank==treebank) {
 			return;
 		}
-		
+
 		this.treebank = treebank;
-		
+
 		resetIgnoreTreebankEvents();
 		resetEdit();
 	}
@@ -152,27 +152,27 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		}
 		if(treebank==null) {
 			formBuilder.clear();
-			
+
 			return;
 		}
-		
+
 		doResetEdit();
 	}
-	
+
 	protected void doResetEdit() {
-		
+
 		// Name
 		formBuilder.setValue("name", treebank.getName()); //$NON-NLS-1$
-		
+
 		// Location
 		Location location = treebank.getLocation();
 		formBuilder.setValue("location", location); //$NON-NLS-1$
-		
+
 		// Properties
 		Map<String, Object> properties = new HashMap<>(treebank.getProperties());
 		filterProperties(properties);
 		formBuilder.setValue("properties", properties); //$NON-NLS-1$
-		
+
 	}
 
 	/**
@@ -186,21 +186,21 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		if(treebank==null) {
 			return;
 		}
-		
+
 		doApplyEdit();
 	}
-	
+
 	protected void doApplyEdit() {
-		
+
 		setIgnoreTreebankEvents(true);
 		try {
-			
+
 			// Name
 			String newName = (String)formBuilder.getValue("name"); //$NON-NLS-1$
 			if(!newName.equals(treebank.getName())) {
 				String uniqueName = TreebankRegistry.getInstance().getUniqueName(newName);
 				if(!uniqueName.equals(newName)) {
-					DialogFactory.getGlobalFactory().showInfo(null, 
+					DialogFactory.getGlobalFactory().showInfo(null,
 							"plugins.languageTools.treebankEditView.dialogs.title",  //$NON-NLS-1$
 							"plugins.languageTools.treebankExplorerView.dialogs.duplicateName",  //$NON-NLS-1$
 							newName, uniqueName);
@@ -208,14 +208,14 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 				formBuilder.setValue("name", uniqueName); //$NON-NLS-1$
 				TreebankRegistry.getInstance().setName(treebank, uniqueName);
 			}
-			
+
 			// Location
 			Location location = null;
 			try {
 				location = (Location)formBuilder.getValue("location"); //$NON-NLS-1$
 			} catch (InvalidFormDataException e) {
 				LoggerFactory.log(this, Level.SEVERE, "Failed to resolve location for treebank: "+treebank.getName(), e); //$NON-NLS-1$
-				DialogFactory.getGlobalFactory().showError(null, 
+				DialogFactory.getGlobalFactory().showError(null,
 						"plugins.languageTools.treebankEditView.dialogs.title",  //$NON-NLS-1$
 						"plugins.languageTools.treebankEditView.dialogs.invalidLocation",  //$NON-NLS-1$
 						((LocationFormEntry)formBuilder.getEntry("location")).getLocationString()); //$NON-NLS-1$
@@ -223,7 +223,7 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 			if(!Locations.equals(location, treebank.getLocation())) {
 				TreebankRegistry.getInstance().setLocation(treebank, location);
 			}
-	
+
 			// Properties
 			// Replace the old set of properties
 			@SuppressWarnings("unchecked")
@@ -233,12 +233,12 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 			setIgnoreTreebankEvents(true);
 		}
 	}
-	
+
 	protected static boolean equals(Object o1, Object o2) {
 		if(o1==null || o2==null) {
 			return false;
 		}
-		
+
 		return o1.equals(o2);
 	}
 
@@ -253,12 +253,12 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		if(treebank==null) {
 			return false;
 		}
-		
+
 		// Compare name
 		if(!equals(formBuilder.getValue("name"), treebank.getName())) { //$NON-NLS-1$
 			return true;
 		}
-		
+
 		// Compare location
 		Location location = null;
 		try {
@@ -269,15 +269,12 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		if(!Locations.equals(location, treebank.getLocation())) {
 			return true;
 		}
-		
+
 		// Compare complete set of properties
 		@SuppressWarnings("unchecked")
 		Map<String, Object> properties = (Map<String, Object>) formBuilder.getValue("properties"); //$NON-NLS-1$
-		if((properties==null || properties.isEmpty()) !=
-				treebank.getProperties().isEmpty()) {
-			return true;
-		}
-		if(properties.size()!= treebank.getProperties().size()) {
+		int size = properties==null ? 0 : properties.size();
+		if(size!=treebank.getProperties().size()) {
 			return true;
 		}
 		if(properties!=null) {
@@ -294,7 +291,7 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -306,7 +303,7 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		if(handler!=null) {
 			TreebankRegistry.getInstance().removeListener(handler);
 		}
-		
+
 		treebank = null;
 	}
 
@@ -317,9 +314,9 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 	public Treebank getEditingItem() {
 		return treebank;
 	}
-	
+
 	protected void filterProperties(Map<String, Object> properties) {
-		for(Iterator<Entry<String, Object>> i = properties.entrySet().iterator(); 
+		for(Iterator<Entry<String, Object>> i = properties.entrySet().iterator();
 				i.hasNext(); ) {
 			Entry<String, Object> entry = i.next();
 			if(!isPropertyKeyAllowed(entry.getKey())) {
@@ -327,11 +324,11 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 			}
 		}
 	}
-	
+
 	protected boolean isPropertyKeyAllowed(String key) {
 		return true;
 	}
-	
+
 	protected class Handler implements EventListener, Filter {
 
 		/**
@@ -351,6 +348,6 @@ public abstract class BasicTreebankEditor implements Editor<Treebank> {
 		public boolean accepts(Object obj) {
 			return isPropertyKeyAllowed((String)obj);
 		}
-		
+
 	}
 }

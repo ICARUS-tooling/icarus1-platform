@@ -43,7 +43,7 @@ import de.ims.icarus.plugins.jgraph.cells.GraphNode;
  */
 @XmlRootElement(name="coref-node")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CorefNodeData extends CorefCellData<Span> implements GraphNode {
+public class CorefNodeData extends CorefCellData<Span> implements GraphNode, Cloneable {
 
 	private static final long serialVersionUID = 857912220195344541L;
 

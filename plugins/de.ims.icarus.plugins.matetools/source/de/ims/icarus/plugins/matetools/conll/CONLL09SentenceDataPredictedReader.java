@@ -75,9 +75,9 @@ public class CONLL09SentenceDataPredictedReader implements SentenceDataReader {
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
 					+ file);
 
-		if (options == null) {
-			options = Options.emptyOptions;
-		}
+//		if (options == null) {
+//			options = Options.emptyOptions;
+//		}
 
 		normalize = true;
 		inputFormat = 0;

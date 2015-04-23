@@ -95,7 +95,7 @@ public enum ProsodyLevel implements Identity {
 
 	public abstract String[] getAvailableProperties();
 
-	private static Map<String, ProsodyLevel> tokenMap;
+	private static volatile Map<String, ProsodyLevel> tokenMap;
 
 	public static ProsodyLevel parseLevel(String s) {
 		if(tokenMap==null) {
@@ -111,22 +111,22 @@ public enum ProsodyLevel implements Identity {
 		return tokenMap.get(s);
 	}
 
-	private static ProsodyLevel[] values;
+	private static volatile ProsodyLevel[] values;
 
-	public ProsodyLevel up() {
+	private ProsodyLevel[] sharedValues() {
 		if(values==null) {
 			values = values();
 		}
 
-		return values[ordinal()+1];
+		return values;
+	}
+
+	public ProsodyLevel up() {
+		return sharedValues()[ordinal()+1];
 	}
 
 	public ProsodyLevel down() {
-		if(values==null) {
-			values = values();
-		}
-
-		return values[ordinal()-1];
+		return sharedValues()[ordinal()-1];
 	}
 
 	/**

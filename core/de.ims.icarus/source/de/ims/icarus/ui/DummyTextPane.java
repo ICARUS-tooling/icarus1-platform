@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui;
@@ -30,13 +30,13 @@ import java.awt.Rectangle;
 import javax.swing.JTextPane;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public class DummyTextPane extends JTextPane {
-	
+
 	private static final long serialVersionUID = -8618929791704766334L;
 
 	@Override
@@ -72,9 +72,15 @@ public class DummyTextPane extends JTextPane {
 	@Override
 	protected void firePropertyChange(String propertyName, Object oldValue,
 			Object newValue) {
-		if (propertyName == "document" || propertyName == "font" //$NON-NLS-1$ //$NON-NLS-2$
-				|| propertyName == "highlighter") { //$NON-NLS-1$
+		switch (propertyName) {
+		case "document": //$NON-NLS-1$
+		case "font": //$NON-NLS-1$
+		case "highlighter": //$NON-NLS-1$
 			super.firePropertyChange(propertyName, oldValue, newValue);
+			break;
+
+		default:
+			break;
 		}
 	}
 

@@ -47,11 +47,6 @@ import de.ims.icarus.util.strings.StringUtil;
  */
 public class LabelPattern implements ProsodyConstants {
 
-	public static void main(String[] args) {
-		String test = "%documentId::15:% (n) $speaker:::?:$\\:  ";
-		LabelPattern pattern = new LabelPattern(test);
-	}
-
 	private Element[] elements;
 	private String pattern;
 

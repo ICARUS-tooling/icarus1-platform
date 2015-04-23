@@ -50,7 +50,7 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement
-public class SearchDescriptor {
+public class SearchDescriptor implements Cloneable {
 
 	@XmlTransient
 	private Search search;

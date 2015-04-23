@@ -95,9 +95,9 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 			throw new FileNotFoundException("Missing File: " //$NON-NLS-1$
 											+file);
 
-		if (options == null){
-			options = Options.emptyOptions;
-		}
+//		if (options == null){
+//			options = Options.emptyOptions;
+//		}
 
 
 		// TODO extend with options FixME: Gold/System?!
@@ -294,8 +294,7 @@ public class TCF04SentenceDataReader implements SentenceDataReader {
 		DefaultFileLocation dloc = new DefaultFileLocation(file);
 		Options o = null;
 
-		TCF04SentenceDataReader t4 = new TCF04SentenceDataReader();
-		try {
+		try (TCF04SentenceDataReader t4 = new TCF04SentenceDataReader()) {
 			t4.init(dloc, o);
 			while (t4.next() != null){
 				t4.next();
