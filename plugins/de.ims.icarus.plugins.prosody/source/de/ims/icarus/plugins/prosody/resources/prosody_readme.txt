@@ -46,3 +46,36 @@ Supported syllable properties:
 	painte_c2				float
 	painte_d				float
 	painte_max_c			float		maximum taken from painte_c1 and painte_c2
+	
+Supported header properties for the prosody reader:
+	columns							detailed specification of each column in the tabular format
+	documentBegin					prefix to be used to detect the beginning of a document
+	documentEnd						prefix to be used to detect the end of a document
+	sentenceBegin					prefix to be used to detect the beginning of a sentence
+	sentenceEnd						prefix to be used to detect the end of a sentence
+	wordBegin						prefix to be used to detect the beginning of a word
+	wordEnd							prefix to be used to detect the end of a word
+	separator						pattern to be used for splitting the column data in a row of text
+
+	skipEmptyLines					flag to indicate whether empty lines should be skipped entirely without even considering above delimiter properties
+	syllableOffsetsFromSampa		flag to indicate whether to create syllable offsets from sampa annotations
+	localSampaRulesFile				name or path of a sampa rules file, relative to the /data folder
+	markAccentOnWords				flag to indicate whether words should receive a marker when they are found to host an accented syllable
+	onlyConsiderStressedSylables	flag to indicate that only syllables should be considered for the above accent marking when they are also stressed
+	accentExcursion					excursion (min value of either c1 or c2) to be used as threshold when performing above mentioned accent marking
+	
+Column format for the prosody reader's header section:
+	[property_key,type,level,role,separator]
+
+	property_key			the property key the content of a column will be stored with (it is recommended to stick to the property names defined in the beginning of this document!)
+	type					value type of the column content (int,integer,float,double,bool,boolean,bit,string)
+	level					level within the active document-set the content of the column is meant to annotate (syl,word,sentence,sent,document,doc,document-set) 
+	role					optional hint that the content of a column should either be used as delimiter (DEL) to detect the end or beginning of data points or as aggregator (AGG) that hosts multiple data points of the next lower level
+	separator				optional info on how to split aggregated content in case the column is marked as aggregator (AGG)
+
+Special constants usable as property values in the prosody reader header section:
+	TAB						tab symbol (\t)
+	SPACE					space symbol ( )
+	NEWLINE					matches an empty line
+	NEWLINES				matches an arbitrary number of consecutive empty lines
+	WHITESPACE				matches an arbitrary sequence of whitespace characters (space, \t, etc...)

@@ -49,6 +49,9 @@ public class CharLineBuffer extends Splitable {
 	private final int bufferSize;
 	private int nextChar;
 
+	private int lineNumber;
+	private boolean eos;
+
 	// Cursor cursorCache
 	private Stack<Cursor> cursorCache = new Stack<>();
 	private Map<String, Matcher> regexCache;
@@ -80,6 +83,14 @@ public class CharLineBuffer extends Splitable {
 		ignoreLF = false;
 	}
 
+	public int getLineNumber() {
+		return lineNumber;
+	}
+
+	public boolean isEndOfStream() {
+		return eos;
+	}
+
 	public void reset() throws IOException {
 		if(reader!=null) {
 			reader.close();
@@ -87,6 +98,8 @@ public class CharLineBuffer extends Splitable {
 		}
 
 		ignoreLF = false;
+		eos = false;
+		lineNumber = -1;
 	}
 
 	public void close() throws IOException {
@@ -103,9 +116,11 @@ public class CharLineBuffer extends Splitable {
 	 * or a linebreak occurs.
 	 */
 	public boolean next() throws IOException {
-		nextChar = 0;
+		if(eos) {
+			return false;
+		}
 
-		boolean eos = false;
+		nextChar = 0;
 
 		char_loop : for(;;) {
 			int c = reader.read();
@@ -120,8 +135,10 @@ public class CharLineBuffer extends Splitable {
 				break char_loop;
 
 			case LF:
-				if(!ignoreLF)
+				if(!ignoreLF) {
+					lineNumber++;
 					break char_loop;
+				}
 				break;
 
 			default:
@@ -135,6 +152,27 @@ public class CharLineBuffer extends Splitable {
 		}
 
 		return !eos || nextChar>0;
+	}
+
+	public boolean nextNonEmptyLine() throws IOException {
+		while(isEmpty() && next());
+		return !eos;
+	}
+
+	public void trim() {
+		if(isEmpty()) {
+			return;
+		}
+
+		int leftShift = 0;
+		while(leftShift<nextChar && Character.isWhitespace(buffer[leftShift])) leftShift++;
+
+		if(leftShift>0) {
+			nextChar -= leftShift;
+			System.arraycopy(buffer, leftShift, buffer, 0, nextChar);
+		}
+
+		while(nextChar>0 && Character.isWhitespace(buffer[nextChar-1])) nextChar--;
 	}
 
 	private Cursor getCursor0(int index0, int index1) {

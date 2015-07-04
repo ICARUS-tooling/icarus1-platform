@@ -182,6 +182,13 @@
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.FestivalDocumentReader" />
 	</extension>
 	
+	<extension id="ProsodyTableReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
+		<parameter id="name" value="plugins.prosody.prosodyTableReader.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodyTableReader.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.UniSylDocumentReader" />
+	</extension>
+	
 	<extension id="ProsodyOutlinePresenter" plugin-id="de.ims.icarus.coref" point-id="CoreferencePresenter">
 		<parameter id="name" value="plugins.prosody.prosodyOutlinePresenter.identity.name" />
 		<parameter id="description" value="plugins.prosody.prosodyOutlinePresenter.identity.description" />

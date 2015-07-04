@@ -116,6 +116,16 @@ public class Options extends HashMap<String, Object> {
 		return value;
 	}
 
+	public String getString(String key, String defaultValue) {
+		Object result = get(key);
+
+		return result instanceof String ? (String) result : defaultValue;
+	}
+
+	public String getString(String key) {
+		return getString(key, null);
+	}
+
 	public int getInteger(String key, int defaultValue) {
 		Object result = get(key);
 		if(result instanceof String) {

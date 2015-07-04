@@ -557,7 +557,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return documentSet;
 	}
 
-	public static void loadDocumentSet(Reader<CoreferenceDocumentData> reader,
+	public static void loadDocumentSet(Reader<? extends CoreferenceDocumentData> reader,
 			Location location, Options options, CoreferenceDocumentSet target) throws IOException, UnsupportedLocationException,
 				UnsupportedFormatException {
 

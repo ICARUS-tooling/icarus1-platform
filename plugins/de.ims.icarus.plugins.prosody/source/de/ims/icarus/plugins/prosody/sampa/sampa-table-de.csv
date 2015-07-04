@@ -1,3 +1,7 @@
+# FORMAT:
+# <sampa_symbol>,[<graphem_sequence>,]
+#
+# general rules
 p,p,b,pp,bb,bst,
 b,b,bb,
 t,t,tt,d,th,dt
