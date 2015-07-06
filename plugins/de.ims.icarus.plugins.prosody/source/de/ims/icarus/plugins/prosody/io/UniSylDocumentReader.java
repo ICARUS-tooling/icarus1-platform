@@ -25,6 +25,9 @@
  */
 package de.ims.icarus.plugins.prosody.io;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -32,15 +35,22 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.io.Reader;
+import de.ims.icarus.language.coref.Cluster;
+import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceDocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.EdgeSet;
+import de.ims.icarus.language.coref.Span;
+import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.prosody.DefaultProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
@@ -63,6 +73,7 @@ import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 import de.ims.icarus.util.strings.CharLineBuffer;
 import de.ims.icarus.util.strings.Splitable;
+import de.ims.icarus.util.strings.StringPrimitives;
 
 /**
  * @author Markus Gärtner
@@ -106,6 +117,10 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 
 	private SampaMapper2 sampaMapper;
 	private Matcher emptyContentMatcher;
+	protected TIntObjectMap<Cluster> clusterMap;
+
+	protected LinkedList<Span> spanBuffer;
+	protected Stack<Span> spanStack;
 
 	public UniSylDocumentReader() {
 		// no-op
@@ -160,6 +175,12 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 
 		if(config.emptyContent!=null) {
 			emptyContentMatcher = Pattern.compile(config.emptyContent).matcher(""); //$NON-NLS-1$
+		}
+
+		if(config.createCorefStructure) {
+			clusterMap  = new TIntObjectHashMap<>();
+			spanBuffer  = new LinkedList<>();
+			spanStack  = new Stack<>();
 		}
 	}
 
@@ -588,7 +609,86 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		sentence.setProperty(index, TONAL_PROMINENCE_KEY, hasTonalProminence);
 	}
 
+	private static final String OBR = "("; //$NON-NLS-1$
+	private static final String CBR = ")"; //$NON-NLS-1$
+
 	private void createCorefStructure() {
 
+		for(int sentIndex=0; sentIndex<document.size(); sentIndex++) {
+			DefaultProsodicSentenceData sentence = (DefaultProsodicSentenceData) document.get(sentIndex);
+			for(int i=0; i<sentence.length(); i++) {
+				String coref = (String) sentence.getProperty(i, config.corefPropertyKey);
+				if(!coref.isEmpty()) {
+					// Build spans
+					String[] splits = coref.split("\\|"); //$NON-NLS-1$
+					for(String chunk : splits) {
+						if(chunk.startsWith(OBR)) {
+							int i1 = chunk.length()-1;
+							if(chunk.endsWith(CBR)) {
+								i1--;
+							}
+							int clusterId = StringPrimitives.parseInt(chunk, 1, i1);
+
+							// Start of span definition
+							Span span = new Span(i, i, sentIndex);
+
+							if(clusterMap!=null) {
+								Cluster cluster = clusterMap.get(clusterId);
+								if (cluster==null) {
+									cluster = new Cluster(clusterId);
+									clusterMap.put(clusterId, cluster);
+								}
+								cluster.add(span);
+								span.setCluster(cluster);
+							}
+
+							spanStack.push(span);
+						}
+						if(chunk.endsWith(CBR)) {
+							int i0 = chunk.startsWith(OBR) ? 1 : 0;
+							int clusterId = StringPrimitives.parseInt(chunk, i0, chunk.length()-2);
+
+							// End of span definition
+							Span span = null;
+							for(int idx=spanStack.size()-1; idx>-1; idx--) {
+								if(spanStack.get(idx).getClusterId()==clusterId) {
+									span = spanStack.remove(idx);
+									break;
+								}
+							}
+							if(span==null)
+								throw new IllegalArgumentException("No span introduced for cluster-id: "+clusterId); //$NON-NLS-1$
+							span.setEndIndex(i);
+
+							// Ensure there can be only one span covering the exact
+							// same range of indices (we keep the first such one and
+							// discard all subsequent spans for this range
+							if(span.compareTo(spanBuffer.peekLast())!=0) {
+								spanBuffer.offerLast(span);
+							}
+						}
+					}
+				}
+			}
+
+			if(!spanStack.isEmpty())
+				throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
+
+			Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
+			if(spans!=null) {
+				CoreferenceAllocation allocation = documentSet.getDefaultAllocation();
+				allocation.setSpans(document.getId(), sentIndex, spans);
+			}
+
+			spanStack.clear();
+			spanBuffer.clear();
+		}
+
+		SpanSet spanSet = document.getDefaultSpanSet();
+		if(spanSet!=null) {
+			CoreferenceAllocation allocation = documentSet.getDefaultAllocation();
+			EdgeSet edgeSet = CoreferenceUtils.defaultBuildEdgeSet(spanSet);
+			allocation.setEdgeSet(document.getId(), edgeSet);
+		}
 	}
 }

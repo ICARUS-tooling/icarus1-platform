@@ -111,6 +111,7 @@ public class UniSylIOUtils {
 	public static final String KEY_EMPTY_CONTENT = "emptyContent"; //$NON-NLS-1$
 	public static final String KEY_ADJUST_DEPENDENCY_HEADS = "adjustDependencyHeads"; //$NON-NLS-1$
 	public static final String KEY_CREATE_COREF_STRUCTURE = "createCorefStructure"; //$NON-NLS-1$
+	public static final String KEY_COREF_PROPERTY_KEY = "corefPropertyKey"; //$NON-NLS-1$
 
 	public static final String ROLE_DELIMITER = "DEL"; //$NON-NLS-1$
 	public static final String ROLE_AGGREGATE = "AGG"; //$NON-NLS-1$
@@ -216,6 +217,11 @@ public class UniSylIOUtils {
 		config.emptyContent = options.getString(KEY_EMPTY_CONTENT);
 		config.adjustDependencyHeads = options.getBoolean(KEY_ADJUST_DEPENDENCY_HEADS);
 		config.createCorefStructure = options.getBoolean(KEY_CREATE_COREF_STRUCTURE);
+		config.corefPropertyKey = options.getString(KEY_COREF_PROPERTY_KEY);
+
+		if(config.createCorefStructure && config.corefPropertyKey==null) {
+			config.corefPropertyKey = "coref";
+		}
 
 		// Now check for column based delimiters and get lineLevel
 		AnnotationLevel lineLevel = AnnotationLevel.DOCUMENT_SET;
@@ -442,6 +448,7 @@ public class UniSylIOUtils {
 		int accentExcursion = -1;
 		boolean adjustDependencyHeads = false;
 		boolean createCorefStructure = false;
+		String corefPropertyKey;
 
 		String localSampaRulesFile;
 
