@@ -33,6 +33,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.io.IOUtil;
@@ -103,6 +105,7 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 	private int wordIndex;
 
 	private SampaMapper2 sampaMapper;
+	private Matcher emptyContentMatcher;
 
 	public UniSylDocumentReader() {
 		// no-op
@@ -153,6 +156,10 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 			if(sampaMapper==null){
 				sampaMapper = new SampaMapper2();
 			}
+		}
+
+		if(config.emptyContent!=null) {
+			emptyContentMatcher = Pattern.compile(config.emptyContent).matcher(""); //$NON-NLS-1$
 		}
 	}
 
@@ -208,15 +215,18 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 
 			buffer.trim();
 
-			if(buffer.startsWith("#")) { //$NON-NLS-1$
-				tryReadProperty();
-			} else {
+			if(buffer.getLineNumber()==59) {
+				System.out.println(buffer);
+			}
+
+			boolean isHashLine = buffer.startsWith("#"); //$NON-NLS-1$
+			if(!isHashLine || !tryReadProperty()) {
 
 				Arrays.fill(delimiterResults, 0);
 //				Arrays.fill(lineActions, 0);
 
 				int currentLine = buffer.getLineNumber();
-				boolean isDataLine = !tryRawDelimiters();
+				boolean isDataLine = !tryRawDelimiters() && !isHashLine;
 
 				if(buffer.getLineNumber()>currentLine) {
 					isDataLine = true;
@@ -250,17 +260,23 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		return null;
 	}
 
-	private void tryReadProperty() {
+	private boolean tryReadProperty() {
 		if(currentLevel==null) {
-			return;
+			return false;
 		}
 
 		int sepIdx = buffer.indexOf('=');
+
+		if(sepIdx==-1) {
+			return false;
+		}
 
 		String key = buffer.substring(1, sepIdx);
 		String value = buffer.substring(sepIdx+1);
 
 		assignProperty(currentLevel, key, value);
+
+		return true;
 	}
 
 	private static final AnnotationLevel[] levels = AnnotationLevel.values();
@@ -286,9 +302,8 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 			}
 			delimiterResults[i] |= delimiter.checkLine(buffer);
 
-			if(!UniSylIOUtils.isSameElement(delimiterResults[i])) {
-				changeDetected = true;
-			}
+			changeDetected |= UniSylIOUtils.isBeginElement(delimiterResults[i])
+					|| UniSylIOUtils.isEndElement(delimiterResults[i]);
 		}
 
 		return changeDetected;
@@ -302,6 +317,17 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 				continue;
 			}
 			delimiterResults[i] |= delimiter.checkLine(buffer);
+		}
+	}
+
+	private boolean isEmptyContent(CharSequence s) {
+		if(emptyContentMatcher==null) {
+			return false;
+		} else {
+			emptyContentMatcher.reset(s);
+			boolean result = emptyContentMatcher.matches();
+			emptyContentMatcher.reset();
+			return result;
 		}
 	}
 
@@ -328,7 +354,6 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		boolean endWord = forceEnd || endSent || UniSylIOUtils.isEndElement(delimiterResults[AnnotationLevel.WORD.ordinal()]);
 
 		if(endWord && sentence!=null) {
-			//TODO collect cached syls from colPayload
 			if(needsSylCollector) {
 				int sylCount = 0;
 				for(Column column : config.columns) {
@@ -368,9 +393,7 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		}
 
 		if(endDoc && document!=null) {
-			if(document.getId()==null) {
-				document.setId("doc_"+document.getDocumentIndex()); //$NON-NLS-1$
-			}
+			finalizeDocument();
 
 			documentSet.add(document);
 			document = null;
@@ -403,6 +426,20 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		}
 	}
 
+	private void finalizeDocument() {
+		if(document.getId()==null) {
+			Object id = document.getProperty(DOCUMENT_ID);
+			if(id==null) {
+				id = "doc_"+document.getDocumentIndex(); //$NON-NLS-1$
+			}
+			document.setId(String.valueOf(id));
+		}
+
+		if(config.createCorefStructure) {
+			createCorefStructure();
+		}
+	}
+
 	private void finalizeSentence() {
 		// Create 'forms' array
 		String[] forms = new String[wordIndex+1];
@@ -423,6 +460,11 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 			// Check for word accent markers
 			if(config.markAccentOnWords) {
 				markTonalProminence(i);
+			}
+
+			if(config.adjustDependencyHeads) {
+				int head = sentence.getHead(i);
+				sentence.setProperty(i, HEAD_KEY, Math.max(head-1, DATA_UNDEFINED_VALUE));
 			}
 		}
 		sentence.setForms(forms);
@@ -462,12 +504,20 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 			Splitable cursor = buffer.getSplitCursor(column.index);
 
 			if(column.isAggregator()) {
-				int sylCount = cursor.split(column.separator);
-				Object array = type.createSylBuffer(sylCount);
-				for(int i=0; i<sylCount; i++) {
-					Splitable part = cursor.getSplitCursor(i);
-					type.parseAndSet(array, i, part);
-					part.recycle();
+
+				Object array;
+
+				if(isEmptyContent(cursor)) {
+					array = type.emptySylBuffer();
+				} else {
+					int sylCount = cursor.split(column.separator);
+					array = type.createSylBuffer(sylCount);
+					for(int i=0; i<sylCount; i++) {
+						Splitable part = cursor.getSplitCursor(i);
+						type.parseAndSet(array, i, part);
+						part.recycle();
+					}
+					sentence.setProperty(wordIndex, SYLLABLE_COUNT, sylCount);
 				}
 
 				sentence.setProperty(wordIndex, column.property, array);
@@ -481,7 +531,8 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 				} break;
 
 				default:
-					assignProperty(column.level, column.property, type.parse(cursor));
+					Object value = isEmptyContent(cursor) ? type.emptyValue() : type.parse(cursor);
+					assignProperty(column.level, column.property, value);
 					break;
 				}
 			}
@@ -535,5 +586,9 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		}
 
 		sentence.setProperty(index, TONAL_PROMINENCE_KEY, hasTonalProminence);
+	}
+
+	private void createCorefStructure() {
+
 	}
 }

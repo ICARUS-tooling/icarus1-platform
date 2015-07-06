@@ -108,6 +108,9 @@ public class UniSylIOUtils {
 	public static final String KEY_MARK_ACCENT_ON_WORDS = "markAccentOnWords"; //$NON-NLS-1$
 	public static final String KEY_ONLY_CONSIDER_STRESSED_SYLLABLES = "onlyConsiderStressedSylables"; //$NON-NLS-1$
 	public static final String KEY_ACCENT_EXCURSION = "accentExcursion"; //$NON-NLS-1$
+	public static final String KEY_EMPTY_CONTENT = "emptyContent"; //$NON-NLS-1$
+	public static final String KEY_ADJUST_DEPENDENCY_HEADS = "adjustDependencyHeads"; //$NON-NLS-1$
+	public static final String KEY_CREATE_COREF_STRUCTURE = "createCorefStructure"; //$NON-NLS-1$
 
 	public static final String ROLE_DELIMITER = "DEL"; //$NON-NLS-1$
 	public static final String ROLE_AGGREGATE = "AGG"; //$NON-NLS-1$
@@ -181,26 +184,26 @@ public class UniSylIOUtils {
 
 		// Word level delimiters
 		if((val=options.getString(KEY_WORD_BEGIN))!=null) {
-			addDelimiter(config, AnnotationLevel.WORD, newLineDelimiter(val, BEGIN_ELEMENT), true);
+			addDelimiter(config, AnnotationLevel.WORD, newLineDelimiter(val, BEGIN_ELEMENT, 0), true);
 		}
 		if((val=options.getString(KEY_WORD_END))!=null) {
-			addDelimiter(config, AnnotationLevel.WORD, newLineDelimiter(val, END_ELEMENT), true);
+			addDelimiter(config, AnnotationLevel.WORD, newLineDelimiter(val, END_ELEMENT, SAME_ELEMENT), true);
 		}
 
 		// Sentence level delimiters
 		if((val=options.getString(KEY_SENTENCE_BEGIN))!=null) {
-			addDelimiter(config, AnnotationLevel.SENTENCE, newLineDelimiter(val, BEGIN_ELEMENT), true);
+			addDelimiter(config, AnnotationLevel.SENTENCE, newLineDelimiter(val, BEGIN_ELEMENT, 0), true);
 		}
 		if((val=options.getString(KEY_SENTENCE_END))!=null) {
-			addDelimiter(config, AnnotationLevel.SENTENCE, newLineDelimiter(val, END_ELEMENT), true);
+			addDelimiter(config, AnnotationLevel.SENTENCE, newLineDelimiter(val, END_ELEMENT, SAME_ELEMENT), true);
 		}
 
 		// Document level delimiters
 		if((val=options.getString(KEY_DOCUMENT_BEGIN))!=null) {
-			addDelimiter(config, AnnotationLevel.DOCUMENT, newLineDelimiter(val, BEGIN_ELEMENT), true);
+			addDelimiter(config, AnnotationLevel.DOCUMENT, newLineDelimiter(val, BEGIN_ELEMENT, 0), true);
 		}
 		if((val=options.getString(KEY_DOCUMENT_END))!=null) {
-			addDelimiter(config, AnnotationLevel.DOCUMENT, newLineDelimiter(val, END_ELEMENT), true);
+			addDelimiter(config, AnnotationLevel.DOCUMENT, newLineDelimiter(val, END_ELEMENT, SAME_ELEMENT), true);
 		}
 
 		// Flags
@@ -210,6 +213,9 @@ public class UniSylIOUtils {
 		config.onlyConsiderStressedSylables = options.getBoolean(KEY_ONLY_CONSIDER_STRESSED_SYLLABLES);
 		config.accentExcursion = options.getInteger(KEY_ACCENT_EXCURSION);
 		config.localSampaRulesFile = options.getString(KEY_LOCAL_SAMPA_RULES_FILE);
+		config.emptyContent = options.getString(KEY_EMPTY_CONTENT);
+		config.adjustDependencyHeads = options.getBoolean(KEY_ADJUST_DEPENDENCY_HEADS);
+		config.createCorefStructure = options.getBoolean(KEY_CREATE_COREF_STRUCTURE);
 
 		// Now check for column based delimiters and get lineLevel
 		AnnotationLevel lineLevel = AnnotationLevel.DOCUMENT_SET;
@@ -228,7 +234,7 @@ public class UniSylIOUtils {
 			}
 
 			if(column.isAggregator() && column.separator==null) {
-				column.separator = "|"; //$NON-NLS-1$
+				column.separator = "\\|"; //$NON-NLS-1$
 			}
 		}
 
@@ -332,16 +338,16 @@ public class UniSylIOUtils {
 		}
 	}
 
-	private static Delimiter newLineDelimiter(String s, int hitResult) {
+	private static Delimiter newLineDelimiter(String s, int hitResult, int missResult) {
 		switch (s) {
 		case CONST_NEWLINE:
-			return new EmptyLineDelimiter(hitResult);
+			return new EmptyLineDelimiter(hitResult, missResult);
 
 		case CONST_NEWLINES:
-			return new EmptyLineDelimiter(hitResult, true);
+			return new EmptyLineDelimiter(hitResult, missResult, true);
 
 		default:
-			return new LinePrefixDelimiter(s, hitResult);
+			return new LinePrefixDelimiter(s, hitResult, missResult);
 		}
 	}
 
@@ -434,8 +440,12 @@ public class UniSylIOUtils {
 		boolean markAccentOnWords = false;
 		boolean onlyConsiderStressedSylables = false;
 		int accentExcursion = -1;
+		boolean adjustDependencyHeads = false;
+		boolean createCorefStructure = false;
 
 		String localSampaRulesFile;
+
+		String emptyContent;
 	}
 
 	public static class Column {
@@ -506,11 +516,12 @@ public class UniSylIOUtils {
 	public static class LinePrefixDelimiter implements Delimiter {
 
 		private final String prefix;
-		private final int hitResult;
+		private final int hitResult, missResult;
 
-		public LinePrefixDelimiter(String prefix, int hitResult) {
+		public LinePrefixDelimiter(String prefix, int hitResult, int missResult) {
 			this.prefix = prefix;
 			this.hitResult = hitResult;
+			this.missResult = missResult;
 		}
 
 		/**
@@ -518,7 +529,7 @@ public class UniSylIOUtils {
 		 */
 		@Override
 		public int checkLine(CharLineBuffer line) {
-			return StringUtil.equals(line, prefix) ? hitResult : SAME_ELEMENT;
+			return line.startsWith(prefix) ? hitResult : missResult;
 		}
 
 		/**
@@ -632,15 +643,16 @@ public class UniSylIOUtils {
 
 	public static class EmptyLineDelimiter implements Delimiter {
 
-		private final int hitResult;
+		private final int hitResult, missResult;
 		private final boolean multiline;
 
-		public EmptyLineDelimiter(int hitResult) {
-			this(hitResult, false);
+		public EmptyLineDelimiter(int hitResult, int missResult) {
+			this(hitResult, missResult, false);
 		}
 
-		public EmptyLineDelimiter(int hitResult, boolean multiline) {
+		public EmptyLineDelimiter(int hitResult, int missResult, boolean multiline) {
 			this.hitResult = hitResult;
+			this.missResult = missResult;
 			this.multiline = multiline;
 		}
 
@@ -651,7 +663,7 @@ public class UniSylIOUtils {
 		public int checkLine(CharLineBuffer line) {
 
 			if(!line.isEmpty()) {
-				return SAME_ELEMENT;
+				return missResult;
 			}
 
 			if(multiline) {
@@ -735,6 +747,11 @@ public class UniSylIOUtils {
 			public int bufferSize(Object buffer) {
 				return ((int[][])buffer).length;
 			}
+
+			@Override
+			public Object emptyValue() {
+				return Integer.valueOf(-1);
+			}
 		},
 
 		FLOAT {
@@ -761,6 +778,11 @@ public class UniSylIOUtils {
 			@Override
 			public int bufferSize(Object buffer) {
 				return ((float[][])buffer).length;
+			}
+
+			@Override
+			public Object emptyValue() {
+				return Float.valueOf(0f);
 			}
 		},
 
@@ -789,6 +811,11 @@ public class UniSylIOUtils {
 			public int bufferSize(Object buffer) {
 				return ((double[])buffer).length;
 			}
+
+			@Override
+			public Object emptyValue() {
+				return Double.valueOf(0d);
+			}
 		},
 
 		BIT {
@@ -815,6 +842,11 @@ public class UniSylIOUtils {
 			@Override
 			public int bufferSize(Object buffer) {
 				return ((boolean[])buffer).length;
+			}
+
+			@Override
+			public Object emptyValue() {
+				return Boolean.valueOf(false);
 			}
 		},
 
@@ -843,6 +875,11 @@ public class UniSylIOUtils {
 			public int bufferSize(Object buffer) {
 				return ((boolean[])buffer).length;
 			}
+
+			@Override
+			public Object emptyValue() {
+				return Boolean.valueOf(false);
+			}
 		},
 
 		STRING {
@@ -870,6 +907,11 @@ public class UniSylIOUtils {
 			public int bufferSize(Object buffer) {
 				return ((String[])buffer).length;
 			}
+
+			@Override
+			public Object emptyValue() {
+				return "";
+			}
 		},
 
 		;
@@ -879,6 +921,7 @@ public class UniSylIOUtils {
 		public abstract int bufferSize(Object buffer);
 		public abstract void parseAndSet(Object buffer, int index, CharSequence s);
 		public abstract Object parse(CharSequence s);
+		public abstract Object emptyValue();
 
 		public Object cloneBuffer(Object buffer) {
 			int size = bufferSize(buffer);
