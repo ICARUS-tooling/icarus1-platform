@@ -107,14 +107,15 @@ public interface ProsodyConstants extends LanguageConstants {
 	public static final String SYLLABLE_POSITION_TYPE = "position_type"; //$NON-NLS-1$
 
 	// Accent shape constants
-	public static final int ACCENT_SHAPE_RISE_VALUE = 1;
-	public static final int ACCENT_SHAPE_FALL_VALUE = 2;
-	public static final int ACCENT_SHAPE_RISE_FALL_VALUE = 3;
+	public static final int PEAK_SHAPE_RISE_VALUE = 1;
+	public static final int PEAK_SHAPE_FALL_VALUE = 2;
+	public static final int PEAK_SHAPE_RISE_FALL_VALUE = 3;
+	public static final int PEAK_SHAPE_NO_PEAK_VALUE = 4;
 
-	public static final String ACCENT_SHAPE_RISE_LABEL = "Rise"; //$NON-NLS-1$
-	public static final String ACCENT_SHAPE_FALL_LABEL = "Fall"; //$NON-NLS-1$
-	public static final String ACCENT_SHAPE_RISE_FALL_LABEL = "Rise-Fall"; //$NON-NLS-1$
-	public static final String ACCENT_SHAPE_UNACCENTED_LABEL = "Unaccented"; //$NON-NLS-1$
+	public static final String PEAK_SHAPE_RISE_LABEL = "Rise"; //$NON-NLS-1$
+	public static final String PEAK_SHAPE_FALL_LABEL = "Fall"; //$NON-NLS-1$
+	public static final String PEAK_SHAPE_RISE_FALL_LABEL = "Rise-Fall"; //$NON-NLS-1$
+	public static final String PEAK_SHAPE_NO_PEAK_LABEL = "No Peak"; //$NON-NLS-1$
 
 	// Painte channel constants
 	public static final int PAINTE_CHANNEL_INSIDE_VALUE = 1;

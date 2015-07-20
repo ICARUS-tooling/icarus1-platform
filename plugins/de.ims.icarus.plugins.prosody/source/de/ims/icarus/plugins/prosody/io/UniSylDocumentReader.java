@@ -74,6 +74,7 @@ import de.ims.icarus.util.location.UnsupportedLocationException;
 import de.ims.icarus.util.strings.CharLineBuffer;
 import de.ims.icarus.util.strings.Splitable;
 import de.ims.icarus.util.strings.StringPrimitives;
+import de.ims.icarus.util.strings.StringUtil;
 
 /**
  * @author Markus Gärtner
@@ -229,15 +230,11 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		while(!buffer.isEndOfStream()) {
 //			System.out.println("LINE"+(buffer.getLineNumber()+1)+": "+buffer); //$NON-NLS-1$ //$NON-NLS-2$
 
+			buffer.trim();
+
 			if(config.skipEmptyLines && buffer.isEmpty()) {
 				buffer.next();
 				continue;
-			}
-
-			buffer.trim();
-
-			if(buffer.getLineNumber()==59) {
-				System.out.println(buffer);
 			}
 
 			boolean isHashLine = buffer.startsWith("#"); //$NON-NLS-1$
@@ -468,6 +465,9 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 			Object form = sentence.getProperty(i, FORM_KEY);
 			if(form==null) {
 				form = ""; //$NON-NLS-1$
+			} else if(config.decodeFestivalUmlauts) {
+				form = decode(String.valueOf(form));
+				sentence.setProperty(i, FORM_KEY, form);
 			}
 			forms[i] = String.valueOf(form);
 
@@ -560,6 +560,58 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 
 			cursor.recycle();
 		}
+	}
+
+	private StringBuilder decodeBuffer = new StringBuilder();
+
+	private String decode(String s) {
+		decodeBuffer.setLength(0);
+
+		boolean escaped = false;
+		for(int i=0; i<s.length(); i++) {
+			char c = s.charAt(i);
+
+			if(escaped) {
+				switch (c) {
+				case 'a':
+					c = 'ä';
+					break;
+				case 'A':
+					c = 'Ä';
+					break;
+				case 'o':
+					c = 'ö';
+					break;
+				case 'O':
+					c = 'Ö';
+					break;
+				case 'u':
+					c = 'ü';
+					break;
+				case 'U':
+					c = 'Ü';
+					break;
+				case 's':
+					c = 'ß';
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			escaped = c=='"';
+
+			if(!escaped) {
+				decodeBuffer.append(c);
+			}
+		}
+
+		if(decodeBuffer.length()!=s.length()) {
+			s = StringUtil.intern(decodeBuffer);
+		}
+
+		return s;
 	}
 
 	private static int[] EMPTY_INTS = {};

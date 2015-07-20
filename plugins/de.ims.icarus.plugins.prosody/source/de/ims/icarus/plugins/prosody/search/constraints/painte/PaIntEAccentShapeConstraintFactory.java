@@ -78,21 +78,21 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 	public Object[] getLabelSet(Object specifier) {
 		return new Object[] {
 			LanguageConstants.DATA_UNDEFINED_LABEL,
-			ACCENT_SHAPE_RISE_LABEL,
-			ACCENT_SHAPE_FALL_LABEL,
-			ACCENT_SHAPE_RISE_FALL_LABEL,
-			ACCENT_SHAPE_UNACCENTED_LABEL,
+			PEAK_SHAPE_RISE_LABEL,
+			PEAK_SHAPE_FALL_LABEL,
+			PEAK_SHAPE_RISE_FALL_LABEL,
+			PEAK_SHAPE_NO_PEAK_LABEL,
 		};
 	}
 
 	@Override
 	public Object labelToValue(Object label, Object specifier) {
-		return ProsodyUtils.parseAccentShapeLabel((String) label);
+		return ProsodyUtils.parsePeakShapeLabel((String) label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value, Object specifier) {
-		return ProsodyUtils.getAccentShapeLabel((int) value);
+		return ProsodyUtils.getPeakShapeLabel((int) value);
 	}
 
 	/**
@@ -140,24 +140,24 @@ public class PaIntEAccentShapeConstraintFactory extends AbstractConstraintFactor
 			float c2 = tree.getPainteC2(sylIndex);
 
 			if(c1<excursion && c2<excursion) {
-				return DATA_UNDEFINED_VALUE;
+				return PEAK_SHAPE_NO_PEAK_VALUE;
 			}
 
 			if(Math.abs(c1-c2)<=delta) {
-				return (b>=minBRiseFall && b<=maxBRiseFall) ? ACCENT_SHAPE_RISE_FALL_VALUE : DATA_UNDEFINED_VALUE;
+				return (b>=minBRiseFall && b<=maxBRiseFall) ? PEAK_SHAPE_RISE_FALL_VALUE : DATA_UNDEFINED_VALUE;
 			} else if(c1>c2) {
-				return (b>=minBRise && b<=maxBRise) ? ACCENT_SHAPE_RISE_VALUE : DATA_UNDEFINED_VALUE;
+				return (b>=minBRise && b<=maxBRise) ? PEAK_SHAPE_RISE_VALUE : DATA_UNDEFINED_VALUE;
 			} else {
-				return (b>=minBFall && b<=maxBFall) ? ACCENT_SHAPE_FALL_VALUE : DATA_UNDEFINED_VALUE;
+				return (b>=minBFall && b<=maxBFall) ? PEAK_SHAPE_FALL_VALUE : DATA_UNDEFINED_VALUE;
 			}
 		}
 
 		@Override
 		public Object getLabel(Object value) {
-			if((int)value == DATA_UNDEFINED_VALUE) {
-				return ACCENT_SHAPE_UNACCENTED_LABEL;
-			}
-			return ProsodyUtils.getAccentShapeLabel((int) value);
+//			if((int)value == DATA_UNDEFINED_VALUE) {
+//				return PEAK_SHAPE_NO_PEAK_LABEL;
+//			}
+			return ProsodyUtils.getPeakShapeLabel((int) value);
 		}
 	}
 }

@@ -118,7 +118,10 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 
 				for(int i=0; i<properties.length; i++) {
 					if(i>0) {
-						sb.append(","); //$NON-NLS-1$
+						sb.append(',');
+						if(i%10==0) {
+							sb.append("<br>"); //$NON-NLS-1$
+						}
 					}
 					sb.append(properties[i]);
 				}
@@ -198,7 +201,7 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 		case DOCUMENT: return new ProsodyTextSource.DocumentTextSource(prosodyAccessor);
 
 		default:
-			throw new IllegalArgumentException("Not a valid level: "+level);
+			throw new IllegalArgumentException("Not a valid level: "+level); //$NON-NLS-1$
 		}
 	}
 

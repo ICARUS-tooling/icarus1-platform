@@ -263,27 +263,31 @@ public class ProsodyUtils implements ProsodyConstants {
 		}
 	}
 
-	public static String getAccentShapeLabel(int value) {
+	public static String getPeakShapeLabel(int value) {
 		switch (value) {
-		case ACCENT_SHAPE_RISE_VALUE:
-			return ACCENT_SHAPE_RISE_LABEL;
-		case ACCENT_SHAPE_FALL_VALUE:
-			return ACCENT_SHAPE_FALL_LABEL;
-		case ACCENT_SHAPE_RISE_FALL_VALUE:
-			return ACCENT_SHAPE_RISE_FALL_LABEL;
+		case PEAK_SHAPE_RISE_VALUE:
+			return PEAK_SHAPE_RISE_LABEL;
+		case PEAK_SHAPE_FALL_VALUE:
+			return PEAK_SHAPE_FALL_LABEL;
+		case PEAK_SHAPE_RISE_FALL_VALUE:
+			return PEAK_SHAPE_RISE_FALL_LABEL;
+		case PEAK_SHAPE_NO_PEAK_VALUE:
+			return PEAK_SHAPE_NO_PEAK_LABEL;
 
 		default:
 			return LanguageConstants.DATA_UNDEFINED_LABEL;
 		}
 	}
 
-	public static int parseAccentShapeLabel(String label) {
-		if(ACCENT_SHAPE_RISE_LABEL.equals(label)) {
-			return ACCENT_SHAPE_RISE_VALUE;
-		} else if(ACCENT_SHAPE_FALL_LABEL.equals(label)) {
-			return ACCENT_SHAPE_FALL_VALUE;
-		} else if(ACCENT_SHAPE_RISE_FALL_LABEL.equals(label)) {
-			return ACCENT_SHAPE_RISE_FALL_VALUE;
+	public static int parsePeakShapeLabel(String label) {
+		if(PEAK_SHAPE_RISE_LABEL.equals(label)) {
+			return PEAK_SHAPE_RISE_VALUE;
+		} else if(PEAK_SHAPE_FALL_LABEL.equals(label)) {
+			return PEAK_SHAPE_FALL_VALUE;
+		} else if(PEAK_SHAPE_RISE_FALL_LABEL.equals(label)) {
+			return PEAK_SHAPE_RISE_FALL_VALUE;
+		} else if(PEAK_SHAPE_NO_PEAK_LABEL.equals(label)) {
+			return PEAK_SHAPE_NO_PEAK_VALUE;
 		} else {
 			return LanguageConstants.DATA_UNDEFINED_VALUE;
 		}

@@ -112,6 +112,7 @@ public class UniSylIOUtils {
 	public static final String KEY_ADJUST_DEPENDENCY_HEADS = "adjustDependencyHeads"; //$NON-NLS-1$
 	public static final String KEY_CREATE_COREF_STRUCTURE = "createCorefStructure"; //$NON-NLS-1$
 	public static final String KEY_COREF_PROPERTY_KEY = "corefPropertyKey"; //$NON-NLS-1$
+	public static final String KEY_DECODE_FESTIVAL_UMLAUTS = "decodeFestivalUmlauts"; //$NON-NLS-1$
 
 	public static final String ROLE_DELIMITER = "DEL"; //$NON-NLS-1$
 	public static final String ROLE_AGGREGATE = "AGG"; //$NON-NLS-1$
@@ -218,6 +219,7 @@ public class UniSylIOUtils {
 		config.adjustDependencyHeads = options.getBoolean(KEY_ADJUST_DEPENDENCY_HEADS);
 		config.createCorefStructure = options.getBoolean(KEY_CREATE_COREF_STRUCTURE);
 		config.corefPropertyKey = options.getString(KEY_COREF_PROPERTY_KEY);
+		config.decodeFestivalUmlauts = options.getBoolean(KEY_DECODE_FESTIVAL_UMLAUTS);
 
 		if(config.createCorefStructure && config.corefPropertyKey==null) {
 			config.corefPropertyKey = "coref";
@@ -449,6 +451,7 @@ public class UniSylIOUtils {
 		boolean adjustDependencyHeads = false;
 		boolean createCorefStructure = false;
 		String corefPropertyKey;
+		boolean decodeFestivalUmlauts = false;
 
 		String localSampaRulesFile;
 

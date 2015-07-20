@@ -1,2 +1,1 @@
 de.ims.icarus.model
-de.ims.icarus.prosody

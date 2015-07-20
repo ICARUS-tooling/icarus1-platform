@@ -192,6 +192,11 @@ public class SoundPlayer {
 	public SoundFile getSoundFile(ProsodicSentenceData sentence) throws SoundException {
 		if (sentence == null)
 			throw new NullPointerException("Invalid sentence"); //$NON-NLS-1$
+		String fileName = (String) sentence.getProperty(ProsodyConstants.AUDIO_FILE_KEY);
+
+		if(fileName!=null) {
+			return getSoundFile(fileName);
+		}
 
 		return getSoundFile(sentence.getDocument());
 	}

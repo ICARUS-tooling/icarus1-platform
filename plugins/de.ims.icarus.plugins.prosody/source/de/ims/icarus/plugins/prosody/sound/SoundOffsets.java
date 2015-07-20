@@ -65,7 +65,7 @@ public class SoundOffsets {
 
 	public static float getEndOffset(ProsodicSentenceData sentence) {
 		int index = sentence.length()-1;
-		while(index>0) {
+		while(index>=0) {
 			float endOffset = sentence.getEndTimestamp(index);
 
 			if(endOffset!=LanguageConstants.DATA_UNDEFINED_VALUE) {
