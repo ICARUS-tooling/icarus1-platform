@@ -384,6 +384,12 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 					sylCount = list.size();
 					Object buffer = column.type.createSylBuffer(sylCount);
 					for(int i=0; i<sylCount; i++) {
+						String s = list.get(i);
+
+						if(isEmptyContent(s)) {
+							continue;
+						}
+
 						try {
 							column.type.parseAndSet(buffer, i, list.get(i));
 						} catch(NumberFormatException e) {
