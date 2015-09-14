@@ -57,6 +57,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.PlainDocument;
 
@@ -469,18 +470,66 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 	}
 
 	@SuppressWarnings("serial")
-	private static class NumberDocument extends PlainDocument {
+	private abstract static class NumberDocument extends PlainDocument {
+
+		private StringBuilder buffer = new StringBuilder();
 
 		@Override
 		public void insertString(int offset, String str, AttributeSet a)
 				throws BadLocationException {
-			super.insertString(offset, str, a);
-			String newText = getText(0, getLength());
-			if (!(newText.equals(LanguageConstants.DATA_UNDEFINED_LABEL)
-					|| newText.matches("^\\d*$"))) { //$NON-NLS-1$
-				remove(offset, str.length());
+
+			buffer.setLength(0);
+			buffer.append(getText(0, getLength()));
+			buffer.insert(offset, str);
+
+			String text = buffer.toString();
+
+			if(!text.equals(LanguageConstants.DATA_UNDEFINED_LABEL) && !test(text)) {
+				return;
 			}
+
+			super.insertString(offset, str, a);
 		}
+
+		protected abstract boolean test(String s);
+	}
+
+	@SuppressWarnings("serial")
+	private static class IntegerDocument extends NumberDocument {
+
+		@Override
+		protected boolean test(String s) {
+
+			boolean ok = true;
+
+			try {
+				Long.parseLong(s);
+			} catch (NumberFormatException e) {
+				ok = false;
+			}
+
+			return ok;
+		}
+
+	}
+
+	@SuppressWarnings("serial")
+	private static class FloatDocument extends NumberDocument {
+
+		@Override
+		protected boolean test(String s) {
+
+			boolean ok = true;
+
+			try {
+				Double.parseDouble(s);
+			} catch (NumberFormatException e) {
+				ok = false;
+			}
+
+			return ok;
+		}
+
 	}
 
 	private static class GroupingCellRenderer extends DefaultListCellRenderer implements Icon {
@@ -824,6 +873,8 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 		private ConstraintFactory factory;
 		private boolean displayingGroups = false;
 
+		private Class<?> currentValueClass = null;
+
 		ConstraintFormEntry(ConstraintFactory factory, ActionListener listener) {
 			this.factory = factory;
 
@@ -841,6 +892,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			specifierSelect.setEditable(true);
 			specifierSelect.setRenderer(sharedRenderer);
 			UIUtil.fitToContent(specifierSelect, 60, 100, 20);
+			specifierSelect.addActionListener(this);
 			specifierSelect.setVisible(specifiers!=null);
 
 			Object specifier = specifierSelect.getSelectedItem();
@@ -856,15 +908,10 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			Object defaultValue = factory.valueToLabel(factory.getDefaultValue(specifier), specifier);
 
 			valueSelect = labelSet==null ? new JComboBox<>() : new JComboBox<>(labelSet);
-
-			if(Integer.class.equals(valueClass)) {
-				JTextComponent editor = (JTextComponent) valueSelect.getEditor().getEditorComponent();
-				editor.setDocument(new NumberDocument());
-			}
-
 			valueSelect.setEditable(valueClass!=null);
-
 			valueSelect.setSelectedItem(defaultValue);
+
+			refreshValueDocument();
 
 
 			UIUtil.resizeComponent(valueSelect, 100, 20);
@@ -872,6 +919,40 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			label = new JLabel(factory.getName());
 
 			refreshButtons();
+		}
+
+		private void refreshValueDocument() {
+
+			Object specifier = specifierSelect.getSelectedItem();
+			Class<?> valueClass = factory.getValueClass(specifier);
+
+			if(valueClass==currentValueClass) {
+				return;
+			}
+
+			Document doc = null;
+
+			if(Number.class.isAssignableFrom(valueClass)) {
+				if(Integer.class.equals(valueClass)
+						|| Long.class.equals(valueClass)
+						|| Short.class.equals(valueClass)) {
+					doc = new IntegerDocument();
+				} else if(Float.class.equals(valueClass)
+						|| Double.class.equals(valueClass)) {
+					doc = new FloatDocument();
+				}
+			}
+
+			if(doc==null) {
+				doc = new PlainDocument();
+			}
+
+			Object value = valueSelect.getSelectedItem();
+
+			JTextComponent editor = (JTextComponent) valueSelect.getEditor().getEditorComponent();
+			editor.setDocument(doc);
+
+			valueSelect.setSelectedItem(value);
 		}
 
 		private JButton createHelperButton(boolean add, ActionListener listener) {
@@ -904,6 +985,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 				throw new IllegalArgumentException("Factory not designed to handle constraints for token: "+constraint.getToken()); //$NON-NLS-1$
 
 
+			specifierSelect.setSelectedItem(constraint.getSpecifier());
 			operatorSelect.setSelectedItem(constraint.getOperator());
 			label.setText(factory.getName());
 			label.setToolTipText(factory.getDescription());
@@ -916,7 +998,6 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 				Object currentValue = factory.valueToLabel(constraint.getValue(), constraint.getSpecifier());
 				displayValue(currentValue);
 			}
-			specifierSelect.setSelectedItem(constraint.getSpecifier());
 
 			return this;
 		}
@@ -1044,6 +1125,8 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 					displayValue(null);
 				}
 
+			} else if(e.getSource()==specifierSelect) {
+				refreshValueDocument();
 			}
 		}
 

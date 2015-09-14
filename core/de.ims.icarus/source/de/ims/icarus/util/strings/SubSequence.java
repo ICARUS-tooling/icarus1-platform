@@ -25,11 +25,19 @@
  */
 package de.ims.icarus.util.strings;
 
+import static java.util.Objects.requireNonNull;
+
 public class SubSequence extends AbstractString {
 
 	private final CharSequence source;
-	private final int offset;
-	private final int len;
+	private int offset;
+	private int len;
+
+	public SubSequence(CharSequence source) {
+		this.source = requireNonNull(source);
+		offset = 0;
+		len = source.length();
+	}
 
 	public SubSequence(CharSequence source, int offset, int len) {
 		if (source == null)
@@ -61,5 +69,17 @@ public class SubSequence extends AbstractString {
 			throw new IndexOutOfBoundsException();
 
 		return source.charAt(offset+index);
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+
+	public void setLength(int len) {
+		this.len = len;
 	}
 }
