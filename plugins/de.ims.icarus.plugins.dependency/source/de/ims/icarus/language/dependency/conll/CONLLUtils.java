@@ -125,7 +125,7 @@ public class CONLLUtils {
 				Cursor cursor = row.getSplitCursor(ID09);
 				int offset = cursor.indexOf('_');
 				if(offset>-1 && offset<cursor.length()) {
-					index = StringPrimitives.parseInt(cursor, offset+1, -1);
+					index = StringPrimitives.parseInt(cursor, 0, offset-1)-1;
 				} else {
 					checkIdForIndex = false;
 				}
@@ -180,7 +180,7 @@ public class CONLLUtils {
 				Cursor cursor = row.getSplitCursor(ID09);
 				int offset = cursor.indexOf('_');
 				if(offset>-1 && offset<cursor.length()) {
-					index = StringPrimitives.parseInt(cursor, offset+1, -1);
+					index = StringPrimitives.parseInt(cursor, 0, offset-1)-1;
 				} else {
 					checkIdForIndex = false;
 				}
@@ -235,7 +235,7 @@ public class CONLLUtils {
 				Cursor cursor = row.getSplitCursor(ID06);
 				int offset = cursor.indexOf('_');
 				if(offset>-1 && offset<cursor.length()) {
-					index = StringPrimitives.parseInt(cursor, offset+1, -1);
+					index = StringPrimitives.parseInt(cursor, 0, offset-1)-1;
 				} else {
 					checkIdForIndex = false;
 				}
@@ -290,7 +290,7 @@ public class CONLLUtils {
 				Cursor cursor = row.getSplitCursor(ID06);
 				int offset = cursor.indexOf('_');
 				if(offset>-1 && offset<cursor.length()) {
-					index = StringPrimitives.parseInt(cursor, offset+1, -1);
+					index = StringPrimitives.parseInt(cursor, 0, offset-1)-1;
 				} else {
 					checkIdForIndex = false;
 				}

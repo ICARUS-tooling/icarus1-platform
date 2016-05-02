@@ -373,6 +373,7 @@ public final class PluginUtil {
 			// Load preferences
 			Collection<PluginAttribute> preferencesAttributes = descriptor.getAttributes(PREFERENCES_KEY);
 			if(preferencesAttributes!=null && !preferencesAttributes.isEmpty()) {
+				getPluginManager().activatePlugin(descriptor.getId());
 				for(PluginAttribute attribute : preferencesAttributes) {
 					classLoader.loadClass(attribute.getValue()).newInstance();
 				}

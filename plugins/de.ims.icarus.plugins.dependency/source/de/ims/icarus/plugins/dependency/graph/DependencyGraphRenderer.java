@@ -506,7 +506,7 @@ public class DependencyGraphRenderer extends GraphRenderer implements mxITextSha
 			vis[0] = isTrue("showRelation"); //$NON-NLS-1$
 			vis[1] = isTrue("showDirection"); //$NON-NLS-1$
 			vis[2] = isTrue("showDistance"); //$NON-NLS-1$
-			vis[3] = isTrue("markNonProjective"); //$NON-NLS-1$
+			vis[3] = isTrue("markNonProjective") && !data.isProjective(); //$NON-NLS-1$
 
 			tokens = edgeTokens;
 		}

@@ -91,6 +91,30 @@ public class TextArea implements SwingConstants {
 
 		FontMetrics fm = c.getFontMetrics(font);
 
+		return getSize0(lines, fm, d);
+	}
+
+	public Dimension getSize(String[] lines, FontMetrics fm) {
+		return getSize(lines, fm, new Dimension());
+	}
+
+	public Dimension getSize(String[] lines, FontMetrics fm, Dimension d) {
+		if(d==null) {
+			d = new Dimension();
+		}
+
+		// Make sure to reset size
+		d.height = d.width = 0;
+
+		if(lines==null || lines.length==0) {
+			return d;
+		}
+
+		return getSize0(lines, fm, d);
+	}
+
+	private Dimension getSize0(String[] lines, FontMetrics fm, Dimension d) {
+
 		d.height = lines.length * fm.getHeight();
 
 		for(String s : lines) {

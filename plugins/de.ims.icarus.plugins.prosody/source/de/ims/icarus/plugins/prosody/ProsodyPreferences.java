@@ -45,6 +45,7 @@ import de.ims.icarus.plugins.prosody.ui.geom.Axis;
 import de.ims.icarus.plugins.prosody.ui.geom.GridStyle;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntECurve;
 import de.ims.icarus.plugins.prosody.ui.geom.PaIntEGraph;
+import de.ims.icarus.plugins.prosody.ui.graph.ProsodyGraphRenderer2;
 import de.ims.icarus.plugins.prosody.ui.helper.ProsodyListCellRenderer;
 import de.ims.icarus.plugins.prosody.ui.view.PreviewSize;
 import de.ims.icarus.plugins.prosody.ui.view.outline.SentencePanel.PanelConfig;
@@ -84,16 +85,10 @@ public class ProsodyPreferences {
 		// DEFAULT GROUP
 		builder.addGroup("prosody", true); //$NON-NLS-1$
 		// DEPENDENCY GRAPH GROUP
-		builder.addBooleanEntry("showIndex", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showLemma", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showFeatures", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showForm", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showPos", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showRelation", true); //$NON-NLS-1$
-		builder.addBooleanEntry("showDirection", false); //$NON-NLS-1$
-		builder.addBooleanEntry("showDistance", false); //$NON-NLS-1$
-		builder.addBooleanEntry("markRoot", true); //$NON-NLS-1$
-		builder.addBooleanEntry("markNonProjective", false); //$NON-NLS-1$
+		builder.addStringEntry("nodeLabelPattern", escapePattern(ProsodyGraphRenderer2.DEFAULT_NODE_LABEL_PATTERN)); //$NON-NLS-1$
+		builder.addStringEntry("edgeLabelPattern", escapePattern(ProsodyGraphRenderer2.DEFAULT_EDGE_LABEL_PATTERN)); //$NON-NLS-1$
+		builder.addBooleanEntry("showCurvePreview", true); //$NON-NLS-1$
+		//TODO add additional config entries
 		JGraphPreferences.buildDefaultGraphConfig(builder, null);
 		builder.reset();
 

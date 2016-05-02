@@ -19,26 +19,45 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.treetable;
 
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultTreeSelectionModel;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
- * 
+ *
  */
-public class TreeTableSelectionModel extends DefaultTreeSelectionModel {
+public class TreeTableSelectionModel extends DefaultTreeSelectionModel implements ListSelectionListener {
 
 	private static final long serialVersionUID = 4988709537124187882L;
+
+	public TreeTableSelectionModel() {
+		listSelectionModel.addListSelectionListener(this);
+	}
 
 	// Allow access to the internal list selection model
 	public ListSelectionModel getListSelectionModel() {
 		return listSelectionModel;
+	}
+
+	/**
+	 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+	 */
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		if(e.getValueIsAdjusting()) {
+			return;
+		}
+
+		//TODO map from table row selection to tree path selection
+
 	}
 }

@@ -405,6 +405,9 @@ public final class UIUtil {
 		tooltip = StringUtil.wrap(tooltip, fm, DEFAULT_TOOLTIP_WIDTH);
 		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
+
+//		System.out.println("orig="+tooltip+" new="+convertedTooltip);
+
 		if(convertedTooltip.length()!=tooltip.length()) {
 			tooltip = HTML_TAG+convertedTooltip;
 		}
@@ -420,7 +423,8 @@ public final class UIUtil {
 			return tooltip;
 		}
 
-		String convertedTooltip = HtmlUtils.escapeHTML(tooltip).replaceAll(
+		String convertedTooltip = HtmlUtils.escapeHTML(tooltip);
+		convertedTooltip = convertedTooltip.replaceAll(
 				"\\n\\r|\\r\\n|\\n|\\r", "<br>"); //$NON-NLS-1$ //$NON-NLS-2$
 		if(convertedTooltip.length()!=tooltip.length()) {
 			tooltip = "<html>"+convertedTooltip; //$NON-NLS-1$
@@ -509,6 +513,11 @@ public final class UIUtil {
 		if (comp.getSize().height > dim.height)
 			dim.height = comp.getSize().height;
 		return resizeComponent(comp, dim);
+	}
+
+	public static void expandRoot(JTree tree) {
+	    Object root = tree.getModel().getRoot();
+	    tree.expandPath(new TreePath(root));
 	}
 
 	public static void expandAll(JTree tree, boolean expand) {

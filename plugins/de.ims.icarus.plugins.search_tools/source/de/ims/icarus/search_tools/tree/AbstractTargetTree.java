@@ -168,8 +168,11 @@ public abstract class AbstractTargetTree<E extends Object> implements TargetTree
 		for (int i = 0; i < size; i++) {
 			head = fetchHead(i);
 			if(head == LanguageConstants.DATA_UNDEFINED_VALUE) {
-				data = null;
-				throw new IllegalArgumentException("Data contains undefined head at index: "+i); //$NON-NLS-1$
+				// ignore dangling heads, nothing we should restrict too much
+
+//				System.out.println("dangling head at index "+(i+1)+" in "+data);
+//				data = null;
+//				throw new IllegalArgumentException("Data contains undefined head at index: "+i); //$NON-NLS-1$
 			} else if (head == LanguageConstants.DATA_HEAD_ROOT) {
 				roots.add(i);
 			} else {

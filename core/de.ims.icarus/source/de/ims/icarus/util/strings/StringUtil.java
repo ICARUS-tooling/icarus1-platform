@@ -576,6 +576,14 @@ public final class StringUtil {
 
 	private static DecimalFormat decimalFormat = new DecimalFormat("#,###"); //$NON-NLS-1$
 
+	public static String formatDecimal(Number n) {
+		if(n instanceof Float || n instanceof Double) {
+			return formatDecimal(n.doubleValue());
+		} else {
+			return formatDecimal(n.longValue());
+		}
+	}
+
 	public static String formatDecimal(int value) {
 		synchronized (decimalFormat) {
 			return decimalFormat.format(value);

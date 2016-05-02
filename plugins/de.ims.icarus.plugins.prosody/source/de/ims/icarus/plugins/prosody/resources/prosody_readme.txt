@@ -70,7 +70,7 @@ Column format for the prosody reader's header section:
 	property_key			the property key the content of a column will be stored with (it is recommended to stick to the property names defined in the beginning of this document!)
 	type					value type of the column content (int,integer,float,double,bool,boolean,bit,string)
 	level					level within the active document-set the content of the column is meant to annotate (syl,word,sentence,sent,document,doc,document-set) 
-	role					optional hint that the content of a column should either be used as delimiter (DEL) to detect the end or beginning of data points or as aggregator (AGG) that hosts multiple data points of the next lower level
+	role					optional hint that the content of a column should either be used as delimiter (DEL) to detect the end or beginning of data points or as aggregator (AGG) that hosts multiple data points of the next lower level (currently only supported on the word level, meaning the aggregated content is meant to be projected onto the syllable level)
 	separator				optional info on how to split aggregated content in case the column is marked as aggregator (AGG)
 
 Special constants usable as property values in the prosody reader header section:

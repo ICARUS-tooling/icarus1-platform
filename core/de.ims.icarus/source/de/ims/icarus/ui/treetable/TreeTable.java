@@ -19,21 +19,30 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.treetable;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.swing.JComponent;
 import javax.swing.JTable;
+import javax.swing.JToolTip;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
- * 
+ *
  */
 public class TreeTable extends JTable {
 
@@ -41,20 +50,26 @@ public class TreeTable extends JTable {
 
 	private TreeTableCellRenderer tree;
 
+	private Set<Class<?>> useCustomTooltipComponent = new HashSet<>();
+
 	public TreeTable(TreeTableModel treeTableModel) {
 		this(treeTableModel, null);
 	}
 
 	public TreeTable(TreeTableModel treeTableModel, TableColumnModel columnModel) {
 		//super(null, columnModel);
-		
+
 		setAutoCreateColumnsFromModel(false);
-		
+
 		if(columnModel!=null) {
 			setColumnModel(columnModel);
 		}
 		tree = new TreeTableCellRenderer(this, treeTableModel);
 		setModel(new TreeTableModelAdapter(treeTableModel, tree));
+
+		if(columnModel==null) {
+			setAutoCreateColumnsFromModel(true);
+		}
 
 		// Link selections
 		TreeTableSelectionModel selectionModel = new TreeTableSelectionModel();
@@ -69,8 +84,94 @@ public class TreeTable extends JTable {
 		setShowGrid(false);
 		setIntercellSpacing(new Dimension(0, 0));
 	}
-	
+
+	public void setUseCustomTooltipComponent(Class<?> clazz, boolean doUse) {
+		if (doUse) {
+			useCustomTooltipComponent.add(clazz);
+		} else {
+			useCustomTooltipComponent.remove(clazz);
+		}
+	}
+
+	public boolean isUseCustomTooltipComponent(Class<?> clazz) {
+		return useCustomTooltipComponent.contains(clazz);
+	}
+
+	/**
+	 * @see javax.swing.JComponent#createToolTip()
+	 */
+	@Override
+	public JToolTip createToolTip() {
+
+		JToolTip result = null;
+
+		// Only try to get custom component if there are any custom flags at all
+		if(!useCustomTooltipComponent.isEmpty()) {
+			Point p = getMousePosition();
+			if(p!=null) {
+				int column = columnAtPoint(p);
+				if(column!=-1) {
+					Class<?> clazz = getColumnClass(column);
+					if(clazz!=null && isUseCustomTooltipComponent(clazz)) {
+						int row = rowAtPoint(p);
+
+			            TableCellRenderer renderer = getCellRenderer(row, column);
+			            Component component = prepareRenderer(renderer, row, column);
+
+			            if(component instanceof JComponent) {
+			            	result = ((JComponent)renderer).createToolTip();
+			            	if(result!=null) {
+			            		result.setComponent(this);
+			            	}
+			            }
+					}
+				}
+			}
+		}
+
+		if(result==null) {
+			result = super.createToolTip();
+		}
+
+		return result;
+	}
+
+	/**
+	 * @see javax.swing.JComponent#getToolTipLocation(java.awt.event.MouseEvent)
+	 */
+	@Override
+	public Point getToolTipLocation(MouseEvent event) {
+		Point p = null;
+
+		if(!useCustomTooltipComponent.isEmpty()) {
+			Point pos = getMousePosition();
+			if(pos!=null) {
+				int column = columnAtPoint(pos);
+				if(column!=-1) {
+					Class<?> clazz = getColumnClass(column);
+					if(clazz!=null && isUseCustomTooltipComponent(clazz)) {
+						int row = rowAtPoint(pos);
+
+			            Rectangle bounds = getCellRect(row, column, true);
+
+			            p = new Point(bounds.x, bounds.y+bounds.height);
+					}
+				}
+			}
+		}
+
+		if(p==null) {
+			p = super.getToolTipLocation(event);
+		}
+
+		return p;
+	}
+
 	public TreeTableCellRenderer getTreeTableCellRenderer() {
 		return tree;
+	}
+
+	public TreeTableSelectionModel getTreeSelectionModel() {
+		return (TreeTableSelectionModel) tree.getSelectionModel();
 	}
 }

@@ -29,8 +29,10 @@ import de.ims.icarus.config.ConfigDelegate;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.plugins.dependency.graph.DependencyGraphPresenter;
 import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
+import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
+import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.data.ContentType;
 
@@ -43,6 +45,22 @@ public class ProsodySentenceGraphPresenter extends DependencyGraphPresenter {
 
 	private static final long serialVersionUID = 7817927685989029383L;
 
+	protected ProsodicSentenceData sentence;
+
+	public ProsodicSentenceData getSentence() {
+		return sentence;
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.dependency.graph.DependencyGraphPresenter#setData(java.lang.Object, de.ims.icarus.util.Options)
+	 */
+	@Override
+	protected void setData(Object data, Options options) {
+
+		sentence = (data instanceof ProsodicSentenceData) ? (ProsodicSentenceData) data : null;
+
+		super.setData(data, options);
+	}
 
 	@Override
 	protected void loadPreferences() {
@@ -60,7 +78,7 @@ public class ProsodySentenceGraphPresenter extends DependencyGraphPresenter {
 
 	@Override
 	protected GraphRenderer createDefaultGraphRenderer() {
-		return new ProsodyGraphRenderer();
+		return new ProsodyGraphRenderer2();
 	}
 
 	@Override
@@ -75,6 +93,11 @@ public class ProsodySentenceGraphPresenter extends DependencyGraphPresenter {
 	public ProsodicAnnotationManager getAnnotationManager() {
 		return (ProsodicAnnotationManager) super.getAnnotationManager();
 	}
+
+//	@Override
+//	protected mxICellEditor createCellEditor() {
+//		return null;
+//	}
 
 	/**
 	 * @see de.ims.icarus.plugins.jgraph.view.GraphPresenter#getContentType()
