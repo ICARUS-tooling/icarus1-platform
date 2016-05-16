@@ -25,14 +25,14 @@
  */
 package de.ims.icarus.plugins.prosody;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ProsodicDocumentData extends CoreferenceDocumentData {
+public interface ProsodicDocumentData extends DocumentData {
 
 	@Override
 	ProsodicSentenceData get(int index);

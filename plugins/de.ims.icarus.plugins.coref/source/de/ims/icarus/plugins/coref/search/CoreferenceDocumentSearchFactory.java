@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.plugins.coref.search;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
@@ -61,7 +61,7 @@ public class CoreferenceDocumentSearchFactory extends AbstractSearchFactory {
 	}
 
 	public ContentType getContentType() {
-		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentData.class);
+		return ContentTypeRegistry.getInstance().getTypeForClass(DocumentData.class);
 	}
 
 	/**

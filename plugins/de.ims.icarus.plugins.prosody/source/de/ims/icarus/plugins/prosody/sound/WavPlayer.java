@@ -40,7 +40,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
@@ -281,7 +281,7 @@ public class WavPlayer {
 		}
 
 		static float getEndOffset(ProsodicDocumentData document) {
-			CoreferenceDocumentSet documentSet = document.getDocumentSet();
+			DocumentSet documentSet = document.getDocumentSet();
 			int index = document.getDocumentIndex();
 			if(index>=documentSet.size()-1) {
 				return NO_VALUE;

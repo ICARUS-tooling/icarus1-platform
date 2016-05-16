@@ -44,17 +44,17 @@ import de.ims.icarus.util.mem.Link;
  *
  */
 @HeapMember
-public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentData> {
+public class DocumentSet extends CorefListMember<DocumentData> {
 
 	@Link
-	private Map<String, CoreferenceDocumentData> idMap;
+	private Map<String, DocumentData> idMap;
 
 	@Link
 	private CoreferenceAllocation allocation;
 	@Link
 	private CoreferenceAllocation defaultAllocation = new CoreferenceAllocation();
 
-	public CoreferenceDocumentData getDocument(String documentId) {
+	public DocumentData getDocument(String documentId) {
 		return idMap==null ? null : idMap.get(documentId);
 	}
 
@@ -70,12 +70,12 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 		return result;
 	}
 
-	public Collection<CoreferenceDocumentData> getDocuments() {
+	public Collection<DocumentData> getDocuments() {
 		return CollectionUtils.getCollectionProxy(items);
 	}
 
 	@Override
-	public void add(CoreferenceDocumentData data) {
+	public void add(DocumentData data) {
 		if(idMap==null) {
 			idMap = new HashMap<>();
 		}
@@ -86,7 +86,7 @@ public class CoreferenceDocumentSet extends CorefListMember<CoreferenceDocumentD
 		super.add(data);
 	}
 
-	public CoreferenceDocumentData newDocument(String id) {
+	public DocumentData newDocument(String id) {
 		DefaultCoreferenceDocumentData data = new DefaultCoreferenceDocumentData(this, size());
 		data.setId(id);
 		add(data);

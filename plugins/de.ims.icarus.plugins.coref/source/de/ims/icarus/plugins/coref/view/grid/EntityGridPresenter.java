@@ -57,7 +57,7 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
@@ -102,7 +102,7 @@ import de.ims.icarus.util.data.ContentType;
  */
 public class EntityGridPresenter extends TablePresenter implements AnnotationController, Installable {
 
-	protected CoreferenceDocumentData document;
+	protected DocumentData document;
 	protected CoreferenceAllocation allocation;
 	protected CoreferenceAllocation goldAllocation;
 
@@ -375,7 +375,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	 * @see de.ims.icarus.ui.view.Presenter#getPresentedData()
 	 */
 	@Override
-	public CoreferenceDocumentData getPresentedData() {
+	public DocumentData getPresentedData() {
 		return document;
 	}
 
@@ -443,7 +443,7 @@ public class EntityGridPresenter extends TablePresenter implements AnnotationCon
 	 */
 	@Override
 	protected void setData(Object data, Options options) {
-		document = (CoreferenceDocumentData) data;
+		document = (DocumentData) data;
 
 		if(options==null) {
 			options = Options.emptyOptions;

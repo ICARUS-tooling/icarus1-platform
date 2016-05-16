@@ -277,6 +277,11 @@
 		<parameter id="class" value="de.ims.icarus.plugins.coref.view.grid.EntityGridPresenter" />
 	</extension>
 	
+	<extension id="ListGraphPresenterLink" plugin-id="de.ims.icarus.core" point-id="Link">
+		<parameter id="extension" value="de.ims.icarus.jgraph@ListGraphPresenter" />
+		<parameter id="extension-point" value="de.ims.icarus.coref@CoreferencePresenter" />
+	</extension>
+	
 	<extension id="CoreferenceDocumentDataPresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">
 		<doc>
 			<doc-text>
@@ -325,19 +330,19 @@
 	<extension id="CoreferenceDocumentDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on de.ims.icarus.language.coref.CoreferenceDocumentData
+				Content type based on de.ims.icarus.language.coref.DocumentData
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="de.ims.icarus.language.coref.CoreferenceDocumentData" />
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.DocumentData" />
 	</extension>
 	
 	<extension id="CoreferenceDocumentSetContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on de.ims.icarus.language.coref.CoreferenceDocumentSet
+				Content type based on de.ims.icarus.language.coref.DocumentSet
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="de.ims.icarus.language.coref.CoreferenceDocumentSet" />
+		<parameter id="contentClass" value="de.ims.icarus.language.coref.DocumentSet" />
 	</extension>
 	
 	<extension id="CoreferenceEdgeSetContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">

@@ -23,21 +23,39 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.coref.io;
+package de.ims.icarus.language.coref;
 
-import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.DocumentSet;
-import de.ims.icarus.util.Options;
-import de.ims.icarus.util.location.Location;
+import de.ims.icarus.language.SentenceDataList;
+
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface AllocationReader {
-	public void init(Location location, 
-			Options options, DocumentSet documentSet) throws Exception;
+public interface DocumentData extends SentenceDataList {
+
+	public static final String DOCUMENT_ID_PROPERTY = "documentId"; //$NON-NLS-1$
+	public static final String DOCUMENT_HEADER_PROPERTY = "documentHeader"; //$NON-NLS-1$
 	
-	public void readAllocation(CoreferenceAllocation target) throws Exception;
+	@Override
+	public CoreferenceData get(int index);
+	
+	public void add(CoreferenceData data);
+
+	public DocumentSet getDocumentSet();
+	
+	public SpanSet getSpanSet();
+	
+	public EdgeSet getEdgeSet();
+	
+	public SpanSet getDefaultSpanSet();
+	
+	public EdgeSet getDefaultEdgeSet();
+
+	public int getDocumentIndex();
+
+	public String getId();
+	
+	public Object getProperty(String key);
 }

@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,83 +23,87 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.coref.io;
+package de.ims.icarus.plugins.prosody.io;
 
 import java.io.IOException;
 
-import de.ims.icarus.io.IOUtil;
-import de.ims.icarus.io.Reader;
+import de.ims.icarus.language.SentenceData;
+import de.ims.icarus.language.SentenceDataReader;
 import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.DocumentSet;
-import de.ims.icarus.language.coref.CoreferenceUtils;
-import de.ims.icarus.plugins.coref.io.CONLL12Utils.BlockHandler;
+import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
-import de.ims.icarus.util.strings.CharTableBuffer;
-
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class CONLL12DocumentReader implements Reader<DocumentData> {
+public class UniSylSentenceReader implements SentenceDataReader {
 
-	private CharTableBuffer buffer;
-	private BlockHandler blockHandler;
+	private UniSylDocumentReader reader;
 	private DocumentSet documentSet;
+	private DocumentData document;
 
-	public CONLL12DocumentReader() {
-		// no-op
-	}
+	private boolean doRead = true;
+
+	private int documentIndex;
+	private int sentenceIndex;
 
 	/**
-	 * @see de.ims.icarus.io.Reader#init(de.ims.icarus.util.location.Location, de.ims.icarus.util.Options)
+	 * @see de.ims.icarus.language.SentenceDataReader#init(de.ims.icarus.util.location.Location, de.ims.icarus.util.Options)
 	 */
 	@Override
 	public void init(Location location, Options options) throws IOException,
 			UnsupportedLocationException {
-		if(location==null)
-			throw new NullPointerException("Invalid location"); //$NON-NLS-1$
 
-		documentSet = (DocumentSet) options.get("documentSet"); //$NON-NLS-1$
+		reader = new UniSylDocumentReader();
+		documentSet = (DocumentSet) reader.create();
 
-		blockHandler = new BlockHandler();
-
-		buffer = new CharTableBuffer();
-		buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
-		buffer.setRowFilter(blockHandler);
+		options.put("documentSet", documentSet); //$NON-NLS-1$
+		reader.init(location, options);
 	}
 
 	/**
-	 * @see de.ims.icarus.io.Reader#next()
+	 * @see de.ims.icarus.language.SentenceDataReader#next()
 	 */
 	@Override
-	public DocumentData next() throws IOException, UnsupportedFormatException {
-		return CONLL12Utils.readDocumentData(documentSet, buffer, blockHandler);
+	public SentenceData next() throws IOException, UnsupportedFormatException {
+		if(doRead) {
+			reader.next();
+			doRead = false;
+		}
+
+		if(documentIndex>=documentSet.size()) {
+			return null;
+		}
+
+		if(document==null || sentenceIndex>=document.size()) {
+			document = documentSet.get(documentIndex++);
+			sentenceIndex = 0;
+		}
+
+		return document.get(sentenceIndex++);
 	}
 
 	/**
-	 * @see de.ims.icarus.io.Reader#close()
+	 * @see de.ims.icarus.language.SentenceDataReader#close()
 	 */
 	@Override
 	public void close() throws IOException {
-		try {
-			buffer.close();
-		} finally {
-			buffer = null;
-		}
+		reader.close();
 	}
 
 	/**
-	 * @see de.ims.icarus.io.Reader#getContentType()
+	 * @see de.ims.icarus.language.SentenceDataReader#getContentType()
 	 */
 	@Override
 	public ContentType getContentType() {
-		return CoreferenceUtils.getCoreferenceDocumentContentType();
+		return ProsodyUtils.getProsodySentenceContentType();
 	}
 
 }

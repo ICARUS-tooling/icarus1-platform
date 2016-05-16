@@ -25,20 +25,20 @@
  */
 package de.ims.icarus.plugins.prosody.pattern;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 
 public final class ProsodyData {
 
-	private CoreferenceDocumentSet documentSet;
+	private DocumentSet documentSet;
 
 	private ProsodicDocumentData document;
 	private ProsodicSentenceData sentence;
 
 	private int documentIndex, sentenceIndex, wordIndex, syllableIndex;
 
-	public CoreferenceDocumentSet getDocumentSet() {
+	public DocumentSet getDocumentSet() {
 		return documentSet;
 	}
 

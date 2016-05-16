@@ -37,8 +37,8 @@ import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.EdgeSet;
@@ -111,17 +111,17 @@ public final class CONLL12Utils implements CorefConstants {
 	private static final String DELIMITER = "\\s+"; //$NON-NLS-1$
 	private static final String EMPTY = ""; //$NON-NLS-1$
 
-	public static DefaultCoreferenceData readData(CoreferenceDocumentData document, CharTableBuffer buffer) {
+	public static DefaultCoreferenceData readData(DocumentData document, CharTableBuffer buffer) {
 		if(buffer.isEmpty())
 			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
 
 		return createData(document, buffer, null);
 	}
 
-	public static CoreferenceDocumentData readDocumentData(CoreferenceDocumentSet documentSet,
+	public static DocumentData readDocumentData(DocumentSet documentSet,
 			CharTableBuffer buffer, BlockHandler blockHandler) throws IOException {
 
-		CoreferenceDocumentData result = null;
+		DocumentData result = null;
 		TIntObjectMap<Cluster> clusterMap = new TIntObjectHashMap<>();
 
 		while(buffer.next()) {
@@ -168,7 +168,7 @@ public final class CONLL12Utils implements CorefConstants {
 	 * N 	Coreference 	Coreference chain information encoded in a parenthesis structure.
 	 *
 	 */
-	private static DefaultCoreferenceData createData(CoreferenceDocumentData document,
+	private static DefaultCoreferenceData createData(DocumentData document,
 			CharTableBuffer buffer, TIntObjectMap<Cluster> clusterMap) {
 		int size = buffer.getRowCount();
 		String[] forms = new String[size];

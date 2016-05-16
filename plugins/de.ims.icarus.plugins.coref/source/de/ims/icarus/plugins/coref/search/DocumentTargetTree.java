@@ -32,7 +32,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
@@ -48,7 +48,7 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentData> {
+public class DocumentTargetTree extends AbstractTargetTree<DocumentData> {
 
 	protected SpanSet spanSet;
 	protected EdgeSet edgeSet;
@@ -64,7 +64,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 
 	@Override
 	protected boolean supports(Object data) {
-		return data instanceof CoreferenceDocumentData;
+		return data instanceof DocumentData;
 	}
 
 	@Override
@@ -229,7 +229,7 @@ public class DocumentTargetTree extends AbstractTargetTree<CoreferenceDocumentDa
 
 	// DOCUMENT METHODS
 
-	public CoreferenceDocumentData getDocument() {
+	public DocumentData getDocument() {
 		return data;
 	}
 

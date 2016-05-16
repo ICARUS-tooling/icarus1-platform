@@ -39,7 +39,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
@@ -126,13 +126,13 @@ import de.ims.icarus.util.strings.StringPrimitives;
  * @version $Id$
  *
  */
-public final class ProsodyIOUtils implements ProsodyConstants {
+public final class DirndlIOUtils implements ProsodyConstants {
 
 	public static boolean DEFAULT_SYLLABLES_FROM_SAMPA = false;
 	public static boolean DEFAULT_MARK_ACCENTS = false;
 	public static Set<String> SENTENCE_BLACKLIST = null;
 
-	private ProsodyIOUtils() {
+	private DirndlIOUtils() {
 		// no-op
 	}
 
@@ -187,7 +187,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 	private static final String DELIMITER = "\\s+"; //$NON-NLS-1$
 	private static final String EMPTY = ""; //$NON-NLS-1$
 
-	public static ProsodicDocumentData readDocumentData(CoreferenceDocumentSet documentSet,
+	public static ProsodicDocumentData readDocumentData(DocumentSet documentSet,
 			CharTableBuffer buffer, ReaderControl readerControl) throws IOException {
 
 		DefaultProsodicDocumentData result = null;
@@ -432,7 +432,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 //							}
 //
 //							if(report) {
-//								LoggerFactory.info(ProsodyIOUtils.class,
+//								LoggerFactory.info(DirndlIOUtils.class,
 //										buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[i]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 //							}
 //						}
@@ -942,7 +942,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReader#initColumns()
+		 * @see de.ims.icarus.plugins.prosody.io.DirndlIOUtils.SentenceReader#initColumns()
 		 */
 		@Override
 		protected void initColumns() {
@@ -1010,7 +1010,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 					}
 
 					if(report) {
-						LoggerFactory.info(ProsodyIOUtils.class,
+						LoggerFactory.info(DirndlIOUtils.class,
 								buffer.getErrorMessage("Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+forms[index]+"'")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
@@ -1044,7 +1044,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReader#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
+		 * @see de.ims.icarus.plugins.prosody.io.DirndlIOUtils.SentenceReader#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
 		 */
 		@Override
 		protected void readAdditionalColumns(int i, Row row) {
@@ -1169,7 +1169,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReaderV03#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
+		 * @see de.ims.icarus.plugins.prosody.io.DirndlIOUtils.SentenceReaderV03#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
 		 */
 		@Override
 		protected void readAdditionalColumns(int i, Row row) {
@@ -1205,7 +1205,7 @@ public final class ProsodyIOUtils implements ProsodyConstants {
 		}
 
 		/**
-		 * @see de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.SentenceReaderV03#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
+		 * @see de.ims.icarus.plugins.prosody.io.DirndlIOUtils.SentenceReaderV03#readAdditionalColumns(int, de.ims.icarus.util.strings.CharTableBuffer.Row)
 		 */
 		@Override
 		protected void readAdditionalColumns(int i, Row row) {

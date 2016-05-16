@@ -58,7 +58,7 @@ import javax.swing.border.EmptyBorder;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
 import de.ims.icarus.language.coref.registry.DescriptorState;
@@ -603,7 +603,7 @@ public class ProsodySearchResultPresenter implements AWTPresenter, GraphBasedPre
 		String name = document.getId();
 
 		if(name==null) {
-			name = (String) sentence.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
+			name = (String) sentence.getProperty(DocumentData.DOCUMENT_HEADER_PROPERTY);
 		}
 		if(name==null) {
 			name = "<unnamed> "+StringUtil.formatDecimal(document.getDocumentIndex()); //$NON-NLS-1$

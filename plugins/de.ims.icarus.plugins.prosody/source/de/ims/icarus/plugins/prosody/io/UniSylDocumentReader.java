@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -46,7 +45,7 @@ import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
@@ -68,7 +67,6 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.DataCreater;
-import de.ims.icarus.util.location.DefaultFileLocation;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 import de.ims.icarus.util.strings.CharLineBuffer;
@@ -83,26 +81,8 @@ import de.ims.icarus.util.strings.StringUtil;
  */
 public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataCreater, ProsodyConstants {
 
-	public static void main(String[] args) throws Exception {
-
-		Core.debugInit();
-
-		String path = "D:\\Workspaces\\Default\\Icarus\\data\\prosody\\all-feats-utf8-header.txt"; //$NON-NLS-1$
-		Location location = new DefaultFileLocation(Paths.get(path));
-
-		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
-		Options options = new Options();
-		options.put("documentSet", documentSet); //$NON-NLS-1$
-
-		try(UniSylDocumentReader reader = new UniSylDocumentReader()) {
-			CoreferenceUtils.loadDocumentSet(reader, location, options, documentSet);
-		}
-
-		System.out.println(documentSet.size());
-	}
-
 	private CharLineBuffer buffer;
-	private CoreferenceDocumentSet documentSet;
+	private DocumentSet documentSet;
 
 	private UniSylConfig config;
 
@@ -136,7 +116,7 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		if(location==null)
 			throw new NullPointerException("Invalid location"); //$NON-NLS-1$
 
-		documentSet = (CoreferenceDocumentSet) options.get("documentSet"); //$NON-NLS-1$
+		documentSet = (DocumentSet) options.get("documentSet"); //$NON-NLS-1$
 
 		buffer = new CharLineBuffer();
 		buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
@@ -638,7 +618,7 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 				sentence.setProperty(index, SYLLABLE_FORM_KEY, labels);
 				sentence.setMapsSyllables(index, true);
 			} else {
-				LoggerFactory.info(ProsodyIOUtils.class,
+				LoggerFactory.info(DirndlIOUtils.class,
 						"Unable to map /"+Arrays.deepToString(sampa)+"/ to '"+word+"'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}

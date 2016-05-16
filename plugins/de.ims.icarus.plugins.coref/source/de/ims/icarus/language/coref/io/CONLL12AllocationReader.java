@@ -27,8 +27,8 @@ package de.ims.icarus.language.coref.io;
 
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
 import de.ims.icarus.util.Options;
@@ -41,16 +41,16 @@ import de.ims.icarus.util.location.Location;
  */
 public class CONLL12AllocationReader implements AllocationReader {
 
-	private CoreferenceDocumentSet documentSet;
+	private DocumentSet documentSet;
 	private Location location;
 	private Options options;
 
 	/**
-	 * @see de.ims.icarus.language.coref.io.AllocationReader#init(de.ims.icarus.util.location.Location, de.ims.icarus.util.Options, de.ims.icarus.language.coref.CoreferenceDocumentSet)
+	 * @see de.ims.icarus.language.coref.io.AllocationReader#init(de.ims.icarus.util.location.Location, de.ims.icarus.util.Options, de.ims.icarus.language.coref.DocumentSet)
 	 */
 	@Override
 	public void init(Location location, Options options,
-			CoreferenceDocumentSet documentSet) throws Exception {
+			DocumentSet documentSet) throws Exception {
 
 		this.location = location;
 		this.options = options;
@@ -62,9 +62,9 @@ public class CONLL12AllocationReader implements AllocationReader {
 	 */
 	@Override
 	public void readAllocation(CoreferenceAllocation target) throws Exception {
-		try(Reader<CoreferenceDocumentData> reader = new CONLL12DocumentReader()) {
+		try(Reader<DocumentData> reader = new CONLL12DocumentReader()) {
 
-			CoreferenceDocumentSet documentSet = CoreferenceUtils.loadDocumentSet(reader, location, options);
+			DocumentSet documentSet = CoreferenceUtils.loadDocumentSet(reader, location, options);
 			CoreferenceAllocation defaultAllocation = documentSet.getDefaultAllocation();
 
 			target.setProperties(defaultAllocation.getProperties());

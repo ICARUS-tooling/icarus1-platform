@@ -28,7 +28,7 @@ package de.ims.icarus.language.coref.registry;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.util.location.Location;
 
@@ -59,7 +59,7 @@ public class DefaultAllocationDescriptor extends AllocationDescriptor {
 		if(descriptor==null) {
 			return null;
 		}
-		CoreferenceDocumentSet documentSet = descriptor.getDocumentSet();
+		DocumentSet documentSet = descriptor.getDocumentSet();
 		if(documentSet==null) {
 			return null;
 		}

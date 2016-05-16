@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.plugins.coref.view.ea;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.plugins.coref.view.DocumentListCellRenderer;
 import de.ims.icarus.ui.list.FilterListCellRenderer;
 
@@ -39,19 +39,19 @@ public class DocumentFilterListCellRenderer extends FilterListCellRenderer {
 
 	private static final long serialVersionUID = -5231096330001611041L;
 	
-	private CoreferenceDocumentSet documentSet;
+	private DocumentSet documentSet;
 
 	/**
 	 * @return the documentSet
 	 */
-	public CoreferenceDocumentSet getDocumentSet() {
+	public DocumentSet getDocumentSet() {
 		return documentSet;
 	}
 
 	/**
 	 * @param documentSet the documentSet to set
 	 */
-	public void setDocumentSet(CoreferenceDocumentSet documentSet) {
+	public void setDocumentSet(DocumentSet documentSet) {
 		this.documentSet = documentSet;
 	}
 
@@ -60,7 +60,7 @@ public class DocumentFilterListCellRenderer extends FilterListCellRenderer {
 	 */
 	@Override
 	protected String getTextForValue(int index, Boolean value) {
-		CoreferenceDocumentData docData = documentSet==null ? null :
+		DocumentData docData = documentSet==null ? null :
 			documentSet.get(index);
 		
 		return DocumentListCellRenderer.defaultGetTextForValue(index, docData);

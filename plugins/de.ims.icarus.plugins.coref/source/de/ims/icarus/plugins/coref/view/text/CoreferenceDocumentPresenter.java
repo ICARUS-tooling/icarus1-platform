@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
@@ -56,7 +56,7 @@ import de.ims.icarus.util.data.ContentType;
  */
 public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresenter {
 
-	protected CoreferenceDocumentData data;
+	protected DocumentData data;
 
 	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
 
@@ -125,7 +125,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 
 	@Override
 	protected void setData(Object data) {
-		this.data = (CoreferenceDocumentData) data;
+		this.data = (DocumentData) data;
 
 		if(data instanceof AnnotatedCoreferenceDocumentData) {
 			getAnnotationManager().setAnnotation(((AnnotatedData)data).getAnnotation());
@@ -147,7 +147,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 		doc.setFilter(filter);
 
 		doc.setAnnotationManager(getAnnotationManager());
-		doc.appendBatchCoreferenceDocumentData(data, getAllocation(), getGoldAllocation());
+		doc.appendBatchDocumentData(data, getAllocation(), getGoldAllocation());
 
 		doc.applyBatchUpdates(0);
 
@@ -166,7 +166,7 @@ public class CoreferenceDocumentPresenter extends AbstractCoreferenceTextPresent
 	 * @see de.ims.icarus.ui.view.Presenter#getPresentedData()
 	 */
 	@Override
-	public CoreferenceDocumentData getPresentedData() {
+	public DocumentData getPresentedData() {
 		return data;
 	}
 

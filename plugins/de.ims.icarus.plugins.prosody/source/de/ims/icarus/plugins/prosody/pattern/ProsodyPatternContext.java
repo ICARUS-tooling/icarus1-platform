@@ -43,7 +43,7 @@ import de.ims.icarus.util.strings.pattern.TextSource;
 public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 
 //	public static void main(String[] args) throws Exception {
-//		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
+//		DocumentSet documentSet = new DocumentSet();
 //		DefaultProsodicDocumentData document = new DefaultProsodicDocumentData(documentSet, 0);
 //
 //		String[] forms = new String[]{"This", "is", "a", "test"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

@@ -113,7 +113,7 @@ public class ContextOutline extends CoreferenceDocumentPresenter {
 		int fromIndex = Math.max(0, index-scope);
 		int toIndex = Math.min(data.size()-1, index+scope);
 
-		doc.appendBatchCoreferenceDocumentData(data,
+		doc.appendBatchDocumentData(data,
 				getAllocation(), getGoldAllocation(),
 				fromIndex, toIndex);
 

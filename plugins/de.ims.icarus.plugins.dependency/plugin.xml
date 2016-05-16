@@ -185,6 +185,9 @@
 		<parameter id="token" value="distance" />
 		<parameter id="token" value="direction" />
 		<parameter id="token" value="projectivity" />
+		<parameter id="token" value="wordPos" />
+		<parameter id="token" value="wordPosInv" />
+		<parameter id="token" value="section" />
 		<parameter id="factories">
 			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
 			<parameter id="lemma" value="de.ims.icarus.language.dependency.search.constraints.DependencyLemmaConstraintFactory" />
@@ -194,6 +197,9 @@
 			<parameter id="distance" value="de.ims.icarus.language.dependency.search.constraints.DependencyDistanceConstraintFactory" />
 			<parameter id="direction" value="de.ims.icarus.language.dependency.search.constraints.DependencyDirectionConstraintFactory" />
 			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.constraints.DependencyProjectivityConstraintFactory" />
+			<parameter id="wordPos" value="de.ims.icarus.language.dependency.search.constraints.DependencyWordPositionConstraintFactory" />
+			<parameter id="wordPosInv" value="de.ims.icarus.language.dependency.search.constraints.DependencyInvertedWordPositionConstraintFactory" />
+			<parameter id="section" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelativeWordPositionConstraintFactory" />
 		</parameter>
 	</extension>
 	

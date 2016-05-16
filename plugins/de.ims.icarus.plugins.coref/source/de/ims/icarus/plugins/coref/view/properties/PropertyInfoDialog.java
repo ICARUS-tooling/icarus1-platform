@@ -62,7 +62,7 @@ import javax.swing.SwingWorker;
 import de.ims.icarus.Core;
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
@@ -580,7 +580,7 @@ public class PropertyInfoDialog extends JFrame {
 			Counter sentenceCounter = getCachedCounter(documentSet.getId());
 			if(sentenceCounter==null) {
 				sentenceCounter = new Counter();
-				CoreferenceDocumentSet dSet = documentSet.get();
+				DocumentSet dSet = documentSet.get();
 				publish(new Range(dSet.size()), 0, true);
 				for(int i=0; i<dSet.size(); i++) {
 					PropertyUtils.countProperties(sentenceCounter, dSet.get(i));

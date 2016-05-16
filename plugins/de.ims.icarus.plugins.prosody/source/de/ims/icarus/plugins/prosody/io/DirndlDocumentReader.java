@@ -29,11 +29,11 @@ import java.io.IOException;
 
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.io.Reader;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentSet;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
-import de.ims.icarus.plugins.prosody.io.ProsodyIOUtils.ReaderControl;
+import de.ims.icarus.plugins.prosody.io.DirndlIOUtils.ReaderControl;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
@@ -48,13 +48,13 @@ import de.ims.icarus.util.strings.CharTableBuffer;
  * @version $Id$
  *
  */
-public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, DataCreater {
+public class DirndlDocumentReader implements Reader<ProsodicDocumentData>, DataCreater {
 
 	private CharTableBuffer buffer;
 	private ReaderControl readerControl;
-	private CoreferenceDocumentSet documentSet;
+	private DocumentSet documentSet;
 
-	public ProsodyDocumentReader() {
+	public DirndlDocumentReader() {
 		// no-op
 	}
 
@@ -67,7 +67,7 @@ public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, Data
 		if(location==null)
 			throw new NullPointerException("Invalid location"); //$NON-NLS-1$
 
-		documentSet = (CoreferenceDocumentSet) options.get("documentSet"); //$NON-NLS-1$
+		documentSet = (DocumentSet) options.get("documentSet"); //$NON-NLS-1$
 
 		readerControl = new ReaderControl();
 
@@ -81,7 +81,7 @@ public class ProsodyDocumentReader implements Reader<ProsodicDocumentData>, Data
 	 */
 	@Override
 	public ProsodicDocumentData next() throws IOException, UnsupportedFormatException {
-		return ProsodyIOUtils.readDocumentData(documentSet, buffer, readerControl);
+		return DirndlIOUtils.readDocumentData(documentSet, buffer, readerControl);
 	}
 
 	/**

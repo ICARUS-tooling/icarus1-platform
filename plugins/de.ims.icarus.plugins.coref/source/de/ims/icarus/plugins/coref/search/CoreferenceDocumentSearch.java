@@ -26,7 +26,7 @@
 package de.ims.icarus.plugins.coref.search;
 
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentResultAnnotator;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.search_tools.SearchFactory;
@@ -65,14 +65,14 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	protected DataList<CoreferenceDocumentData> createSource(Object target) {
+	protected DataList<DocumentData> createSource(Object target) {
 		if(target==null)
 			throw new NullPointerException("Invalid target"); //$NON-NLS-1$
 
 		if(!(target instanceof CoreferenceDocumentSearchTarget))
 			throw new IllegalArgumentException("Unsupported target type: "+target.getClass()); //$NON-NLS-1$
 
-		return (DataList<CoreferenceDocumentData>) target;
+		return (DataList<DocumentData>) target;
 	}
 
 	/**

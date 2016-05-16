@@ -615,7 +615,8 @@
 		</parameter-def>
 	</extension-point>
 			
-	<extension-point id="UIHelper">
+	<extension-point id="UIHelper" parent-point-id="Localizable" 
+			parent-plugin-id="de.ims.icarus.core">
 		<doc>
 			<doc-text>
 				See de.ims.icarus.ui.UIHelperRegistry

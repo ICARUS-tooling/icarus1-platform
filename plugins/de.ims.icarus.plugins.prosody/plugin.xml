@@ -168,27 +168,32 @@
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.ui.table.ProsodySentenceTablePresenter" />
 	</extension>
 	
-	<extension id="ProsodyDocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
-		<parameter id="name" value="plugins.prosody.prosodyDocumentReader.identity.name" />
-		<parameter id="description" value="plugins.prosody.prosodyDocumentReader.identity.description" />
+	<extension id="DirndlDocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
+		<parameter id="name" value="plugins.prosody.dirndlDocumentReader.identity.name" />
+		<parameter id="description" value="plugins.prosody.dirndlDocumentReader.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
-		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.ProsodyDocumentReader" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.DirndlDocumentReader" />
 	</extension>
 	
-	<!--
-	<extension id="FestivalDocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
-		<parameter id="name" value="plugins.prosody.festivalDocumentReader.identity.name" />
-		<parameter id="description" value="plugins.prosody.festivalDocumentReader.identity.description" />
+	<extension id="DirndlSentenceReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+		<parameter id="name" value="plugins.prosody.dirndlSentenceReader.identity.name" />
+		<parameter id="description" value="plugins.prosody.dirndlSentenceReader.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
-		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.FestivalDocumentReader" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.DirndlSentenceReader" />
 	</extension>
-	-->
 	
 	<extension id="ProsodyTableReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
 		<parameter id="name" value="plugins.prosody.prosodyTableReader.identity.name" />
 		<parameter id="description" value="plugins.prosody.prosodyTableReader.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
 		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.UniSylDocumentReader" />
+	</extension>
+	
+	<extension id="ProsodyTableSentenceReader" plugin-id="de.ims.icarus.languageTools" point-id="SentenceDataReader">
+		<parameter id="name" value="plugins.prosody.prosodyTableSentenceReader.identity.name" />
+		<parameter id="description" value="plugins.prosody.prosodyTableSentenceReader.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.prosody.resources.prosody" />
+		<parameter id="class" value="de.ims.icarus.plugins.prosody.io.UniSylSentenceReader" />
 	</extension>
 	
 	<extension id="ProsodyOutlinePresenter" plugin-id="de.ims.icarus.coref" point-id="CoreferencePresenter">
@@ -288,13 +293,14 @@
 		<parameter id="token" value="distance" />
 		<parameter id="token" value="direction" />
 		<parameter id="token" value="projectivity" />
+		<parameter id="token" value="wordPos" />
+		<parameter id="token" value="wordPosInv" />
+		<parameter id="token" value="section" />
 		<!-- new tokens -->
 		<parameter id="token" value="syllableProperty" />
 		<parameter id="token" value="wordProperty" />
 		<parameter id="token" value="sylCount" />
 		<parameter id="token" value="accentShape" />
-		<parameter id="token" value="wordPos" />
-		<parameter id="token" value="section" />
 		<parameter id="token" value="painteIntegral" />
 		<parameter id="token" value="painteRange" />
 		<parameter id="token" value="painteCurve" />
@@ -310,13 +316,14 @@
 			<parameter id="distance" value="de.ims.icarus.language.dependency.search.constraints.DependencyDistanceConstraintFactory" />
 			<parameter id="direction" value="de.ims.icarus.language.dependency.search.constraints.DependencyDirectionConstraintFactory" />
 			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.constraints.DependencyProjectivityConstraintFactory" />
+			<parameter id="wordPos" value="de.ims.icarus.language.dependency.search.constraints.DependencyWordPositionConstraintFactory" />
+			<parameter id="wordPosInv" value="de.ims.icarus.language.dependency.search.constraints.DependencyInvertedWordPositionConstraintFactory" />
+			<parameter id="section" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelativeWordPositionConstraintFactory" />
 			<!-- new factories -->
 			<parameter id="syllableProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllablePropertyConstraintFactory" />
 			<parameter id="wordProperty" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPropertyConstraintFactory" />
 			<parameter id="sylCount" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodySyllableCountConstraintFactory" />
 			<parameter id="accentShape" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEAccentShapeConstraintFactory" />
-			<parameter id="wordPos" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyWordPositionConstraintFactory" />
-			<parameter id="section" value="de.ims.icarus.plugins.prosody.search.constraints.ProsodyRelativeWordPositionConstraintFactory" />
 			<parameter id="painteIntegral" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEIntegralConstraintFactory" />
 			<parameter id="painteRange" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntERangeConstraintFactory" />
 			<parameter id="painteCurve" value="de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntECurveConstraintFactory" />

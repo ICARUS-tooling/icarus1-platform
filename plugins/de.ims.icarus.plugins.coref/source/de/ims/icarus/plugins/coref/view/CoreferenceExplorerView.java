@@ -46,7 +46,7 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.AllocationListWrapper;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
@@ -77,8 +77,8 @@ import de.ims.icarus.util.mpi.ResultMessage;
  */
 public class CoreferenceExplorerView extends View implements Updatable {
 	
-	private JList<CoreferenceDocumentData> list;
-	private DataListModel<CoreferenceDocumentData> listModel;
+	private JList<DocumentData> list;
+	private DataListModel<DocumentData> listModel;
 	
 	private JLabel loadingLabel;
 	
@@ -241,7 +241,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		
 		try {
 			// Fetch document
-			CoreferenceDocumentData document = listModel.getElementAt(index);
+			DocumentData document = listModel.getElementAt(index);
 			if(document==null) {
 				return;
 			}
@@ -285,7 +285,7 @@ public class CoreferenceExplorerView extends View implements Updatable {
 		
 		try {
 			// Fetch document
-			CoreferenceDocumentData document = listModel.getElementAt(index);
+			DocumentData document = listModel.getElementAt(index);
 			if(document==null) {
 				return;
 			}
@@ -342,8 +342,8 @@ public class CoreferenceExplorerView extends View implements Updatable {
 			int index = -1;
 			if(data instanceof Integer) {
 				index = (int) data;
-			} else if(data instanceof CoreferenceDocumentData) {
-				CoreferenceDocumentData document = (CoreferenceDocumentData)data;
+			} else if(data instanceof DocumentData) {
+				DocumentData document = (DocumentData)data;
 				index = ListUtils.indexOf(document, listModel);
 			} else {
 				return message.unsupportedDataResult(this);

@@ -58,7 +58,7 @@ import de.ims.icarus.Core;
 import de.ims.icarus.Core.NamedRunnable;
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
 import de.ims.icarus.plugins.coref.CoreferencePlugin;
@@ -101,7 +101,7 @@ public final class CoreferenceRegistry {
 	private EventSource eventSource;
 
 	private Map<String, DocumentSetDescriptor> documentSetMap;
-	private Map<CoreferenceDocumentSet, DocumentSetDescriptor> documentLookup;
+	private Map<DocumentSet, DocumentSetDescriptor> documentLookup;
 	private List<DocumentSetDescriptor> documentSetList;
 
 	private Map<String, AllocationDescriptor> allocationMap;
@@ -237,7 +237,7 @@ public final class CoreferenceRegistry {
 		return documentSetMap.get(id);
 	}
 
-	public DocumentSetDescriptor getDescriptor(CoreferenceDocumentSet documentSet) {
+	public DocumentSetDescriptor getDescriptor(DocumentSet documentSet) {
 		return documentLookup.get(documentSet);
 	}
 
@@ -314,7 +314,7 @@ public final class CoreferenceRegistry {
 		saveBackground();
 	}
 
-	public void deleteDocumentSet(CoreferenceDocumentSet documentSet) {
+	public void deleteDocumentSet(DocumentSet documentSet) {
 		if(documentSet==null)
 			throw new NullPointerException("Invalid document set"); //$NON-NLS-1$
 
@@ -511,7 +511,7 @@ public final class CoreferenceRegistry {
 		eventSource.removeEventListener(listener, eventName);
 	}
 
-	public void documentSetChanged(CoreferenceDocumentSet documentSet) {
+	public void documentSetChanged(DocumentSet documentSet) {
 		eventSource.fireEvent(new EventObject(Events.CHANGED,
 				"documentSet", getDescriptor(documentSet))); //$NON-NLS-1$
 

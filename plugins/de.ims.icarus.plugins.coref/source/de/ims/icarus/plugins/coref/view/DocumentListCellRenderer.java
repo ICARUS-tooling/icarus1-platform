@@ -30,7 +30,7 @@ import java.awt.Component;
 import javax.swing.JList;
 
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;
 import de.ims.icarus.search_tools.annotation.ResultAnnotation;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
@@ -47,7 +47,7 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 			Object value, int index, boolean isSelected,
 			boolean cellHasFocus) {
 
-		value = getTextForValue(index, (CoreferenceDocumentData) value);
+		value = getTextForValue(index, (DocumentData) value);
 
 		return super.getListCellRendererComponent(list, value, index, isSelected,
 				cellHasFocus);
@@ -55,7 +55,7 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 
 	private static final StringBuilder sb = new StringBuilder(200);
 
-	public static String defaultGetTextForValue(int index, CoreferenceDocumentData docData) {
+	public static String defaultGetTextForValue(int index, DocumentData docData) {
 		if(docData==null) {
 			return null;
 		}
@@ -77,7 +77,7 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 
 		String id = docData.getId();
 		if(id==null) {
-			id = (String) docData.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
+			id = (String) docData.getProperty(DocumentData.DOCUMENT_HEADER_PROPERTY);
 		}
 		if(id==null) {
 			id = "document "+StringUtil.formatDecimal(index); //$NON-NLS-1$
@@ -88,7 +88,7 @@ public class DocumentListCellRenderer extends TooltipListCellRenderer {
 		return sb.toString();
 	}
 
-	protected String getTextForValue(int index, CoreferenceDocumentData docData) {
+	protected String getTextForValue(int index, DocumentData docData) {
 		return defaultGetTextForValue(index, docData);
 	}
 }

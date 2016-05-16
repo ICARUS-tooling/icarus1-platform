@@ -40,8 +40,8 @@ import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
@@ -72,7 +72,7 @@ public class DefaultAllocationReader implements AllocationReader {
 	public static final String COMMENT_PREFIX = "#"; //$NON-NLS-1$
 
 	private CharLineBuffer buffer;
-	private CoreferenceDocumentSet documentSet;
+	private DocumentSet documentSet;
 	private int lineCount;
 
 	private String documentId;
@@ -83,7 +83,7 @@ public class DefaultAllocationReader implements AllocationReader {
 
 	@Override
 	public void init(Location location,
-			Options options, CoreferenceDocumentSet documentSet) throws Exception {
+			Options options, DocumentSet documentSet) throws Exception {
 
 		buffer = new CharLineBuffer();
 		buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
@@ -129,7 +129,7 @@ public class DefaultAllocationReader implements AllocationReader {
 					throw new IllegalArgumentException(String.format(
 							"Unknown document id '%s' at line %s ", documentId, lineCount)); //$NON-NLS-1$
 
-				CoreferenceDocumentData document = documentSet==null ?
+				DocumentData document = documentSet==null ?
 						null : documentSet.getDocument(documentId);
 
 				// Read in properties
@@ -190,7 +190,7 @@ public class DefaultAllocationReader implements AllocationReader {
 		return hasNext;
 	}
 
-	private SpanSet readNodes(CoreferenceDocumentData document) throws IOException {
+	private SpanSet readNodes(DocumentData document) throws IOException {
 		boolean closed = false;
 
 		SpanSet spanSet = new SpanSet();

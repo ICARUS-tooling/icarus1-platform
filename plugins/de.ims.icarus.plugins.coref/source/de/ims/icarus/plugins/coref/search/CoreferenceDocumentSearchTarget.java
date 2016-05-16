@@ -26,8 +26,8 @@
 package de.ims.icarus.plugins.coref.search;
 
 import de.ims.icarus.io.Loadable;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
 import de.ims.icarus.util.NamedObject;
@@ -39,7 +39,7 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class CoreferenceDocumentSearchTarget extends AbstractDataList<CoreferenceDocumentData> implements Loadable, NamedObject {
+public class CoreferenceDocumentSearchTarget extends AbstractDataList<DocumentData> implements Loadable, NamedObject {
 	
 	private final DocumentSetDescriptor documentSet;
 	private final AllocationDescriptor  allocation;
@@ -113,7 +113,7 @@ public class CoreferenceDocumentSearchTarget extends AbstractDataList<Coreferenc
 		return getName();
 	}
 
-	protected CoreferenceDocumentSet getSet() {
+	protected DocumentSet getSet() {
 		return documentSet.get(); 
 	}
 
@@ -122,7 +122,7 @@ public class CoreferenceDocumentSearchTarget extends AbstractDataList<Coreferenc
 	 */
 	@Override
 	public int size() {
-		CoreferenceDocumentSet set = getSet();
+		DocumentSet set = getSet();
 		return set==null ? 0 : set.size();
 	}
 
@@ -130,8 +130,8 @@ public class CoreferenceDocumentSearchTarget extends AbstractDataList<Coreferenc
 	 * @see de.ims.icarus.util.data.DataList#get(int)
 	 */
 	@Override
-	public CoreferenceDocumentData get(int index) {
-		CoreferenceDocumentSet set = getSet();
+	public DocumentData get(int index) {
+		DocumentSet set = getSet();
 		return set==null ? null : set.get(index);
 	}
 
@@ -140,7 +140,7 @@ public class CoreferenceDocumentSearchTarget extends AbstractDataList<Coreferenc
 	 */
 	@Override
 	public ContentType getContentType() {
-		CoreferenceDocumentSet set = getSet();
+		DocumentSet set = getSet();
 		return set==null ? null : set.getContentType();
 	}
 

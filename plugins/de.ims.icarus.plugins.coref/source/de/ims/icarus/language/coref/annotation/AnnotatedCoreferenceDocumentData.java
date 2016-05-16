@@ -31,8 +31,8 @@ import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.util.Wrapper;
@@ -45,12 +45,12 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class AnnotatedCoreferenceDocumentData implements AnnotatedData, CoreferenceDocumentData, Wrapper<CoreferenceDocumentData> {
+public class AnnotatedCoreferenceDocumentData implements AnnotatedData, DocumentData, Wrapper<DocumentData> {
 
-	private final CoreferenceDocumentData source;
+	private final DocumentData source;
 	private Annotation annotation;
 
-	public AnnotatedCoreferenceDocumentData(CoreferenceDocumentData source, Annotation annotation) {
+	public AnnotatedCoreferenceDocumentData(DocumentData source, Annotation annotation) {
 		if(source==null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 
@@ -58,7 +58,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 		this.annotation = annotation;
 	}
 
-	public AnnotatedCoreferenceDocumentData(CoreferenceDocumentData source) {
+	public AnnotatedCoreferenceDocumentData(DocumentData source) {
 		this(source, null);
 	}
 
@@ -120,7 +120,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#get(int)
+	 * @see de.ims.icarus.language.coref.DocumentData#get(int)
 	 */
 	@Override
 	public CoreferenceData get(int index) {
@@ -128,7 +128,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#add(de.ims.icarus.language.coref.CoreferenceData)
+	 * @see de.ims.icarus.language.coref.DocumentData#add(de.ims.icarus.language.coref.CoreferenceData)
 	 */
 	@Override
 	public void add(CoreferenceData data) {
@@ -136,15 +136,15 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDocumentSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDocumentSet()
 	 */
 	@Override
-	public CoreferenceDocumentSet getDocumentSet() {
+	public DocumentSet getDocumentSet() {
 		return source.getDocumentSet();
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getSpanSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getSpanSet()
 	 */
 	@Override
 	public SpanSet getSpanSet() {
@@ -152,7 +152,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getEdgeSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getEdgeSet()
 	 */
 	@Override
 	public EdgeSet getEdgeSet() {
@@ -160,7 +160,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDefaultSpanSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDefaultSpanSet()
 	 */
 	@Override
 	public SpanSet getDefaultSpanSet() {
@@ -168,7 +168,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDefaultEdgeSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDefaultEdgeSet()
 	 */
 	@Override
 	public EdgeSet getDefaultEdgeSet() {
@@ -176,7 +176,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDocumentIndex()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDocumentIndex()
 	 */
 	@Override
 	public int getDocumentIndex() {
@@ -184,7 +184,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getId()
+	 * @see de.ims.icarus.language.coref.DocumentData#getId()
 	 */
 	@Override
 	public String getId() {
@@ -192,7 +192,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getProperty(java.lang.String)
+	 * @see de.ims.icarus.language.coref.DocumentData#getProperty(java.lang.String)
 	 */
 	@Override
 	public Object getProperty(String key) {
@@ -215,7 +215,7 @@ public class AnnotatedCoreferenceDocumentData implements AnnotatedData, Corefere
 	 * @see de.ims.icarus.util.Wrapper#get()
 	 */
 	@Override
-	public CoreferenceDocumentData get() {
+	public DocumentData get() {
 		return source;
 	}
 

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref;
@@ -61,22 +61,22 @@ public class CoreferencePlugin extends Plugin {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public static Collection<Extension> getDocumentReaderExtensions() {
 		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
 				CorefConstants.COREFERENCE_PLUGIN_ID, "DocumentReader"); //$NON-NLS-1$
 		return extensionPoint.getConnectedExtensions();
 	}
-	
+
 	public static Collection<Extension> getAllocationReaderExtensions() {
 		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
 				CorefConstants.COREFERENCE_PLUGIN_ID, "AllocationReader"); //$NON-NLS-1$
 		return extensionPoint.getConnectedExtensions();
 	}
-	
+
 	public static Collection<Extension> getCoreferencePresenterExtensions() {
 		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
 				CorefConstants.COREFERENCE_PLUGIN_ID, "CoreferencePresenter"); //$NON-NLS-1$
-		return extensionPoint.getConnectedExtensions();
+		return PluginUtil.getExtensions(extensionPoint, true, true, null);
 	}
 }

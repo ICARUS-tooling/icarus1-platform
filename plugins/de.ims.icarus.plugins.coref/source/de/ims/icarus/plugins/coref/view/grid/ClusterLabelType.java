@@ -29,7 +29,7 @@ import javax.swing.Icon;
 import javax.xml.bind.annotation.XmlEnum;
 
 import de.ims.icarus.language.coref.Cluster;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.resources.ResourceManager;
@@ -46,14 +46,14 @@ public enum ClusterLabelType implements Identity {
 	FIRST("first") { //$NON-NLS-1$
 		@Override
 		protected Span getSignificantSpan(Cluster cluster,
-				CoreferenceDocumentData document) {
+				DocumentData document) {
 			return cluster.size()==0 ? null : cluster.get(0);
 		}
 	}, 
 	LAST("last") { //$NON-NLS-1$
 		@Override
 		protected Span getSignificantSpan(Cluster cluster,
-				CoreferenceDocumentData document) {
+				DocumentData document) {
 			int size = cluster.size();
 			return size==0 ? null : cluster.get(size-1);
 		}
@@ -61,7 +61,7 @@ public enum ClusterLabelType implements Identity {
 	SHORTEST("shortest") { //$NON-NLS-1$
 		@Override
 		protected Span getSignificantSpan(Cluster cluster,
-				CoreferenceDocumentData document) {
+				DocumentData document) {
 
 			int minLength = Integer.MAX_VALUE;
 			Span minSpan = null;
@@ -81,7 +81,7 @@ public enum ClusterLabelType implements Identity {
 	LONGEST("longest") { //$NON-NLS-1$
 		@Override
 		protected Span getSignificantSpan(Cluster cluster,
-				CoreferenceDocumentData document) {
+				DocumentData document) {
 
 			int maxLength = 0;
 			Span maxSpan = null;
@@ -147,7 +147,7 @@ public enum ClusterLabelType implements Identity {
 		return this;
 	}
 
-	public String getLabel(Cluster cluster, CoreferenceDocumentData document) {
+	public String getLabel(Cluster cluster, DocumentData document) {
 		Span span = getSignificantSpan(cluster, document);
 		
 		if(span==null) {
@@ -157,5 +157,5 @@ public enum ClusterLabelType implements Identity {
 		return CoreferenceUtils.getSpanText(span, document);
 	}
 	
-	protected abstract Span getSignificantSpan(Cluster cluster, CoreferenceDocumentData document);
+	protected abstract Span getSignificantSpan(Cluster cluster, DocumentData document);
 }

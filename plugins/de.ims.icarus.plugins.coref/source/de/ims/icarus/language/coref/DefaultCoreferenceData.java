@@ -45,7 +45,7 @@ public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> i
 	private static final long serialVersionUID = 1641469565583964051L;
 
 	@Reference(ReferenceType.UPLINK)
-	protected CoreferenceDocumentData document;
+	protected DocumentData document;
 
 	@Primitive
 	protected int sentenceIndex = -1;
@@ -58,7 +58,7 @@ public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> i
 		super(forms);
 	}
 
-	public DefaultCoreferenceData(CoreferenceDocumentData document, String[] forms) {
+	public DefaultCoreferenceData(DocumentData document, String[] forms) {
 		this(forms);
 		setDocument(document);
 	}
@@ -78,11 +78,11 @@ public class DefaultCoreferenceData extends BasicSentenceData<CorefProperties> i
 	}
 
 	@Override
-	public CoreferenceDocumentData getDocument() {
+	public DocumentData getDocument() {
 		return document;
 	}
 
-	public void setDocument(CoreferenceDocumentData document) {
+	public void setDocument(DocumentData document) {
 		if(forms!=null && forms.length==0) {
 			return;
 		}

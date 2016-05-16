@@ -25,8 +25,8 @@
  */
 package de.ims.icarus.plugins.prosody;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.util.data.ContentType;
 
 /**
@@ -34,22 +34,22 @@ import de.ims.icarus.util.data.ContentType;
  * @version $Id$
  *
  */
-public class ProsodicDocumentSet extends CoreferenceDocumentSet {
+public class ProsodicDocumentSet extends DocumentSet {
 
 	public void add(DefaultProsodicDocumentData data) {
 		super.add(data);
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentSet#add(de.ims.icarus.language.coref.CoreferenceDocumentData)
+	 * @see de.ims.icarus.language.coref.DocumentSet#add(de.ims.icarus.language.coref.DocumentData)
 	 */
 	@Override
-	public void add(CoreferenceDocumentData data) {
+	public void add(DocumentData data) {
 		add((DefaultProsodicDocumentData)data);
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentSet#newDocument(java.lang.String)
+	 * @see de.ims.icarus.language.coref.DocumentSet#newDocument(java.lang.String)
 	 */
 	@Override
 	public DefaultProsodicDocumentData newDocument(String id) {
@@ -60,7 +60,7 @@ public class ProsodicDocumentSet extends CoreferenceDocumentSet {
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentSet#getContentType()
+	 * @see de.ims.icarus.language.coref.DocumentSet#getContentType()
 	 */
 	@Override
 	public ContentType getContentType() {

@@ -48,7 +48,7 @@ import de.ims.icarus.language.coref.CorefComparison;
 import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
@@ -68,7 +68,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 
 	private static final long serialVersionUID = 1954436908379655973L;
 
-	protected CoreferenceDocumentData document;
+	protected DocumentData document;
 
 	protected Map<String, EntityGridNode> nodes;
 	protected TIntObjectMap<ErrorSummary> columnSummaries = new TIntObjectHashMap<>();
@@ -159,11 +159,11 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		return nodes.get(getKey(rowIndex, columnIndex));
 	}
 
-	public CoreferenceDocumentData getDocument() {
+	public DocumentData getDocument() {
 		return document;
 	}
 
-	public void setDocument(CoreferenceDocumentData document) {
+	public void setDocument(DocumentData document) {
 		if(document==this.document)
 			return;
 

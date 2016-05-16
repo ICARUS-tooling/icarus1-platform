@@ -29,7 +29,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JComponent;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.plugins.core.View;
 import de.ims.icarus.util.mpi.Commands;
 import de.ims.icarus.util.mpi.Message;
@@ -76,7 +76,7 @@ public class CoreferenceDocumentView extends View {
 		if(Commands.PRESENT.equals(message.getCommand())
 				|| Commands.DISPLAY.equals(message.getCommand())) {
 			Object data = message.getData();
-			if(data instanceof CoreferenceDocumentData) {
+			if(data instanceof DocumentData) {
 				//focusView();
 				selectViewTab();
 				presenter.present(data, message.getOptions());

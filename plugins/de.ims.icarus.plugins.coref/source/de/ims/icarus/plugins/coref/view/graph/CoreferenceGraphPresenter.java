@@ -59,7 +59,7 @@ import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
@@ -115,7 +115,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 	protected Filter filter;
 
-	protected CoreferenceDocumentData document;
+	protected DocumentData document;
 	protected CoreferenceAllocation allocation;
 	protected CoreferenceAllocation goldAllocation;
 
@@ -243,7 +243,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	 * @see de.ims.icarus.ui.view.Presenter#getPresentedData()
 	 */
 	@Override
-	public CoreferenceDocumentData getPresentedData() {
+	public DocumentData getPresentedData() {
 		return document;
 	}
 
@@ -260,7 +260,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	 */
 	@Override
 	protected void setData(Object data, Options options) {
-		document = (CoreferenceDocumentData) data;
+		document = (DocumentData) data;
 
 		if(options==null) {
 			options = Options.emptyOptions;

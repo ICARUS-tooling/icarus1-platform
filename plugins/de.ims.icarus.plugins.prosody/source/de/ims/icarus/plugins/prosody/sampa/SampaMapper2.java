@@ -56,16 +56,16 @@ public class SampaMapper2 {
 ////		System.out.println(Arrays.deepToString(syllables));
 //
 //		Core.debugInit(args);
-//		ProsodyIOUtils.DEFAULT_SYLLABLES_FROM_SAMPA = true;
+//		DirndlIOUtils.DEFAULT_SYLLABLES_FROM_SAMPA = true;
 //
 //		LoggerFactory.registerLogFile("de.ims.icarus.plugins.prosody", "icarus.prosody"); //$NON-NLS-1$ //$NON-NLS-2$
 //		LoggerFactory.registerLogFile("de.ims.icarus.language.coref", "icarus.coref"); //$NON-NLS-1$ //$NON-NLS-2$
 //
-//		CoreferenceDocumentSet set = new CoreferenceDocumentSet();
-//		Reader<?> reader = new ProsodyDocumentReader();
+//		DocumentSet set = new DocumentSet();
+//		Reader<?> reader = new DirndlDocumentReader();
 //		Location location = Locations.getFileLocation("data/prosody/dirndl-test-output-prosodic-format-0.3.1 (orig)"); //$NON-NLS-1$
 //
-//		CoreferenceUtils.loadDocumentSet((Reader<CoreferenceDocumentData>) reader, location, new Options(), set);
+//		CoreferenceUtils.loadDocumentSet((Reader<DocumentData>) reader, location, new Options(), set);
 //
 //		System.out.println("documents: "+set.size()); //$NON-NLS-1$
 //	}

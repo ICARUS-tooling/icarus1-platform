@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,39 +23,13 @@
  * $LastChangedRevision$ 
  * $LastChangedBy$
  */
-package de.ims.icarus.language.coref;
-
-import de.ims.icarus.language.SentenceDataList;
-
+package de.ims.icarus.plugins.coref.view.syntax;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface CoreferenceDocumentData extends SentenceDataList {
+public class SyntaxListPresenter {
 
-	public static final String DOCUMENT_ID_PROPERTY = "documentId"; //$NON-NLS-1$
-	public static final String DOCUMENT_HEADER_PROPERTY = "documentHeader"; //$NON-NLS-1$
-	
-	@Override
-	public CoreferenceData get(int index);
-	
-	public void add(CoreferenceData data);
-
-	public CoreferenceDocumentSet getDocumentSet();
-	
-	public SpanSet getSpanSet();
-	
-	public EdgeSet getEdgeSet();
-	
-	public SpanSet getDefaultSpanSet();
-	
-	public EdgeSet getDefaultEdgeSet();
-
-	public int getDocumentIndex();
-
-	public String getId();
-	
-	public Object getProperty(String key);
 }

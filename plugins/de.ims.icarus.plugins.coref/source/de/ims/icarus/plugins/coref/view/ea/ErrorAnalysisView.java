@@ -48,8 +48,8 @@ import javax.swing.SwingUtilities;
 
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.core.View;
@@ -94,11 +94,11 @@ public class ErrorAnalysisView extends View {
 	private JPanel contentPanel;
 
 	private FilterList list;
-	private DataListModel<CoreferenceDocumentData> listModel;
+	private DataListModel<DocumentData> listModel;
 	private FilterListModel filterModel;
 	private DocumentFilterListCellRenderer listRenderer;
 	
-	private CoreferenceDocumentData document;
+	private DocumentData document;
 	private Options options;
 	
 	private boolean analyzeSubSet = false;
@@ -291,7 +291,7 @@ public class ErrorAnalysisView extends View {
 	
 	private void refresh() {
 		
-		CoreferenceDocumentData document = this.document;
+		DocumentData document = this.document;
 		Options options = getPresenterOptions();
 		
 		if(document==null) {
@@ -305,7 +305,7 @@ public class ErrorAnalysisView extends View {
 			return;
 		}
 		
-		Set<CoreferenceDocumentData> documents = collectDocuments();
+		Set<DocumentData> documents = collectDocuments();
 		if(documents.isEmpty()) {
 			// Nothing to do here
 			return;
@@ -334,11 +334,11 @@ public class ErrorAnalysisView extends View {
 		refreshActions();
 	}
 	
-	private Set<CoreferenceDocumentData> collectDocuments() {
+	private Set<DocumentData> collectDocuments() {
 		if(document==null)
 			throw new IllegalStateException("No document available"); //$NON-NLS-1$
 		
-		Set<CoreferenceDocumentData> result = new HashSet<>();
+		Set<DocumentData> result = new HashSet<>();
 		
 		if(analyzeSubSet) {
 			for(int i=0; i<filterModel.getSize(); i++) {
@@ -353,7 +353,7 @@ public class ErrorAnalysisView extends View {
 		return result;
 	}
 	
-	private void setDocument(CoreferenceDocumentData document) {
+	private void setDocument(DocumentData document) {
 		if(this.document==document) {
 			return;
 		}
@@ -381,11 +381,11 @@ public class ErrorAnalysisView extends View {
 		if(Commands.DISPLAY.equals(message.getCommand())
 				|| Commands.PRESENT.equals(message.getCommand())) {
 			Object data = message.getData();
-			CoreferenceDocumentData document = null;
-			if(data instanceof CoreferenceDocumentData) {
-				document = (CoreferenceDocumentData) data;
-			} else if(data instanceof CoreferenceDocumentSet) {
-				CoreferenceDocumentSet documentSet = (CoreferenceDocumentSet) data;
+			DocumentData document = null;
+			if(data instanceof DocumentData) {
+				document = (DocumentData) data;
+			} else if(data instanceof DocumentSet) {
+				DocumentSet documentSet = (DocumentSet) data;
 				if(documentSet.size()>0) {
 					document = documentSet.get(0);
 				}

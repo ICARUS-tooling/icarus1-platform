@@ -54,7 +54,7 @@ public interface CoreferenceData extends SentenceData {
 	// NOTE: spans should always be sorted descending in order of size!
 	Span[] getSpans();
 
-	CoreferenceDocumentData getDocument();
+	DocumentData getDocument();
 
 	CorefProperties getProperties();
 }

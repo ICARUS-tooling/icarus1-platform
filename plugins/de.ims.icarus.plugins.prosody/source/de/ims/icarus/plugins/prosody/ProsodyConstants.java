@@ -26,7 +26,7 @@
 package de.ims.icarus.plugins.prosody;
 
 import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 
 /**
  * @author Markus Gärtner
@@ -48,7 +48,7 @@ public interface ProsodyConstants extends LanguageConstants {
 			PROSODY_PLUGIN_ID+"@PaIntEEditorView"; //$NON-NLS-1$
 
 	// Document properties
-	public static final String DOCUMENT_ID = CoreferenceDocumentData.DOCUMENT_ID_PROPERTY;
+	public static final String DOCUMENT_ID = DocumentData.DOCUMENT_ID_PROPERTY;
 	public static final String AUDIO_FILE_KEY = "audio-file"; //$NON-NLS-1$
 	public static final String AUDIO_OFFSET_KEY = "audio-offset"; //$NON-NLS-1$
 

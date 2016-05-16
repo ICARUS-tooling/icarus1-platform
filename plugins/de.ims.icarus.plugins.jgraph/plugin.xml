@@ -258,6 +258,23 @@
 		<parameter id="class" value="de.ims.icarus.plugins.jgraph.util.CellBuffer" />
 	</extension>
 	
+	<extension id="ListGraphPresenter" plugin-id="de.ims.icarus.core" point-id="UIHelper">
+		<doc>
+			<doc-text>
+				Presenter implementation for generic DataList objects in asplit view:
+				A lower area is occupied by a ListPresenter that gives a scrollable overview
+				on the content of the DataList. For a detailled outline the upper area hosts 
+				a graph-based presenter for inspection of items selected in the lower list.
+			</doc-text>
+		</doc>
+		<parameter id="name" value="plugins.jgraph.listGraphPresenter.identity.name" />
+		<parameter id="description" value="plugins.jgraph.listGraphPresenter.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.jgraph.resources.jgraph" />
+		<parameter id="class" value="de.ims.icarus.plugins.jgraph.view.ListGraphPresenter" />
+		<parameter id="contentType" value="de.ims.icarus.core@DataListContentType" />
+		<parameter id="interface" value="de.ims.icarus.ui.view.AWTPresenter" />
+	</extension>
+	
 	<!-- GRAPH UTILITIES -->
 	
 	<extension id="DefaultGraphLayout" plugin-id="de.ims.icarus.jgraph" point-id="GraphLayout">

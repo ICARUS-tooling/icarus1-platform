@@ -222,7 +222,9 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 
 	    	ProsodicAnnotationManager manager = (ProsodicAnnotationManager) getAnnotationManager();
 	    	ProsodicAnnotation annotation = getAnnotation();
-	    	manager.setAnnotation(annotation);
+	    	if(manager!=null) {
+	    		manager.setAnnotation(annotation);
+	    	}
 
 			Dimension size = new Dimension();
 
@@ -231,7 +233,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 				curveHeight = previewSize.getHeight(fm);
 				textHeight = fm.getHeight();
 
-				final boolean hasHighlight = manager.hasAnnotation();
+				final boolean hasHighlight = manager!=null && manager.hasAnnotation();
 
 				int width = 0;
 
@@ -256,7 +258,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 					boolean wordHighlighted = false;
 
 					if(hasHighlight) {
-						long highlight = manager.getHighlight(wordIndex);
+						long highlight = manager!=null ? manager.getHighlight(wordIndex) : 0L;
 
 						wordHighlighted = ProsodyHighlighting.getInstance().isHighlighted(highlight);
 
@@ -287,7 +289,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 							continue;
 						}
 
-						long highlight = annotation.getHighlight(wordIndex, sylIndex);
+						long highlight = annotation!=null ? annotation.getHighlight(wordIndex, sylIndex) : 0L;
 						if(ProsodyHighlighting.getInstance().isHighlighted(highlight)) {
 							Color col = ProsodyHighlighting.getInstance().getGroupColor(highlight);
 							if(col!=null) {

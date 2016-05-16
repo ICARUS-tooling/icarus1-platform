@@ -27,7 +27,7 @@ package de.ims.icarus.plugins.prosody;
 
 import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.DefaultCoreferenceDocumentData;
 import de.ims.icarus.util.data.ContentType;
 
@@ -42,7 +42,7 @@ public class DefaultProsodicDocumentData extends DefaultCoreferenceDocumentData 
 	 * @param documentSet
 	 * @param documentIndex
 	 */
-	public DefaultProsodicDocumentData(CoreferenceDocumentSet documentSet, int documentIndex) {
+	public DefaultProsodicDocumentData(DocumentSet documentSet, int documentIndex) {
 		super(documentSet, documentIndex);
 	}
 

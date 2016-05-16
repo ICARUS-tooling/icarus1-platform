@@ -56,7 +56,7 @@ import javax.swing.table.TableColumn;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.Span;
@@ -87,7 +87,7 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 	protected JPanel contentPanel;
 	protected JLabel indexLabel;
 
-	protected CoreferenceDocumentData document;
+	protected DocumentData document;
 
 	protected ActionManager actionManager;
 
@@ -221,11 +221,11 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 	}
 
 
-	public CoreferenceDocumentData getDocument() {
+	public DocumentData getDocument() {
 		return document;
 	}
 
-	public void setDocument(CoreferenceDocumentData document) {
+	public void setDocument(DocumentData document) {
 		this.document = document;
 	}
 

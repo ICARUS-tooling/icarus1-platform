@@ -42,8 +42,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
@@ -64,9 +64,9 @@ import de.ims.icarus.util.data.DataListModel;
 public class CoreferenceDocumentSetPresenter extends
 		AbstractCoreferenceTextPresenter {
 
-	protected CoreferenceDocumentSet data;
+	protected DocumentSet data;
 	protected JList<?> documentList;
-	protected DataListModel<CoreferenceDocumentData> documentListModel = new DataListModel<>();
+	protected DataListModel<DocumentData> documentListModel = new DataListModel<>();
 	
 	private boolean showDocumentFilter = true;
 	
@@ -106,7 +106,7 @@ public class CoreferenceDocumentSetPresenter extends
 	 * @see de.ims.icarus.ui.view.Presenter#getPresentedData()
 	 */
 	@Override
-	public CoreferenceDocumentSet getPresentedData() {
+	public DocumentSet getPresentedData() {
 		return data;
 	}
 
@@ -123,7 +123,7 @@ public class CoreferenceDocumentSetPresenter extends
 	 */
 	@Override
 	protected void setData(Object data) {
-		this.data = (CoreferenceDocumentSet) data;
+		this.data = (DocumentSet) data;
 		
 		documentListModel.setDataList(this.data);
 		
@@ -207,8 +207,8 @@ public class CoreferenceDocumentSetPresenter extends
 			return false;
 		}
 		
-		CoreferenceDocumentData docData = documentListModel.getElementAt(index);
-		doc.appendBatchCoreferenceDocumentData(docData, getAllocation(), getGoldAllocation());
+		DocumentData docData = documentListModel.getElementAt(index);
+		doc.appendBatchDocumentData(docData, getAllocation(), getGoldAllocation());
 		
 		doc.applyBatchUpdates(0);
 		

@@ -48,8 +48,8 @@ import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.io.Loadable;
 import de.ims.icarus.io.Reader;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
@@ -73,7 +73,7 @@ import de.ims.icarus.xml.jaxb.MapAdapter;
 @XmlRootElement(name="documentSet")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DocumentSetDescriptor implements Loadable,
-		Wrapper<CoreferenceDocumentSet>, DataList<AllocationDescriptor>, NamedObject {
+		Wrapper<DocumentSet>, DataList<AllocationDescriptor>, NamedObject {
 
 	// User defined id for the document set
 	@XmlElement(name="name", defaultValue="<unnamed>")
@@ -94,7 +94,7 @@ public class DocumentSetDescriptor implements Loadable,
 	private Map<String, Object> properties;
 
 	@XmlTransient
-	private CoreferenceDocumentSet documentSet;
+	private DocumentSet documentSet;
 
 	@XmlElement(name="reader")
 	@XmlJavaTypeAdapter(ExtensionAdapter.class)
@@ -137,7 +137,7 @@ public class DocumentSetDescriptor implements Loadable,
 		if(!loading.compareAndSet(false, true))
 			throw new IllegalStateException("Loading process already started"); //$NON-NLS-1$
 
-		Reader<CoreferenceDocumentData> reader = null;
+		Reader<DocumentData> reader = null;
 
 		try {
 
@@ -150,7 +150,7 @@ public class DocumentSetDescriptor implements Loadable,
 				throw new IllegalStateException("No valid reader available"); //$NON-NLS-1$
 
 			Options options = new Options(getProperties());
-			CoreferenceDocumentSet documentSet = getDocumentSet();
+			DocumentSet documentSet = getDocumentSet();
 			documentSet.free();
 
 			CoreferenceUtils.loadDocumentSet(reader, location, options, documentSet);
@@ -191,27 +191,27 @@ public class DocumentSetDescriptor implements Loadable,
 		this.properties = properties;
 	}
 
-	public CoreferenceDocumentSet getDocumentSet() {
+	public DocumentSet getDocumentSet() {
 		if(documentSet==null) {
 			@SuppressWarnings("resource")
-			Reader<CoreferenceDocumentData> reader = createReader();
+			Reader<DocumentData> reader = createReader();
 			if(reader instanceof DataCreater) {
-				documentSet = (CoreferenceDocumentSet) ((DataCreater)reader).create();
+				documentSet = (DocumentSet) ((DataCreater)reader).create();
 			} else {
-				documentSet = new CoreferenceDocumentSet();
+				documentSet = new DocumentSet();
 			}
 		}
 		return documentSet;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Reader<CoreferenceDocumentData> createReader() {
+	private Reader<DocumentData> createReader() {
 		Extension readerExtension = getReaderExtension();
 		if(readerExtension==null) {
 			return null;
 		}
 		try {
-			return (Reader<CoreferenceDocumentData>) PluginUtil.instantiate(readerExtension);
+			return (Reader<DocumentData>) PluginUtil.instantiate(readerExtension);
 		} catch (Exception e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"Failed to instantiate reader: "+readerExtension.getUniqueId(), e); //$NON-NLS-1$
@@ -258,7 +258,7 @@ public class DocumentSetDescriptor implements Loadable,
 
 	@Override
 	public void free() {
-		CoreferenceDocumentSet documentSet = getDocumentSet();
+		DocumentSet documentSet = getDocumentSet();
 
 		documentSet.free();
 
@@ -275,7 +275,7 @@ public class DocumentSetDescriptor implements Loadable,
 	 * @see de.ims.icarus.util.Wrapper#get()
 	 */
 	@Override
-	public CoreferenceDocumentSet get() {
+	public DocumentSet get() {
 		return getDocumentSet();
 	}
 

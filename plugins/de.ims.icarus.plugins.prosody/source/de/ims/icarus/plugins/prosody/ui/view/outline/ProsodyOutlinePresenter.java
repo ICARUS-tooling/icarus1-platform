@@ -57,7 +57,7 @@ import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
@@ -116,7 +116,7 @@ import de.ims.icarus.util.transfer.ConsumerMenu;
 public class ProsodyOutlinePresenter implements AWTPresenter,
 	Installable, AWTPresenter.TextBasedPresenter{
 
-	protected CoreferenceDocumentData data;
+	protected DocumentData data;
 	protected Annotation documentAnnotation;
 	protected ProsodicSentenceData highlightedSentence;
 
@@ -354,7 +354,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 			data = ((Wrapper<?>)data).get();
 		}
 
-		this.data = (CoreferenceDocumentData) data;
+		this.data = (DocumentData) data;
 
 		SoundFile newSoundFile = getSoundFile();
 		if(newSoundFile!=null) {
@@ -544,7 +544,7 @@ public class ProsodyOutlinePresenter implements AWTPresenter,
 	 * @see de.ims.icarus.ui.view.Presenter#getPresentedData()
 	 */
 	@Override
-	public CoreferenceDocumentData getPresentedData() {
+	public DocumentData getPresentedData() {
 		return data;
 	}
 

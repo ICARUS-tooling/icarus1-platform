@@ -314,7 +314,7 @@ public final class CoreferenceUtils implements CorefConstants {
 	}
 
 	public static ContentType getCoreferenceDocumentContentType() {
-		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentData.class);
+		return ContentTypeRegistry.getInstance().getTypeForClass(DocumentData.class);
 	}
 
 	public static ContentType getCoreferenceDocumentAnnotationContentType() {
@@ -334,7 +334,7 @@ public final class CoreferenceUtils implements CorefConstants {
 	}
 
 	public static ContentType getCoreferenceDocumentSetContentType() {
-		return ContentTypeRegistry.getInstance().getTypeForClass(CoreferenceDocumentSet.class);
+		return ContentTypeRegistry.getInstance().getTypeForClass(DocumentSet.class);
 	}
 
 	public static Collection<Edge> removeSingletons(Collection<Edge> edges) {
@@ -361,7 +361,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return result;
 	}
 
-	public static int getSpanLength(Span span, CoreferenceDocumentData document) {
+	public static int getSpanLength(Span span, DocumentData document) {
 		CoreferenceData sentence = document.get(span.getSentenceIndex());
 		int length = 0;
 		for(int i=span.getBeginIndex(); i<=span.getEndIndex(); i++) {
@@ -376,7 +376,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return length;
 	}
 
-	public static String getSpanText(Span span, CoreferenceDocumentData document) {
+	public static String getSpanText(Span span, DocumentData document) {
 		CoreferenceData sentence = document.get(span.getSentenceIndex());
 		StringBuilder sb = new StringBuilder();
 		for(int i=span.getBeginIndex(); i<=span.getEndIndex(); i++) {
@@ -408,7 +408,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return false;
 	}
 
-	public static boolean containsSpan(CoreferenceDocumentData data, Span span) {
+	public static boolean containsSpan(DocumentData data, Span span) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(span==null)
@@ -441,7 +441,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return false;
 	}
 
-	public static boolean containsSpan(CoreferenceDocumentData data, Filter filter) {
+	public static boolean containsSpan(DocumentData data, Filter filter) {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 		if(filter==null)
@@ -456,13 +456,13 @@ public final class CoreferenceUtils implements CorefConstants {
 		return false;
 	}
 
-	public static String getDocumentHeader(CoreferenceDocumentData data) {
+	public static String getDocumentHeader(DocumentData data) {
 		StringBuilder sb = new StringBuilder(50);
 		sb.append(CONLL12Utils.BEGIN_DOCUMENT).append(" "); //$NON-NLS-1$
 
 		String header = data.getId();
 		if(header==null) {
-			header = (String) data.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
+			header = (String) data.getProperty(DocumentData.DOCUMENT_HEADER_PROPERTY);
 		}
 		if(header==null) {
 			header = "<unnamed>"; //$NON-NLS-1$
@@ -507,7 +507,7 @@ public final class CoreferenceUtils implements CorefConstants {
 	public static final SpanSet defaultEmptySpanSet = new SpanSet();
 	public static final EdgeSet defaultEmptyEdgeSet = new EdgeSet();
 
-	public static SpanSet getSpanSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+	public static SpanSet getSpanSet(DocumentData document, CoreferenceAllocation allocation) {
 		SpanSet spanSet = allocation==null ? null : allocation.getSpanSet(document.getId());
 		if(spanSet==null) {
 			spanSet = document.getSpanSet();
@@ -518,7 +518,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return spanSet;
 	}
 
-	public static EdgeSet getEdgeSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+	public static EdgeSet getEdgeSet(DocumentData document, CoreferenceAllocation allocation) {
 		EdgeSet edgeSet = allocation==null ? null : allocation.getEdgeSet(document.getId());
 		if(edgeSet==null) {
 			edgeSet = document.getEdgeSet();
@@ -529,7 +529,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return edgeSet;
 	}
 
-	public static SpanSet getGoldSpanSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+	public static SpanSet getGoldSpanSet(DocumentData document, CoreferenceAllocation allocation) {
 		SpanSet spanSet = allocation==null ? null : allocation.getSpanSet(document.getId());
 
 //		if(spanSet==null) {
@@ -538,7 +538,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return spanSet;
 	}
 
-	public static EdgeSet getGoldEdgeSet(CoreferenceDocumentData document, CoreferenceAllocation allocation) {
+	public static EdgeSet getGoldEdgeSet(DocumentData document, CoreferenceAllocation allocation) {
 		EdgeSet edgeSet = allocation==null ? null : allocation.getEdgeSet(document.getId());
 
 //		if(edgeSet==null) {
@@ -547,27 +547,27 @@ public final class CoreferenceUtils implements CorefConstants {
 		return edgeSet;
 	}
 
-	public static CoreferenceDocumentSet loadDocumentSet(Reader<CoreferenceDocumentData> reader,
+	public static DocumentSet loadDocumentSet(Reader<DocumentData> reader,
 			Location location, Options options) throws IOException, UnsupportedLocationException,
 				UnsupportedFormatException {
 
-		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
+		DocumentSet documentSet = new DocumentSet();
 		loadDocumentSet(reader, location, options, documentSet);
 
 		return documentSet;
 	}
 
-	public static void loadDocumentSet(Reader<? extends CoreferenceDocumentData> reader,
-			Location location, Options options, CoreferenceDocumentSet target) throws IOException, UnsupportedLocationException,
+	public static void loadDocumentSet(Reader<? extends DocumentData> reader,
+			Location location, Options options, DocumentSet target) throws IOException, UnsupportedLocationException,
 				UnsupportedFormatException {
 
 		options.put("documentSet", target); //$NON-NLS-1$
 		reader.init(location, options);
 
-		CoreferenceDocumentData document;
+		DocumentData document;
 		while((document=reader.next())!=null) {
 			// Only add new document if the reader did not use
-			// the CoreferenceDocumentSet.newDocument(String) method
+			// the DocumentSet.newDocument(String) method
 			// to create a new document.
 			if(target.size()==0 || target.get(target.size()-1)!=document) {
 				target.add(document);

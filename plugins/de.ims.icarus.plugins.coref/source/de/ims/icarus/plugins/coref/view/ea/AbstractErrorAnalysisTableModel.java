@@ -35,7 +35,7 @@ import javax.swing.table.AbstractTableModel;
 
 import de.ims.icarus.Core;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.tasks.TaskManager;
@@ -51,7 +51,7 @@ public abstract class AbstractErrorAnalysisTableModel extends AbstractTableModel
 
 	private static final long serialVersionUID = -7927978522711366080L;
 
-	protected Set<CoreferenceDocumentData> documents;
+	protected Set<DocumentData> documents;
 	
 	protected CoreferenceAllocation allocation;
 	protected CoreferenceAllocation goldAllocation;
@@ -88,7 +88,7 @@ public abstract class AbstractErrorAnalysisTableModel extends AbstractTableModel
 	/**
 	 * @return the documents
 	 */
-	public Set<CoreferenceDocumentData> getDocuments() {
+	public Set<DocumentData> getDocuments() {
 		return CollectionUtils.getSetProxy(documents);
 	}
 	
@@ -109,7 +109,7 @@ public abstract class AbstractErrorAnalysisTableModel extends AbstractTableModel
 	/**
 	 * @param documents the documents to set
 	 */
-	public void setDocuments(Set<CoreferenceDocumentData> documents) {
+	public void setDocuments(Set<DocumentData> documents) {
 		if(documents==null)
 			throw new NullPointerException("Invalid documents"); //$NON-NLS-1$
 		

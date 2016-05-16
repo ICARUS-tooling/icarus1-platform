@@ -28,8 +28,8 @@ package de.ims.icarus.plugins.coref.view.properties;
 import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
@@ -57,7 +57,7 @@ public final class PropertyUtils {
 		CorefProperties.countKeys(data.getProperties(), counter);
 	}
 
-	public static void countProperties(Counter counter, CoreferenceDocumentData document) {
+	public static void countProperties(Counter counter, DocumentData document) {
 		if(counter==null)
 			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(document==null || document.size()==0) {
@@ -70,7 +70,7 @@ public final class PropertyUtils {
 		}
 	}
 
-	public static void countProperties(Counter counter, CoreferenceDocumentSet documentSet) {
+	public static void countProperties(Counter counter, DocumentSet documentSet) {
 		if(counter==null)
 			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
 		if(documentSet==null || documentSet.size()==0) {

@@ -23,16 +23,17 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.search.constraints;
+package de.ims.icarus.language.dependency.search.constraints;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
+import de.ims.icarus.plugins.prosody.ui.geom.Axis.Integer;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
+import de.ims.icarus.search_tools.tree.TargetTree;
 import de.ims.icarus.util.Options;
 
 /**
@@ -40,24 +41,24 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class ProsodyWordPositionConstraintFactory extends AbstractConstraintFactory {
+public class DependencyRelativeWordPositionConstraintFactory extends AbstractConstraintFactory implements LanguageConstants {
 
-	public static final String TOKEN = "wordPos"; //$NON-NLS-1$
+	public static final String TOKEN = "section"; //$NON-NLS-1$
 
-	public ProsodyWordPositionConstraintFactory() {
+	public DependencyRelativeWordPositionConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
-				"plugins.prosody.constraints.wordPos.name",  //$NON-NLS-1$
-				"plugins.prosody.constraints.wordPos.description"); //$NON-NLS-1$
-	}
-
-	@Override
-	public SearchOperator[] getSupportedOperators() {
-		return DefaultSearchOperator.numerical();
+				"plugins.languageTools.constraints.section.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.section.description"); //$NON-NLS-1$
 	}
 
 	@Override
 	public Class<?> getValueClass(Object specifier) {
 		return Integer.class;
+	}
+
+	@Override
+	public SearchOperator[] getSupportedOperators() {
+		return DefaultSearchOperator.numerical();
 	}
 
 	@Override
@@ -81,25 +82,27 @@ public class ProsodyWordPositionConstraintFactory extends AbstractConstraintFact
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new ProsodyWordPositionConstraint(value, operator);
+		return new DependencyRelativeWordPositionConstraint(value, operator);
 	}
 
-	private static class ProsodyWordPositionConstraint extends DefaultConstraint {
+	private static class DependencyRelativeWordPositionConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = 1620252858048035885L;
+		private static final long serialVersionUID = -4951579070208503138L;
 
-		public ProsodyWordPositionConstraint(Object value, SearchOperator operator) {
+		public DependencyRelativeWordPositionConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((ProsodyTargetTree)value).getNodeIndex()+1;
+			TargetTree tree = (TargetTree)value;
+//			System.out.println((int) ((tree.getNodeIndex()+1)/(double)tree.size() * 100.0));
+			return (int) ((1+tree.getNodeIndex())/(double)tree.size() * 100.0);
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new ProsodyWordPositionConstraint(getValue(), getOperator());
+			return new DependencyRelativeWordPositionConstraint(getValue(), getOperator());
 		}
 	}
 }

@@ -26,7 +26,7 @@
 package de.ims.icarus.language.coref.annotation;
 
 import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.search_tools.result.ResultEntry;
@@ -75,7 +75,7 @@ public class CoreferenceDocumentResultAnnotator extends
 	 */
 	@Override
 	protected boolean supports(Object data) {
-		return data instanceof CoreferenceDocumentData;
+		return data instanceof DocumentData;
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class CoreferenceDocumentResultAnnotator extends
 	 */
 	@Override
 	protected AnnotatedData createAnnotatedData(Object data, ResultEntry entry) {
-		return new LazyAnnotatedCoreferenceDocumentData((CoreferenceDocumentData) data, entry);
+		return new LazyAnnotatedCoreferenceDocumentData((DocumentData) data, entry);
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class CoreferenceDocumentResultAnnotator extends
 
 		private final ResultEntry entry;
 
-		public LazyAnnotatedCoreferenceDocumentData(CoreferenceDocumentData source,
+		public LazyAnnotatedCoreferenceDocumentData(DocumentData source,
 				ResultEntry entry) {
 			super(source);
 

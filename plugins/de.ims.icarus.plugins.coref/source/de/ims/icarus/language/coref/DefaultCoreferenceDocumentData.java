@@ -43,10 +43,10 @@ import de.ims.icarus.util.mem.ReferenceType;
  *
  */
 @HeapMember
-public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData> implements CoreferenceDocumentData, CorefConstants {
+public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData> implements DocumentData, CorefConstants {
 
 	@Reference(ReferenceType.UPLINK)
-	protected CoreferenceDocumentSet documentSet;
+	protected DocumentSet documentSet;
 
 	@Primitive
 	protected final int documentIndex;
@@ -54,7 +54,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	@Link(cache=true)
 	protected String id;
 
-	public DefaultCoreferenceDocumentData(CoreferenceDocumentSet documentSet, int documentIndex) {
+	public DefaultCoreferenceDocumentData(DocumentSet documentSet, int documentIndex) {
 		setDocumentSet(documentSet);
 		this.documentIndex = documentIndex;
 	}
@@ -68,7 +68,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#add(de.ims.icarus.language.coref.CoreferenceData)
+	 * @see de.ims.icarus.language.coref.DocumentData#add(de.ims.icarus.language.coref.CoreferenceData)
 	 */
 	@Override
 	public void add(CoreferenceData data) {
@@ -117,14 +117,14 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDocumentSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDocumentSet()
 	 */
 	@Override
-	public CoreferenceDocumentSet getDocumentSet() {
+	public DocumentSet getDocumentSet() {
 		return documentSet;
 	}
 
-	public void setDocumentSet(CoreferenceDocumentSet documentSet) {
+	public void setDocumentSet(DocumentSet documentSet) {
 		if(documentSet==null)
 			throw new NullPointerException("Invalid document-set"); //$NON-NLS-1$
 
@@ -132,7 +132,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getSpanSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getSpanSet()
 	 */
 	@Override
 	public SpanSet getSpanSet() {
@@ -140,7 +140,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getEdgeSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getEdgeSet()
 	 */
 	@Override
 	public EdgeSet getEdgeSet() {
@@ -148,7 +148,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDefaultSpanSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDefaultSpanSet()
 	 */
 	@Override
 	public SpanSet getDefaultSpanSet() {
@@ -156,7 +156,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDefaultEdgeSet()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDefaultEdgeSet()
 	 */
 	@Override
 	public EdgeSet getDefaultEdgeSet() {
@@ -164,7 +164,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getDocumentIndex()
+	 * @see de.ims.icarus.language.coref.DocumentData#getDocumentIndex()
 	 */
 	@Override
 	public int getDocumentIndex() {
@@ -191,7 +191,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 	}
 
 	/**
-	 * @see de.ims.icarus.language.coref.CoreferenceDocumentData#getId()
+	 * @see de.ims.icarus.language.coref.DocumentData#getId()
 	 */
 	@Override
 	public String getId() {

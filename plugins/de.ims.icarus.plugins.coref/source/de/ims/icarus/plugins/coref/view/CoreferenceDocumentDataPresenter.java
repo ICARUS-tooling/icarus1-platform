@@ -58,7 +58,7 @@ import org.java.plugin.registry.Extension;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.Span;
@@ -96,7 +96,7 @@ import de.ims.icarus.util.strings.StringUtil;
  */
 public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 
-	private CoreferenceDocumentData document;
+	private DocumentData document;
 	private Options options;
 	private AWTPresenter presenter;
 	private JSplitPane splitPaneH;
@@ -148,10 +148,10 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 			throws UnsupportedPresentationDataException {
 		if(data==null)
 			throw new UnsupportedPresentationDataException("Invalid data"); //$NON-NLS-1$
-		if(!(data instanceof CoreferenceDocumentData))
+		if(!(data instanceof DocumentData))
 			throw new UnsupportedPresentationDataException("Unsupported data type: "+data.getClass()); //$NON-NLS-1$
 
-		displayDocument((CoreferenceDocumentData) data, options);
+		displayDocument((DocumentData) data, options);
 	}
 
 	/**
@@ -398,7 +398,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		return presenter;
 	}
 
-	private void displayDocument(CoreferenceDocumentData document, Options options) {
+	private void displayDocument(DocumentData document, Options options) {
 		if(document==null)
 			throw new NullPointerException("Invalid document"); //$NON-NLS-1$
 
@@ -511,7 +511,7 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 	@SuppressWarnings("incomplete-switch")
 	private void refresh() {
 
-		CoreferenceDocumentData document = this.document;
+		DocumentData document = this.document;
 		Options options = new Options(this.options);
 
 		DescriptorState state = checkDescriptorStates(options);
@@ -569,11 +569,11 @@ public class CoreferenceDocumentDataPresenter implements AWTPresenter {
 		refreshActions();
 	}
 
-	private String getHeaderText(CoreferenceDocumentData document, Options options) {
+	private String getHeaderText(DocumentData document, Options options) {
 		String name = document.getId();
 
 		if(name==null) {
-			name = (String) document.getProperty(CoreferenceDocumentData.DOCUMENT_HEADER_PROPERTY);
+			name = (String) document.getProperty(DocumentData.DOCUMENT_HEADER_PROPERTY);
 		}
 		if(name==null) {
 			name = "<unnamed> "+StringUtil.formatDecimal(document.getDocumentIndex()); //$NON-NLS-1$

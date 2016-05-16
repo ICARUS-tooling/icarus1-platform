@@ -45,7 +45,7 @@ import javax.swing.text.StyleConstants;
 import de.ims.icarus.language.coref.CorefComparison;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
@@ -480,12 +480,12 @@ public class CoreferenceDocument extends BatchDocument {
 		}
 	}
 
-	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data,
+	public void appendBatchDocumentData(DocumentData data,
 			CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation) {
-		appendBatchCoreferenceDocumentData(data, allocation, goldAllocation, -1, -1);
+		appendBatchDocumentData(data, allocation, goldAllocation, -1, -1);
 	}
 
-	public void appendBatchCoreferenceDocumentData(CoreferenceDocumentData data,
+	public void appendBatchDocumentData(DocumentData data,
 			CoreferenceAllocation allocation, CoreferenceAllocation goldAllocation,
 			int index0, int index1) {
 		if(data==null)
@@ -579,7 +579,7 @@ public class CoreferenceDocument extends BatchDocument {
 		return result;
 	}
 
-	public void appendBatchDocumentHeader(CoreferenceDocumentData data) {
+	public void appendBatchDocumentHeader(DocumentData data) {
 		appendBatchLineFeed(null);
 		appendBatchString(CoreferenceUtils.getDocumentHeader(data), HEADER);
 		appendBatchLineFeed(null);

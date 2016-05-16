@@ -34,8 +34,8 @@ import java.util.Set;
 
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.CoreferenceDocumentData;
-import de.ims.icarus.language.coref.CoreferenceDocumentSet;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.DefaultCoreferenceDocumentData;
 import de.ims.icarus.language.coref.Edge;
@@ -59,7 +59,7 @@ public class DefaultErrorAnalysisTableModel extends AbstractErrorAnalysisTableMo
 	@SuppressWarnings({ "nls", "unused" })
 	public static void main(String[] args) throws Exception {
 		
-		CoreferenceDocumentSet documentSet = new CoreferenceDocumentSet();
+		DocumentSet documentSet = new DocumentSet();
 		
 		DefaultCoreferenceDocumentData document = 
 				(DefaultCoreferenceDocumentData) documentSet.newDocument("test");
@@ -68,7 +68,7 @@ public class DefaultErrorAnalysisTableModel extends AbstractErrorAnalysisTableMo
 				new String[]{"A","B","C","A","D","C","B"});
 		
 		DefaultErrorAnalysisTableModel model = new DefaultErrorAnalysisTableModel();
-		model.setDocuments(CollectionUtils.asSet((CoreferenceDocumentData)document));
+		model.setDocuments(CollectionUtils.asSet((DocumentData)document));
 		
 		// False negatives
 		model.test("Singleton 1st (fn)", null, null, "N0", "R-0");
@@ -209,7 +209,7 @@ public class DefaultErrorAnalysisTableModel extends AbstractErrorAnalysisTableMo
 	@Override
 	protected void analyzeDocuments() {
 		
-		Set<CoreferenceDocumentData> documents = getDocuments();
+		Set<DocumentData> documents = getDocuments();
 
 		ResultContainer nom1 = new ResultContainer("Nominal", true); //$NON-NLS-1$
 		ResultContainer nom2 = new ResultContainer("Nominal", false); //$NON-NLS-1$
@@ -218,7 +218,7 @@ public class DefaultErrorAnalysisTableModel extends AbstractErrorAnalysisTableMo
 		ResultContainer pron1 = new ResultContainer("Pronoun", true); //$NON-NLS-1$
 		ResultContainer pron2 = new ResultContainer("Pronoun", false); //$NON-NLS-1$
 		
-		for(CoreferenceDocumentData document : documents) {
+		for(DocumentData document : documents) {
 			
 			String documentId = document.getId();
 			
