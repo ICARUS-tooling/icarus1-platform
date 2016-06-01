@@ -96,6 +96,7 @@ public class ProsodyGraphRenderer2 extends GraphRenderer implements mxITextShape
 
 	private final ProsodyData patternProxy = new ProsodyData();
 
+
 	protected TextSource nodeTextPattern;
 	protected TextSource edgeTextPattern;
 	private boolean showCurvePreview = true;
