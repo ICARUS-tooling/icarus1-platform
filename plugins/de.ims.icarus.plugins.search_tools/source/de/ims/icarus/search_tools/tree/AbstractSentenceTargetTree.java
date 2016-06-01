@@ -14,7 +14,7 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
- *
+
  * $Revision$
  * $Date$
  * $URL$
@@ -23,42 +23,33 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search;
+package de.ims.icarus.search_tools.tree;
 
 import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.dependency.DependencyData;
-import de.ims.icarus.search_tools.tree.AbstractTargetTree;
+import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.util.CorruptedStateException;
 
-
 /**
- * Rooted tree view on dependency data structures.
- *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
+public abstract class AbstractSentenceTargetTree<E extends SentenceData> extends AbstractTargetTree<E> {
 
-	public DependencyTargetTree() {
+
+	public AbstractSentenceTargetTree() {
 		super();
 	}
 
 	@Override
 	protected boolean supports(Object data) {
-		return data instanceof DependencyData;
+		return data instanceof SentenceData;
 	}
 
 	@Override
 	protected int fetchSize() {
 		return data.length();
 	}
-
-	@Override
-	protected int fetchHead(int index) {
-		return data.getHead(index);
-	}
-
 
 
 	// NODE METHODS
@@ -95,15 +86,6 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 	}
 
 	// EDGE METHODS
-
-	public String getRelation() {
-		/*if(edgePointer==-1)
-			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
-		if(nodePointer==-1)
-			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-
-		return data.getRelation(nodePointer);
-	}
 
 	public int getDistance() {
 		/*if(edgePointer==-1)
@@ -148,5 +130,4 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 	}
 
 	// LOCKING METHODS
-
 }

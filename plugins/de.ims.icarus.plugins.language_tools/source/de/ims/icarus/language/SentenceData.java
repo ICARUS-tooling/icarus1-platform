@@ -58,6 +58,12 @@ public interface SentenceData extends Serializable, TextItem {
 	 */
 	String getForm(int index);
 
+	String getPos(int index);
+
+	String getLemma(int index);
+
+	String getFeatures(int index);
+
 	Object getProperty(int index, String key);
 
 	/**
@@ -83,4 +89,13 @@ public interface SentenceData extends Serializable, TextItem {
 	 * object
 	 */
 	Grammar getSourceGrammar();
+
+	/**
+	 * Tests whether a given flag is set on the current {@code SentenceData}
+	 * object. The exact meaning of {@code flag} values is implementation group
+	 * specific.
+	 */
+	boolean isFlagSet(int index, long flag);
+
+	long getFlags(int index);
 }

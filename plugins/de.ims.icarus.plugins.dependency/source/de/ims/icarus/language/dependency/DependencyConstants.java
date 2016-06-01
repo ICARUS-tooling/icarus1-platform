@@ -19,24 +19,24 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.language.dependency;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
  */
 public interface DependencyConstants {
-	
+
 	public static final String GRAMMAR_ID = "dependency"; //$NON-NLS-1$
-	
+
 	public static final String CONTENT_TYPE_ID = "DependencyDataContentType"; //$NON-NLS-1$
-	
+
 
 	// mask fields for data events
 	public static final int DATA_FIELD_FORM = (1 << 0);
@@ -62,17 +62,8 @@ public interface DependencyConstants {
 	public static final int TABLE_INDEX_REL = 6;
 
 	// constraint key labels
-	public static final String CONSTRAINT_KEY_POS = "pos"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_FORM = "form"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_LEMMA = "lemma"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_FEATURES = "feats"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_RELATION = "rel"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_DIR = "dir"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_DIST = "dist"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_TRANS = "trans"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_EDGE = "edge"; //$NON-NLS-1$
-	public static final String CONSTRAINT_KEY_ROOT = "root"; //$NON-NLS-1$
-	
+	public static final String RELATION_KEY = "rel"; //$NON-NLS-1$
+
 	// constraint order
 	public static final int GROUP_ANY = 0;
 	public static final int GROUP_ROOT = 1;
@@ -109,15 +100,15 @@ public interface DependencyConstants {
 	public static final int HIGHLIGHT_DISTANCE_GROUP = (1 << 23) | HIGHLIGHT_GROUP;
 	public static final int HIGHLIGHT_DIRECTION = (1 << 24) | HIGHLIGHT_EDGE_GENERAL;
 	public static final int HIGHLIGHT_DIRECTION_GROUP = (1 << 25) | HIGHLIGHT_GROUP;
-	
-	public static final int HIGHLIGHT_EDGE_MASK = 
-		(HIGHLIGHT_RELATION | HIGHLIGHT_DIRECTION | HIGHLIGHT_DISTANCE) & ~HIGHLIGHT_GENERAL;	
-	public static final int HIGHLIGHT_EDGE_GROUP_MASK = 
+
+	public static final int HIGHLIGHT_EDGE_MASK =
+		(HIGHLIGHT_RELATION | HIGHLIGHT_DIRECTION | HIGHLIGHT_DISTANCE) & ~HIGHLIGHT_GENERAL;
+	public static final int HIGHLIGHT_EDGE_GROUP_MASK =
 		(HIGHLIGHT_EXISTENCE_GROUP | HIGHLIGHT_RELATION_GROUP | HIGHLIGHT_DIRECTION_GROUP | HIGHLIGHT_DISTANCE_GROUP) & ~HIGHLIGHT_GROUP;
-	
-	public static final int HIGHLIGHT_NODE_MASK = 
+
+	public static final int HIGHLIGHT_NODE_MASK =
 		(HIGHLIGHT_FORM | HIGHLIGHT_POS | HIGHLIGHT_LEMMA | HIGHLIGHT_FEATURES) & ~HIGHLIGHT_GENERAL;
-	public static final int HIGHLIGHT_NODE_GROUP_MASK = 
+	public static final int HIGHLIGHT_NODE_GROUP_MASK =
 		(HIGHLIGHT_FORM_GROUP | HIGHLIGHT_POS_GROUP | HIGHLIGHT_LEMMA_GROUP | HIGHLIGHT_FEATURES_GROUP) & ~HIGHLIGHT_GROUP;
 
 }

@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -31,7 +31,6 @@ import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
-import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
 
 /**
@@ -39,13 +38,13 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyFeaturesConstraintFactory extends AbstractConstraintFactory {
+public class PosConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "features"; //$NON-NLS-1$
+	public static final String TOKEN = "pos"; //$NON-NLS-1$
 
-	public DependencyFeaturesConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.features.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.features.description"); //$NON-NLS-1$
+	public PosConstraintFactory() {
+		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.pos.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.pos.description"); //$NON-NLS-1$
 	}
 
 	/**
@@ -55,59 +54,46 @@ public class DependencyFeaturesConstraintFactory extends AbstractConstraintFacto
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyFeaturesConstraint(value, operator);
+			return new PosConstraint(value, operator);
 		else
-			return new DependencyFeaturesCIConstraint(value, operator);
+			return new PosCIConstraint(value, operator);
 	}
 
-	@Override
-	public SearchOperator[] getSupportedOperators() {
-		return new SearchOperator[] {
-			DefaultSearchOperator.EQUALS,
-			DefaultSearchOperator.EQUALS_NOT,
-			DefaultSearchOperator.CONTAINS,
-			DefaultSearchOperator.CONTAINS_NOT,
-			DefaultSearchOperator.MATCHES,
-			DefaultSearchOperator.MATCHES_NOT,
-			DefaultSearchOperator.GROUPING,
-		};
-	}
+	private static class PosConstraint extends DefaultConstraint {
 
-	private static class DependencyFeaturesConstraint extends DefaultConstraint {
+		private static final long serialVersionUID = 18977116270797226L;
 
-		private static final long serialVersionUID = -3346450454270312183L;
-
-		public DependencyFeaturesConstraint(Object value, SearchOperator operator) {
+		public PosConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getFeatures();
+			return ((DependencyTargetTree)value).getPos();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyFeaturesConstraint(getValue(), getOperator());
+			return new PosConstraint(getValue(), getOperator());
 		}
 	}
 
-	private static class DependencyFeaturesCIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class PosCIConstraint extends DefaultCaseInsensitiveConstraint {
 
-		private static final long serialVersionUID = -3346450454270312183L;
+		private static final long serialVersionUID = 4933479883479834272L;
 
-		public DependencyFeaturesCIConstraint(Object value, SearchOperator operator) {
+		public PosCIConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getFeatures().toLowerCase();
+			return ((DependencyTargetTree)value).getPos().toLowerCase();
 		}
 
 		@Override
-		public DependencyFeaturesCIConstraint clone() {
-			return new DependencyFeaturesCIConstraint(getValue(), getOperator());
+		public PosCIConstraint clone() {
+			return (PosCIConstraint) super.clone();
 		}
 	}
 }

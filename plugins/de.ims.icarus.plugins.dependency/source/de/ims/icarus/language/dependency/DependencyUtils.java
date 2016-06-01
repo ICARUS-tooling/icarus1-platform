@@ -59,7 +59,7 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  * @version $Id$
  *
  */
-public class DependencyUtils implements DependencyConstants {
+public class DependencyUtils implements DependencyConstants, LanguageConstants {
 
 	public static Options createOptionsFromConfig() {
 
@@ -287,20 +287,29 @@ public class DependencyUtils implements DependencyConstants {
 
 	protected static void addConstraint(DataEntry entry,
 			String key, String value) {
-		if (CONSTRAINT_KEY_FORM.equals(key))
+
+		switch (key) {
+		case FORM_KEY:
 			entry.form = value;
-		else if (CONSTRAINT_KEY_LEMMA.equals(key))
+			break;
+		case LEMMA_KEY:
 			entry.lemma = value;
-		else if (CONSTRAINT_KEY_FEATURES.equals(key))
+			break;
+		case FEATURES_KEY:
 			entry.features = value;
-		else if (CONSTRAINT_KEY_POS.equals(key))
+			break;
+		case POS_KEY:
 			entry.pos = value;
-		else if (CONSTRAINT_KEY_RELATION.equals(key))
+			break;
+		case RELATION_KEY:
 			entry.relation = value;
-		else
+			break;
+
+		default:
 			throw new IllegalArgumentException(String.format(
 					"Unknown field key: '%s' (value='%s')", String //$NON-NLS-1$
 							.valueOf(key), String.valueOf(value)));
+		}
 	}
 
 	public static Grammar getDependencyGrammar() {

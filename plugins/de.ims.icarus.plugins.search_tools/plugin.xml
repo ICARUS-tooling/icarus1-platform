@@ -88,6 +88,49 @@
 		</parameter-def>
 	</extension-point>
 			
+	<extension-point id="SearchConstraint">
+		<doc>
+			<doc-text>
+				Defines a namespace associated with a collection of supported
+				constraint-tokens and the factories required to instantiate those
+				constraints. 
+			</doc-text>
+		</doc>
+		<parameter-def id="contentType" type="extension-id"
+				multiplicity="one-or-more"
+				custom-data="de.ims.icarus.core@ContentType">
+			<doc>
+				<doc-text>
+					Content type this constraint should be associated with.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="token" multiplicity="one-or-more">
+			<doc>
+				<doc-text>
+					Tokens the context supports. Tokens are case-insensitive and will
+					be cast to lower-case when registered!
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="required" multiplicity="none-or-one" type="boolean" default-value="false">
+			<doc>
+				<doc-text>
+					Indicates whether a constraint is required to be displayed 
+					in the user interface.
+				</doc-text>
+			</doc>
+		</parameter-def>
+		<parameter-def id="factory" multiplicity="one">
+			<doc>
+				<doc-text>
+					Fully qualified name of the factory that must have a no-args constructor and 
+					implement de.ims.icarus.plugins.searchTools.ConstraintFactory interface!
+				</doc-text>
+			</doc>
+		</parameter-def>
+	</extension-point>
+			
 	<extension-point id="SearchFactory" parent-point-id="Localizable" 
 			parent-plugin-id="de.ims.icarus.core">
 		<doc>
@@ -431,5 +474,73 @@
 		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
 		<parameter id="token" value="form" />
 		<parameter id="factories" />
+	</extension>
+	
+	<!-- SEARCH CONSTRAINTS -->
+	
+	<extension id="DirectionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="direction" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.DirectionConstraintFactory" />
+	</extension>
+	
+	<extension id="DistanceConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="distance" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.DistanceConstraintFactory" />
+	</extension>
+	
+	<extension id="FeaturesConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="features" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.FeaturesConstraintFactory" />
+	</extension>
+	
+	<extension id="FormConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="form" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.FormConstraintFactory" />
+	</extension>
+	
+	<extension id="InvertedWordPositionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="wordPosInv" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.InvertedWordPositionConstraintFactory" />
+	</extension>
+	
+	<extension id="LemmaConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="lemma" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.LemmaConstraintFactory" />
+	</extension>
+	
+	<extension id="PosConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="pos" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.PosConstraintFactory" />
+	</extension>
+	
+	<extension id="ProjectivityConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="projectivity" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.ProjectivityConstraintFactory" />
+	</extension>
+	
+	<extension id="RelationConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="relation" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.RelationConstraintFactory" />
+	</extension>
+	
+	<extension id="RelativeWordPositionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="section" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.RelativeWordPositionConstraintFactory" />
+	</extension>
+	
+	<extension id="WordPositionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="wordPos" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.WordPositionConstraintFactory" />
 	</extension>
 </plugin>

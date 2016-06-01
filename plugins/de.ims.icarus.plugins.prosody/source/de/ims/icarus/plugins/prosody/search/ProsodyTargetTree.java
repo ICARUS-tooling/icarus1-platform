@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.plugins.prosody.search;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
@@ -62,10 +63,6 @@ public class ProsodyTargetTree extends DependencyTargetTree implements ProsodyCo
 
 	// WORD METHODS
 
-	public Object getProperty(String key) {
-		return getSource().getProperty(nodePointer, key);
-	}
-
 	public int getSyllableCount() {
 		return getSource().getSyllableCount(nodePointer);
 	}
@@ -79,7 +76,7 @@ public class ProsodyTargetTree extends DependencyTargetTree implements ProsodyCo
 	}
 
 	public String getSpeaker() {
-		return (String) getSource().getProperty(nodePointer, ProsodyConstants.SPEAKER_KEY);
+		return (String) getSource().getProperty(nodePointer, LanguageConstants.SPEAKER_KEY);
 	}
 
 	public String getSpeakerFeatures() {
@@ -87,7 +84,7 @@ public class ProsodyTargetTree extends DependencyTargetTree implements ProsodyCo
 	}
 
 	public String getEntity() {
-		return (String) getSource().getProperty(nodePointer, ProsodyConstants.ENTITY_KEY);
+		return (String) getSource().getProperty(nodePointer, LanguageConstants.ENTITY_KEY);
 	}
 
 	public boolean hasSyllables() {

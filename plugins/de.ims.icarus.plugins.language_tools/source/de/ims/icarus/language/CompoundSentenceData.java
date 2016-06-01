@@ -165,4 +165,34 @@ public class CompoundSentenceData implements SentenceData, Cloneable {
 		SentenceData data = getFirstSet();
 		return data==null ? null : data.getProperty(index, key);
 	}
+
+	@Override
+	public String getPos(int index) {
+		SentenceData data = getFirstSet();
+		return data==null ? null : data.getPos(index);
+	}
+
+	@Override
+	public String getLemma(int index) {
+		SentenceData data = getFirstSet();
+		return data==null ? null : data.getLemma(index);
+	}
+
+	@Override
+	public String getFeatures(int index) {
+		SentenceData data = getFirstSet();
+		return data==null ? null : data.getFeatures(index);
+	}
+
+	@Override
+	public boolean isFlagSet(int index, long flag) {
+		SentenceData data = getFirstSet();
+		return data!=null && data.isFlagSet(index, flag);
+	}
+
+	@Override
+	public long getFlags(int index) {
+		SentenceData data = getFirstSet();
+		return data==null ? 0L : data.getFlags(index);
+	}
 }

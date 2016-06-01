@@ -191,6 +191,34 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 		}
 	}
 
+	@Override
+	public String getPos(int index) {
+		return (String) getProperty(index, POS_KEY);
+	}
+
+	@Override
+	public String getLemma(int index) {
+		return (String) getProperty(index, LEMMA_KEY);
+	}
+
+	@Override
+	public String getFeatures(int index) {
+		return (String) getProperty(index, FEATURES_KEY);
+	}
+
+	@Override
+	public boolean isFlagSet(int index, long flag) {
+		Number flags = (Number) getProperty(index, FLAGS_KEY);
+
+		return flags!=null && (flags.longValue() & flag) == flag;
+	}
+
+	@Override
+	public long getFlags(int index) {
+		Number flags = (Number) getProperty(index, FLAGS_KEY);
+		return flags==null ? 0L : flags.longValue();
+	}
+
 	/**
 	 * @see de.ims.icarus.language.SentenceData#isEmpty()
 	 */

@@ -23,14 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
+import de.ims.icarus.language.LanguageConstants;
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
-import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.Options;
 
 /**
@@ -38,62 +40,66 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyLemmaConstraintFactory extends AbstractConstraintFactory {
+public class DistanceConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "lemma"; //$NON-NLS-1$
+	public static final String TOKEN = "distance"; //$NON-NLS-1$
 
-	public DependencyLemmaConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.lemma.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.lemma.description"); //$NON-NLS-1$
+	public DistanceConstraintFactory() {
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.distance.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.distance.description"); //$NON-NLS-1$
 	}
 
 	/**
+	 *
 	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
 	 */
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyLemmaConstraint(value, operator);
-		else
-			return new DependencyLemmaCIConstraint(value, operator);
+		return new DistanceConstraint(value, operator);
 	}
 
-	private static class DependencyLemmaConstraint extends DefaultConstraint {
+	@Override
+	public SearchOperator[] getSupportedOperators() {
+		return DefaultSearchOperator.numerical();
+	}
 
-		private static final long serialVersionUID = -2816057046153547371L;
+	@Override
+	public Class<?> getValueClass(Object specifier) {
+		return Integer.class;
+	}
 
-		public DependencyLemmaConstraint(Object value, SearchOperator operator) {
+	@Override
+	public Object getDefaultValue(Object specifier) {
+		return LanguageConstants.DATA_UNDEFINED_VALUE;
+	}
+
+	@Override
+	public Object labelToValue(Object label, Object specifier) {
+		return LanguageUtils.parseIntegerLabel((String) label);
+	}
+
+	@Override
+	public Object valueToLabel(Object value, Object specifier) {
+		return LanguageUtils.getLabel((int)value);
+	}
+
+	private static class DistanceConstraint extends DefaultConstraint {
+
+		private static final long serialVersionUID = 4020431284510729498L;
+
+		public DistanceConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getLemma();
+			return ((DependencyTargetTree)value).getDistance();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyLemmaConstraint(getValue(), getOperator());
-		}
-	}
-
-	private static class DependencyLemmaCIConstraint extends DefaultCaseInsensitiveConstraint {
-
-		private static final long serialVersionUID = -8582367322352411091L;
-
-		public DependencyLemmaCIConstraint(Object value, SearchOperator operator) {
-			super(TOKEN, value, operator);
-		}
-
-		@Override
-		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getLemma().toLowerCase();
-		}
-
-		@Override
-		public DependencyLemmaCIConstraint clone() {
-			return new DependencyLemmaCIConstraint(getValue(), getOperator());
+			return new DistanceConstraint(getValue(), getOperator());
 		}
 	}
 }

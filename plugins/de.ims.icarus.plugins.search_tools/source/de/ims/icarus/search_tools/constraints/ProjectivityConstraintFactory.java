@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
@@ -40,11 +40,11 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyProjectivityConstraintFactory extends AbstractConstraintFactory {
+public class ProjectivityConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "projectivity"; //$NON-NLS-1$
 
-	public DependencyProjectivityConstraintFactory() {
+	public ProjectivityConstraintFactory() {
 		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.projectivity.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.projectivity.description"); //$NON-NLS-1$
 	}
@@ -55,7 +55,7 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new DependencyProjectivityConstraint(value, operator);
+		return new ProjectivityConstraint(value, operator);
 	}
 
 	@Override
@@ -95,11 +95,11 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 		};
 	}
 
-	private static class DependencyProjectivityConstraint extends DefaultConstraint {
+	private static class ProjectivityConstraint extends DefaultConstraint {
 
 		private static final long serialVersionUID = -8096178398923755732L;
 
-		public DependencyProjectivityConstraint(Object value, SearchOperator operator) {
+		public ProjectivityConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
@@ -115,7 +115,7 @@ public class DependencyProjectivityConstraintFactory extends AbstractConstraintF
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyProjectivityConstraint(getValue(), getOperator());
+			return new ProjectivityConstraint(getValue(), getOperator());
 		}
 	}
 }

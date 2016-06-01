@@ -189,17 +189,17 @@
 		<parameter id="token" value="wordPosInv" />
 		<parameter id="token" value="section" />
 		<parameter id="factories">
-			<parameter id="form" value="de.ims.icarus.language.dependency.search.constraints.DependencyFormConstraintFactory" />
-			<parameter id="lemma" value="de.ims.icarus.language.dependency.search.constraints.DependencyLemmaConstraintFactory" />
-			<parameter id="pos" value="de.ims.icarus.language.dependency.search.constraints.DependencyPosConstraintFactory" />
-			<parameter id="features" value="de.ims.icarus.language.dependency.search.constraints.DependencyFeaturesConstraintFactory" />
-			<parameter id="relation" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelationConstraintFactory" />
-			<parameter id="distance" value="de.ims.icarus.language.dependency.search.constraints.DependencyDistanceConstraintFactory" />
-			<parameter id="direction" value="de.ims.icarus.language.dependency.search.constraints.DependencyDirectionConstraintFactory" />
-			<parameter id="projectivity" value="de.ims.icarus.language.dependency.search.constraints.DependencyProjectivityConstraintFactory" />
-			<parameter id="wordPos" value="de.ims.icarus.language.dependency.search.constraints.DependencyWordPositionConstraintFactory" />
-			<parameter id="wordPosInv" value="de.ims.icarus.language.dependency.search.constraints.DependencyInvertedWordPositionConstraintFactory" />
-			<parameter id="section" value="de.ims.icarus.language.dependency.search.constraints.DependencyRelativeWordPositionConstraintFactory" />
+			<parameter id="form" value="de.ims.icarus.search_tools.constraints.FormConstraintFactory" />
+			<parameter id="lemma" value="de.ims.icarus.search_tools.constraints.LemmaConstraintFactory" />
+			<parameter id="pos" value="de.ims.icarus.search_tools.constraints.PosConstraintFactory" />
+			<parameter id="features" value="de.ims.icarus.search_tools.constraints.FeaturesConstraintFactory" />
+			<parameter id="relation" value="de.ims.icarus.search_tools.constraints.RelationConstraintFactory" />
+			<parameter id="distance" value="de.ims.icarus.search_tools.constraints.DistanceConstraintFactory" />
+			<parameter id="direction" value="de.ims.icarus.search_tools.constraints.DirectionConstraintFactory" />
+			<parameter id="projectivity" value="de.ims.icarus.search_tools.constraints.ProjectivityConstraintFactory" />
+			<parameter id="wordPos" value="de.ims.icarus.search_tools.constraints.WordPositionConstraintFactory" />
+			<parameter id="wordPosInv" value="de.ims.icarus.search_tools.constraints.InvertedWordPositionConstraintFactory" />
+			<parameter id="section" value="de.ims.icarus.search_tools.constraints.RelativeWordPositionConstraintFactory" />
 		</parameter>
 	</extension>
 	
@@ -210,6 +210,14 @@
 		<parameter id="description" value="plugins.dependency.dependencySearchFactory.identity.description" />
 		<parameter id="resources" value="de.ims.icarus.plugins.dependency.resources.dependency" />
 		<parameter id="icon" value="de/ims/icarus/plugins/dependency/search/dependency-search-factory.gif" />
+	</extension>
+	
+	<!-- SEARCH CONSTRAINTS -->
+	
+	<extension id="DirectionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="direction" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.DirectionConstraintFactory" />
 	</extension>
 	
 </plugin>

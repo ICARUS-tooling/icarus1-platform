@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -38,11 +38,11 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
+public class FormConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "form"; //$NON-NLS-1$
 
-	public DependencyFormConstraintFactory() {
+	public FormConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.form.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.form.description"); //$NON-NLS-1$
 	}
@@ -54,16 +54,16 @@ public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyFormConstraint(value, operator);
+			return new FormConstraint(value, operator);
 		else
-			return new DependencyFormCIConstraint(value, operator);
+			return new FormCIConstraint(value, operator);
 	}
 
-	private static class DependencyFormConstraint extends DefaultConstraint {
+	private static class FormConstraint extends DefaultConstraint {
 
 		private static final long serialVersionUID = 2843300705315175039L;
 
-		public DependencyFormConstraint(Object value, SearchOperator operator) {
+		public FormConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
@@ -74,15 +74,15 @@ public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyFormConstraint(getValue(), getOperator());
+			return new FormConstraint(getValue(), getOperator());
 		}
 	}
 
-	private static class DependencyFormCIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class FormCIConstraint extends DefaultCaseInsensitiveConstraint {
 
 		private static final long serialVersionUID = -7737708296328734303L;
 
-		public DependencyFormCIConstraint(Object value, SearchOperator operator) {
+		public FormCIConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
@@ -92,8 +92,8 @@ public class DependencyFormConstraintFactory extends AbstractConstraintFactory {
 		}
 
 		@Override
-		public DependencyFormCIConstraint clone() {
-			return new DependencyFormCIConstraint(getValue(), getOperator());
+		public FormCIConstraint clone() {
+			return new FormCIConstraint(getValue(), getOperator());
 		}
 	}
 }

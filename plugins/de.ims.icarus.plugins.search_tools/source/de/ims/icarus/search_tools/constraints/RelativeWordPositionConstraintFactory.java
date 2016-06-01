@@ -23,16 +23,17 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.language.dependency.search.DependencyTargetTree;
+import de.ims.icarus.plugins.prosody.ui.geom.Axis.Integer;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
+import de.ims.icarus.search_tools.tree.TargetTree;
 import de.ims.icarus.util.Options;
 
 /**
@@ -40,33 +41,24 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyDistanceConstraintFactory extends AbstractConstraintFactory {
+public class RelativeWordPositionConstraintFactory extends AbstractConstraintFactory implements LanguageConstants {
 
-	public static final String TOKEN = "distance"; //$NON-NLS-1$
+	public static final String TOKEN = "section"; //$NON-NLS-1$
 
-	public DependencyDistanceConstraintFactory() {
-		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.distance.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.distance.description"); //$NON-NLS-1$
-	}
-
-	/**
-	 *
-	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
-	 */
-	@Override
-	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, Object specifier, Options options) {
-		return new DependencyDistanceConstraint(value, operator);
-	}
-
-	@Override
-	public SearchOperator[] getSupportedOperators() {
-		return DefaultSearchOperator.numerical();
+	public RelativeWordPositionConstraintFactory() {
+		super(TOKEN, NODE_CONSTRAINT_TYPE,
+				"plugins.languageTools.constraints.section.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.section.description"); //$NON-NLS-1$
 	}
 
 	@Override
 	public Class<?> getValueClass(Object specifier) {
 		return Integer.class;
+	}
+
+	@Override
+	public SearchOperator[] getSupportedOperators() {
+		return DefaultSearchOperator.numerical();
 	}
 
 	@Override
@@ -84,22 +76,33 @@ public class DependencyDistanceConstraintFactory extends AbstractConstraintFacto
 		return LanguageUtils.getLabel((int)value);
 	}
 
-	private static class DependencyDistanceConstraint extends DefaultConstraint {
+	/**
+	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
+	 */
+	@Override
+	public SearchConstraint createConstraint(Object value,
+			SearchOperator operator, Object specifier, Options options) {
+		return new RelativeWordPositionConstraint(value, operator);
+	}
 
-		private static final long serialVersionUID = 4020431284510729498L;
+	private static class RelativeWordPositionConstraint extends DefaultConstraint {
 
-		public DependencyDistanceConstraint(Object value, SearchOperator operator) {
+		private static final long serialVersionUID = -4951579070208503138L;
+
+		public RelativeWordPositionConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getDistance();
+			TargetTree tree = (TargetTree)value;
+//			System.out.println((int) ((tree.getNodeIndex()+1)/(double)tree.size() * 100.0));
+			return (int) ((1+tree.getNodeIndex())/(double)tree.size() * 100.0);
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyDistanceConstraint(getValue(), getOperator());
+			return new RelativeWordPositionConstraint(getValue(), getOperator());
 		}
 	}
 }

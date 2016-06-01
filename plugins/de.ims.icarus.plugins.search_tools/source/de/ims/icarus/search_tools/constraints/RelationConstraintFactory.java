@@ -23,7 +23,7 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
@@ -38,11 +38,11 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyRelationConstraintFactory extends AbstractConstraintFactory {
+public class RelationConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "relation"; //$NON-NLS-1$
 
-	public DependencyRelationConstraintFactory() {
+	public RelationConstraintFactory() {
 		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.relation.name",  //$NON-NLS-1$
 				"plugins.languageTools.constraints.relation.description"); //$NON-NLS-1$
 	}
@@ -54,16 +54,16 @@ public class DependencyRelationConstraintFactory extends AbstractConstraintFacto
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new DependencyRelationConstraint(value, operator);
+			return new RelationConstraint(value, operator);
 		else
-			return new DependencyRelationCIConstraint(value, operator);
+			return new RelationCIConstraint(value, operator);
 	}
 
-	private static class DependencyRelationConstraint extends DefaultConstraint {
+	private static class RelationConstraint extends DefaultConstraint {
 
 		private static final long serialVersionUID = 1716609613318759367L;
 
-		public DependencyRelationConstraint(Object value, SearchOperator operator) {
+		public RelationConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
@@ -73,16 +73,16 @@ public class DependencyRelationConstraintFactory extends AbstractConstraintFacto
 		}
 
 		@Override
-		public DependencyRelationConstraint clone() {
-			return (DependencyRelationConstraint) super.clone();
+		public RelationConstraint clone() {
+			return (RelationConstraint) super.clone();
 		}
 	}
 
-	private static class DependencyRelationCIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class RelationCIConstraint extends DefaultCaseInsensitiveConstraint {
 
 		private static final long serialVersionUID = -3611860983057645172L;
 
-		public DependencyRelationCIConstraint(Object value, SearchOperator operator) {
+		public RelationCIConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
@@ -92,8 +92,8 @@ public class DependencyRelationConstraintFactory extends AbstractConstraintFacto
 		}
 
 		@Override
-		public DependencyRelationCIConstraint clone() {
-			return (DependencyRelationCIConstraint) super.clone();
+		public RelationCIConstraint clone() {
+			return (RelationCIConstraint) super.clone();
 		}
 	}
 }

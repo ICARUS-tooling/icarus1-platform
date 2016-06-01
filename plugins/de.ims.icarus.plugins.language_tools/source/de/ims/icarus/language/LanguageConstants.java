@@ -75,6 +75,14 @@ public interface LanguageConstants {
 	public static final String GENDER_KEY = "gender"; //$NON-NLS-1$
 	public static final String NUMBER_KEY = "number"; //$NON-NLS-1$
 
+
+	// Edge Properties
+	public static final String DIRECTION_KEY = "dir"; //$NON-NLS-1$
+	public static final String DISTANCE_KEY = "dist"; //$NON-NLS-1$
+	public static final String TRANSITIVE_KEY = "trans"; //$NON-NLS-1$
+	public static final String EDGE_KEY = "edge"; //$NON-NLS-1$
+	public static final String ROOT_KEY = "root"; //$NON-NLS-1$
+
 	// Word Properties
 	public static final String FORM_KEY = "form"; //$NON-NLS-1$
 	public static final String POS_KEY = "pos"; //$NON-NLS-1$

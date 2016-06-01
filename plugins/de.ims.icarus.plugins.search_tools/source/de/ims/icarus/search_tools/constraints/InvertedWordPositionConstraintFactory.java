@@ -15,15 +15,15 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
  *
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 332 $
+ * $Date: 2014-12-16 13:55:39 +0100 (Di, 16 Dez 2014) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.prosody/source/de/ims/icarus/plugins/prosody/search/constraints/WordPositionConstraintFactory.java $
  *
- * $LastChangedDate$
- * $LastChangedRevision$
- * $LastChangedBy$
+ * $LastChangedDate: 2014-12-16 13:55:39 +0100 (Di, 16 Dez 2014) $
+ * $LastChangedRevision: 332 $
+ * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
@@ -37,17 +37,17 @@ import de.ims.icarus.util.Options;
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: WordPositionConstraintFactory.java 332 2014-12-16 12:55:39Z mcgaerty $
  *
  */
-public class DependencyWordPositionConstraintFactory extends AbstractConstraintFactory {
+public class InvertedWordPositionConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "wordPos"; //$NON-NLS-1$
+	public static final String TOKEN = "wordPosInv"; //$NON-NLS-1$
 
-	public DependencyWordPositionConstraintFactory() {
+	public InvertedWordPositionConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
-				"plugins.languageTools.constraints.wordPos.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.wordPos.description"); //$NON-NLS-1$
+				"plugins.languageTools.constraints.wordPosInverted.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.wordPosInverted.description"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -81,25 +81,27 @@ public class DependencyWordPositionConstraintFactory extends AbstractConstraintF
 	@Override
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
-		return new DependencyWordPositionConstraint(value, operator);
+		return new InverseWordPositionConstraint(value, operator);
 	}
 
-	private static class DependencyWordPositionConstraint extends DefaultConstraint {
+	private static class InverseWordPositionConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = 1620252858048035885L;
+		private static final long serialVersionUID = 1620252858046735885L;
 
-		public DependencyWordPositionConstraint(Object value, SearchOperator operator) {
+		public InverseWordPositionConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((TargetTree)value).getNodeIndex()+1;
+			TargetTree tree = (TargetTree) value;
+
+			return tree.size()-tree.getNodeIndex();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyWordPositionConstraint(getValue(), getOperator());
+			return new InverseWordPositionConstraint(getValue(), getOperator());
 		}
 	}
 }

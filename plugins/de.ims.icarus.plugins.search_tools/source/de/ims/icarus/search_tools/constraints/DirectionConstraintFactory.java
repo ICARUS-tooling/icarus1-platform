@@ -23,17 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.language.dependency.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.plugins.prosody.ui.geom.Axis.Integer;
+import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
-import de.ims.icarus.search_tools.tree.TargetTree;
 import de.ims.icarus.util.Options;
 
 /**
@@ -41,24 +40,35 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DependencyRelativeWordPositionConstraintFactory extends AbstractConstraintFactory implements LanguageConstants {
+public class DirectionConstraintFactory extends AbstractConstraintFactory {
 
-	public static final String TOKEN = "section"; //$NON-NLS-1$
+	public static final String TOKEN = "direction"; //$NON-NLS-1$
 
-	public DependencyRelativeWordPositionConstraintFactory() {
-		super(TOKEN, NODE_CONSTRAINT_TYPE,
-				"plugins.languageTools.constraints.section.name",  //$NON-NLS-1$
-				"plugins.languageTools.constraints.section.description"); //$NON-NLS-1$
+	public DirectionConstraintFactory() {
+		super(TOKEN, EDGE_CONSTRAINT_TYPE, "plugins.languageTools.constraints.direction.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.direction.description"); //$NON-NLS-1$
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
+	 */
+	@Override
+	public SearchConstraint createConstraint(Object value,
+			SearchOperator operator, Object specifier, Options options) {
+		return new DirectionConstraint(value, operator);
 	}
 
 	@Override
 	public Class<?> getValueClass(Object specifier) {
-		return Integer.class;
+		return null;
 	}
 
 	@Override
 	public SearchOperator[] getSupportedOperators() {
-		return DefaultSearchOperator.numerical();
+		return new SearchOperator[]{
+				DefaultSearchOperator.EQUALS,
+				DefaultSearchOperator.GROUPING,
+		};
 	}
 
 	@Override
@@ -68,41 +78,44 @@ public class DependencyRelativeWordPositionConstraintFactory extends AbstractCon
 
 	@Override
 	public Object labelToValue(Object label, Object specifier) {
-		return LanguageUtils.parseIntegerLabel((String) label);
+		return LanguageUtils.parseDirectionLabel((String)label);
 	}
 
 	@Override
 	public Object valueToLabel(Object value, Object specifier) {
-		return LanguageUtils.getLabel((int)value);
+		return LanguageUtils.getDirectionLabel((int)value);
 	}
 
-	/**
-	 * @see de.ims.icarus.search_tools.ConstraintFactory#createConstraint(java.lang.Object, de.ims.icarus.search_tools.SearchOperator)
-	 */
 	@Override
-	public SearchConstraint createConstraint(Object value,
-			SearchOperator operator, Object specifier, Options options) {
-		return new DependencyRelativeWordPositionConstraint(value, operator);
+	public Object[] getLabelSet(Object specifier) {
+		return new Object[]{
+				LanguageConstants.DATA_UNDEFINED_LABEL,
+				LanguageConstants.DATA_LEFT_LABEL,
+				LanguageConstants.DATA_RIGHT_LABEL,
+		};
 	}
 
-	private static class DependencyRelativeWordPositionConstraint extends DefaultConstraint {
+	private static class DirectionConstraint extends DefaultConstraint {
 
-		private static final long serialVersionUID = -4951579070208503138L;
+		private static final long serialVersionUID = 8874429868140453623L;
 
-		public DependencyRelativeWordPositionConstraint(Object value, SearchOperator operator) {
+		public DirectionConstraint(Object value, SearchOperator operator) {
 			super(TOKEN, value, operator);
 		}
 
 		@Override
+		public Object getLabel(Object value) {
+			return LanguageUtils.getDirectionLabel((int)value);
+		}
+
+		@Override
 		public Object getInstance(Object value) {
-			TargetTree tree = (TargetTree)value;
-//			System.out.println((int) ((tree.getNodeIndex()+1)/(double)tree.size() * 100.0));
-			return (int) ((1+tree.getNodeIndex())/(double)tree.size() * 100.0);
+			return ((DependencyTargetTree)value).getDirection();
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new DependencyRelativeWordPositionConstraint(getValue(), getOperator());
+			return new DirectionConstraint(getValue(), getOperator());
 		}
 	}
 }
