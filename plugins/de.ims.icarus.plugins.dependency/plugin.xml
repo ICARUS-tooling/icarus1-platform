@@ -82,7 +82,7 @@
 		<doc>
 			<doc-text>
 				GraphPresenter implementation for use with arbitrary sentence data that implements
-				the de.ims.icarus.language.dependency.DependencyData interface.
+				the de.ims.icarus.language.dependency.DependencySentenceData interface.
 			</doc-text>
 		</doc>
 		<parameter id="class" value="de.ims.icarus.plugins.dependency.graph.DependencyGraphPresenter" />
@@ -94,7 +94,7 @@
 		<doc>
 			<doc-text>
 				TablePresenter implementation for use with arbitrary sentence data that implements
-				the de.ims.icarus.language.dependency.DependencyData interface.
+				the de.ims.icarus.language.dependency.DependencySentenceData interface.
 			</doc-text>
 		</doc>
 		<parameter id="class" value="de.ims.icarus.plugins.dependency.table.DependencyTablePresenter" />
@@ -147,10 +147,10 @@
 	<extension id="DependencyDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
-				Content type based on de.ims.icarus.language.dependency.DependencyData
+				Content type based on de.ims.icarus.language.dependency.DependencySentenceData
 			</doc-text>
 		</doc>
-		<parameter id="contentClass" value="de.ims.icarus.language.dependency.DependencyData" />
+		<parameter id="contentClass" value="de.ims.icarus.language.dependency.DependencySentenceData" />
 	</extension>
 	
 	<extension id="DependencyAnnotationContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
@@ -193,7 +193,7 @@
 			<parameter id="lemma" value="de.ims.icarus.search_tools.constraints.LemmaConstraintFactory" />
 			<parameter id="pos" value="de.ims.icarus.search_tools.constraints.PosConstraintFactory" />
 			<parameter id="features" value="de.ims.icarus.search_tools.constraints.FeaturesConstraintFactory" />
-			<parameter id="relation" value="de.ims.icarus.search_tools.constraints.RelationConstraintFactory" />
+			<parameter id="relation" value="de.ims.icarus.language.dependency.search.constraints.RelationConstraintFactory" />
 			<parameter id="distance" value="de.ims.icarus.search_tools.constraints.DistanceConstraintFactory" />
 			<parameter id="direction" value="de.ims.icarus.search_tools.constraints.DirectionConstraintFactory" />
 			<parameter id="projectivity" value="de.ims.icarus.search_tools.constraints.ProjectivityConstraintFactory" />
@@ -214,10 +214,10 @@
 	
 	<!-- SEARCH CONSTRAINTS -->
 	
-	<extension id="DirectionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
-		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
-		<parameter id="token" value="direction" />
-		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.DirectionConstraintFactory" />
+	<extension id="RelationConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.dependency@DependencyDataContentType" />
+		<parameter id="token" value="relation" />
+		<parameter id="factory" value="de.ims.icarus.language.dependency.search.constraints.RelationConstraintFactory" />
 	</extension>
 	
 </plugin>

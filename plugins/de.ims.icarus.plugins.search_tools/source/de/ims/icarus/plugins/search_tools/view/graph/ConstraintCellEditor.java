@@ -216,7 +216,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 
 		List<ConstraintFactory> factories = new ArrayList<>(
 				getPresenter().getConstraintContext().getNodeFactories());
-		Collections.sort(factories, SearchUtils.factorySorter);
+		Collections.sort(factories, SearchUtils.factoryTokenSorter);
 
 		if(!factories.isEmpty()) {
 			// NEGATED
@@ -274,7 +274,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 
 		List<ConstraintFactory> factories = new ArrayList<>(
 				getPresenter().getConstraintContext().getEdgeFactories());
-		Collections.sort(factories, SearchUtils.factorySorter);
+		Collections.sort(factories, SearchUtils.factoryTokenSorter);
 
 		if(!factories.isEmpty()) {
 			// NEGATED
@@ -424,7 +424,7 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 	protected void readEdgeEditor(Object cell) {
 		List<ConstraintFactory> factories = getPresenter().getConstraintContext().getEdgeFactories();
 		if(factories.isEmpty()) {
-			LoggerFactory.log(this, Level.WARNING, "Missing node constraint factories on constraint presenter"); //$NON-NLS-1$
+			LoggerFactory.log(this, Level.WARNING, "Missing edge constraint factories on constraint presenter"); //$NON-NLS-1$
 			return;
 		}
 
@@ -789,7 +789,9 @@ public class ConstraintCellEditor extends HeavyWeightCellEditor implements Prope
 			if(popupMenu==null) {
 				popupMenu = new JPopupMenu();
 
-				List<ConstraintFactory> factories = getFactories(isVertex);
+				List<ConstraintFactory> factories = new ArrayList<>(getFactories(isVertex));
+				Collections.sort(factories, SearchUtils.factoryNameSorter);
+
 				for(ConstraintFactory factory : factories) {
 					JMenuItem menuItem = new JMenuItem(factory.getName());
 					menuItem.setToolTipText(factory.getDescription());

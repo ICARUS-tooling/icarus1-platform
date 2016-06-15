@@ -57,7 +57,7 @@ import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.LanguageManager;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.tokenizer.TokenListCellRenderer;
 import de.ims.icarus.language.tokenizer.TokenizationResult;
@@ -116,7 +116,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		}
 
 		@Override
-		public void outputChanged(DependencyData currentOutput) {
+		public void outputChanged(DependencySentenceData currentOutput) {
 			PipelineWorker worker = MatetoolsParserInputView.this.worker;
 			if(worker!=null) {
 				worker.publishIntermediateResult(currentOutput);
@@ -398,7 +398,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		refreshActions();
 	}
 
-	private void appendResult(DependencyData data) {
+	private void appendResult(DependencySentenceData data) {
 		if(resultList==null) {
 			resultList = new ResultList();
 		}
@@ -522,7 +522,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		"plugins.matetools.matetoolsParserInputView.pipelineWorker.stage4Parsing", //$NON-NLS-1$
 	};
 
-	private class PipelineWorker extends SwingWorker<DependencyData, DependencyData> implements Identity {
+	private class PipelineWorker extends SwingWorker<DependencySentenceData, DependencySentenceData> implements Identity {
 
 		private final String[] tokens;
 		private final ModelStorage storage;
@@ -543,7 +543,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		 * @see javax.swing.SwingWorker#doInBackground()
 		 */
 		@Override
-		protected DependencyData doInBackground() throws Exception {
+		protected DependencySentenceData doInBackground() throws Exception {
 			MatetoolsPipeline pipeline = MatetoolsPipeline.getPipeline(pipelineOwner);
 			if(pipeline==null)
 				throw new IllegalStateException("Synchronization failed - pipeline not owned by "+pipelineOwner.getName()); //$NON-NLS-1$
@@ -551,7 +551,7 @@ public class MatetoolsParserInputView extends TextInputView {
 			return pipeline.runPipeline(tokens, storage, options);
 		}
 
-		private void publishIntermediateResult(DependencyData data) {
+		private void publishIntermediateResult(DependencySentenceData data) {
 			stage++;
 			setProgress(stage*25);
 			firePropertyChange(TaskConstants.INFO_PROPERTY, null, getDescription());
@@ -559,13 +559,13 @@ public class MatetoolsParserInputView extends TextInputView {
 		}
 
 		@Override
-		protected void process(List<DependencyData> chunks) {
+		protected void process(List<DependencySentenceData> chunks) {
 			if(chunks==null || chunks.isEmpty()) {
 				return;
 			}
 
 			// Fetch latest state
-			DependencyData data = chunks.get(chunks.size()-1);
+			DependencySentenceData data = chunks.get(chunks.size()-1);
 
 			// Send data item
 			Options options = new Options();
@@ -580,7 +580,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		@Override
 		protected void done() {
 			worker = null;
-			DependencyData data;
+			DependencySentenceData data;
 			try {
 				data = get();
 				if(data!=null) {
@@ -667,9 +667,9 @@ public class MatetoolsParserInputView extends TextInputView {
 
 	private class ResultList extends AbstractDataList<SentenceData> implements SentenceDataList {
 
-		private List<DependencyData> items;
+		private List<DependencySentenceData> items;
 
-		private void addData(DependencyData data) {
+		private void addData(DependencySentenceData data) {
 			if(items==null) {
 				items = new ArrayList<>();
 			}
@@ -691,7 +691,7 @@ public class MatetoolsParserInputView extends TextInputView {
 		 * @see de.ims.icarus.util.data.DataList#get(int)
 		 */
 		@Override
-		public DependencyData get(int index) {
+		public DependencySentenceData get(int index) {
 			return items==null ? null : items.get(index);
 		}
 

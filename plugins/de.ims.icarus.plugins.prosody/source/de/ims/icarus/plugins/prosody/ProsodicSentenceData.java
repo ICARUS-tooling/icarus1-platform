@@ -26,14 +26,14 @@
 package de.ims.icarus.plugins.prosody;
 
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 
 /**
  * @author Markus Gärtner
  * @version $Id$
  *
  */
-public interface ProsodicSentenceData extends DependencyData, CoreferenceData, ProsodyConstants {
+public interface ProsodicSentenceData extends DependencySentenceData, CoreferenceData, ProsodyConstants {
 
 	@Override
 	ProsodicDocumentData getDocument();

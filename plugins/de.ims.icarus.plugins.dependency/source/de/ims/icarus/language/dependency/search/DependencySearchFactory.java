@@ -25,12 +25,11 @@
  */
 package de.ims.icarus.language.dependency.search;
 
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.treebank.Treebank;
 import de.ims.icarus.language.treebank.TreebankRegistry;
 import de.ims.icarus.plugins.language_tools.treebank.TreebankManagerPerspective;
 import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
-import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
@@ -63,24 +62,9 @@ public class DependencySearchFactory extends AbstractCorpusSearchFactory {
 		return new DependencySearch(this, query, options, target);
 	}
 
+	@Override
 	public ContentType getContentType() {
-		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyData.class);
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#createQuery()
-	 */
-	@Override
-	public SearchQuery createQuery() {
-		return new DefaultSearchQuery(getContentType());
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#getConstraintContext()
-	 */
-	@Override
-	public ConstraintContext getConstraintContext() {
-		return SearchManager.getInstance().getConstraintContext(getContentType());
+		return ContentTypeRegistry.getInstance().getTypeForClass(DependencySentenceData.class);
 	}
 
 	/**
@@ -100,7 +84,8 @@ public class DependencySearchFactory extends AbstractCorpusSearchFactory {
 		TreebankManagerPerspective.ensureExampleTreebank();
 
 		// Generate query
-		SearchQuery query = new DefaultSearchQuery(getContentType());
+		ContentType contentType = ContentTypeRegistry.getInstance().getTypeForClass(DependencySentenceData.class);
+		SearchQuery query = new DefaultSearchQuery(SearchManager.getInstance().getConstraintContext(contentType));
 		query.parseQueryString("[lemma<*>1[relation=SBJ,lemma<*>2]]"); //$NON-NLS-1$
 
 		// Fetch target
@@ -136,10 +121,11 @@ public class DependencySearchFactory extends AbstractCorpusSearchFactory {
 	 */
 	@Override
 	public Search createSearch(String q, String t, Options options) throws Exception {
-		SearchQuery query = createQuery();
-		query.parseQueryString(q);
 
 		Object target = resolveTarget(t);
+
+		SearchQuery query = createQuery();
+		query.parseQueryString(q);
 
 		return createSearch(query, target, options);
 	}

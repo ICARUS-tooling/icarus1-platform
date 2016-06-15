@@ -102,6 +102,42 @@ public class DateUtils {
 		return sb.toString();
 	}
 
+	public static String formatMilliDuration(long time) {
+		if(time<=0)
+			return null;
+
+		long ms = time%1000;
+		long s = time/1000;
+		long m = s/60;
+		long h = m/60;
+		long d = h/24;
+
+		s = s%60;
+		m = m%60;
+		h = h%24;
+
+		StringBuilder sb = new StringBuilder();
+		if(d>0) {
+			sb.append(' ').append(d).append('D');
+		}
+		if(h>0) {
+			sb.append(' ').append(h).append('H');
+		}
+		if(m>0) {
+			sb.append(' ').append(m).append('M');
+		}
+		if(s>0) {
+			sb.append(' ').append(s).append('S');
+		}
+		if(ms>0) {
+			sb.append(' ').append(ms).append("MS"); //$NON-NLS-1$
+		}
+
+		StringUtil.trim(sb);
+
+		return sb.toString();
+	}
+
 	public static long getTime(Date date) {
 		return date==null ? 0L : date.getTime();
 	}

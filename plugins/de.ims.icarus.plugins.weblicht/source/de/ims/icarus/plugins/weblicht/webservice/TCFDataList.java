@@ -37,7 +37,7 @@ import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.tuebingen.uni.sfs.wlf1.io.TextCorpusStreamed;
@@ -169,7 +169,7 @@ public class TCFDataList implements SentenceDataList {
 		return get(index, type);
 	}
 
-	private class TCFSentenceData implements DependencyData {
+	private class TCFSentenceData implements DependencySentenceData {
 
 		private static final long serialVersionUID = -1706328677253900802L;
 
@@ -230,7 +230,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getForm(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getForm(int)
 		 */
 		@Override
 		public String getForm(int index) {
@@ -238,7 +238,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getPos(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getPos(int)
 		 */
 		@Override
 		public String getPos(int index) {
@@ -251,7 +251,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getRelation(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getRelation(int)
 		 */
 		@Override
 		public String getRelation(int index) {
@@ -291,7 +291,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getLemma(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getLemma(int)
 		 */
 		@Override
 		public String getLemma(int index) {
@@ -304,7 +304,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getFeatures(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFeatures(int)
 		 */
 		@Override
 		public String getFeatures(int index) {
@@ -328,7 +328,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getHead(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getHead(int)
 		 */
 		@Override
 		public int getHead(int index) {
@@ -402,7 +402,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#isFlagSet(int,
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#isFlagSet(int,
 		 *      long)
 		 */
 		@Override
@@ -411,7 +411,7 @@ public class TCFDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getFlags(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFlags(int)
 		 */
 		@Override
 		public long getFlags(int index) {
@@ -439,6 +439,18 @@ public class TCFDataList implements SentenceDataList {
 		 */
 		@Override
 		public Object getProperty(int index, String key) {
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.SentenceData#getProperty(java.lang.String)
+		 */
+		@Override
+		public Object getProperty(String key) {
+			switch (key) {
+			case LanguageConstants.INDEX_KEY: return getIndex();
+			}
+
 			return null;
 		}
 

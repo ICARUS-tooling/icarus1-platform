@@ -170,11 +170,13 @@ public abstract class AbstractSearchResult implements SearchResult {
 	 */
 	@Override
 	public ContentType getContentType() {
-		return getTarget().getContentType();
+//		return getTarget().getContentType();
+		//TODO changed to work around bug of search results reporting content types incompatible with presenters
+		return getSource().getQuery().getConstraintContext().getContentType();
 	}
 
 	public ConstraintContext getContext() {
-		return search==null ? null : search.getFactory().getConstraintContext();
+		return search==null ? null : search.getQuery().getConstraintContext();
 	}
 
 	/**

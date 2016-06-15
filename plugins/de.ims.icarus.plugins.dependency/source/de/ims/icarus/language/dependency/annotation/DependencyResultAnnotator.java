@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.language.dependency.annotation;
 
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.search_tools.result.ResultEntry;
@@ -64,7 +64,7 @@ public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
 	 */
 	@Override
 	protected int getHead(Object data, int index) {
-		return ((DependencyData)data).getHead(index);
+		return ((DependencySentenceData)data).getHead(index);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
 	 */
 	@Override
 	protected boolean supports(Object data) {
-		return data instanceof DependencyData;
+		return data instanceof DependencySentenceData;
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
 	 */
 	@Override
 	protected AnnotatedData createAnnotatedData(Object data, ResultEntry entry) {
-		return new LazyAnnotatedDependencyData((DependencyData) data, entry);
+		return new LazyAnnotatedDependencyData((DependencySentenceData) data, entry);
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class DependencyResultAnnotator extends AbstractTreeResultAnnotator {
 		private static final long serialVersionUID = -1463625267475398824L;
 		private final ResultEntry entry;
 
-		public LazyAnnotatedDependencyData(DependencyData source, ResultEntry entry) {
+		public LazyAnnotatedDependencyData(DependencySentenceData source, ResultEntry entry) {
 			super(source);
 
 			this.entry = entry;

@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.editor;
@@ -66,36 +66,37 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
  *
  */
 public class DefaultQueryEditor extends QueryEditor {
-	
+
 	protected ConstraintGraphPresenter graphPresenter;
 	protected JTextPane queryPane;
 	protected JSplitPane splitPane;
 
 	protected ActionManager actionManager;
 	protected CallbackHandler callbackHandler;
-	
+
 	protected JPanel contentPanel;
 
 	public DefaultQueryEditor() {
 		// no-op
 	}
-	
+
 	protected ActionManager getActionManager() {
 		if(actionManager==null) {
 			actionManager = ActionManager.globalManager().derive();
 		}
-		
+
 		return actionManager;
 	}
 
+	@Override
 	public boolean supports(ContentType contentType) {
 		return ContentTypeRegistry.isCompatible(
 				LanguageUtils.getSentenceDataContentType(), contentType);
 	}
-	
-	
+
+
 	protected void buildContentPanel() {
-		
+
 		contentPanel = new JPanel();
 
 		// Load actions
@@ -103,7 +104,7 @@ public class DefaultQueryEditor extends QueryEditor {
 		URL actionLocation = DefaultQueryEditor.class.getResource(path);
 		if(actionLocation==null)
 			throw new CorruptedStateException("Missing resources: "+path); //$NON-NLS-1$
-		
+
 		try {
 			getActionManager().loadActions(actionLocation);
 		} catch (IOException e) {
@@ -122,7 +123,7 @@ public class DefaultQueryEditor extends QueryEditor {
 			public boolean getScrollableTracksViewportWidth() {
 				return true;
 			}
-			
+
 		};
 		queryPane.setFont(UIManager.getFont("Label.font")); //$NON-NLS-1$
 		UIUtil.disableHtml(queryPane);
@@ -144,36 +145,36 @@ public class DefaultQueryEditor extends QueryEditor {
 		JScrollPane scrollPane = new JScrollPane(queryPane);
 		scrollPane.setBorder(null);
 		scrollPane.setPreferredSize(new Dimension(200, 50));
-		
+
 		JPanel lowerPanel = new JPanel(new BorderLayout());
 		lowerPanel.add(createToolBar().buildToolBar(), BorderLayout.NORTH);
 		lowerPanel.add(scrollPane, BorderLayout.CENTER);
-		
-		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, 
+
+		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
 				graphPresenter.getPresentingComponent(), lowerPanel);
 		splitPane.setDividerSize(5);
 		splitPane.setResizeWeight(1);
 		splitPane.setBorder(null);
-		
+
 		contentPanel.setLayout(new BorderLayout());
 		contentPanel.add(splitPane, BorderLayout.CENTER);
-		
+
 		registerActionCallbacks();
-		
+
 		refreshActions();
 	}
-	
+
 	protected void refreshActions() {
 		// no-op
 	}
-	
+
 	protected void registerActionCallbacks() {
 		if(callbackHandler==null) {
 			callbackHandler = createCallbackHandler();
 		}
-		
+
 		ActionManager actionManager = getActionManager();
-		
+
 		actionManager.addHandler("plugins.searchTools.defaultQueryEditor.synchronizeGraphAction",  //$NON-NLS-1$
 				callbackHandler, "synchronizeGraph"); //$NON-NLS-1$
 		actionManager.addHandler("plugins.searchTools.defaultQueryEditor.synchronizeQueryAction",  //$NON-NLS-1$
@@ -181,14 +182,14 @@ public class DefaultQueryEditor extends QueryEditor {
 		actionManager.addHandler("plugins.searchTools.defaultQueryEditor.commitAction",  //$NON-NLS-1$
 				callbackHandler, "commit"); //$NON-NLS-1$
 	}
-	
+
 	protected ActionComponentBuilder createToolBar() {
 		ActionComponentBuilder builder = new ActionComponentBuilder(getActionManager());
 		builder.setActionListId("plugins.searchTools.defaultQueryEditor.toolBarList"); //$NON-NLS-1$
-		
+
 		return builder;
 	}
-	
+
 	protected CallbackHandler createCallbackHandler() {
 		return new CallbackHandler();
 	}
@@ -217,7 +218,7 @@ public class DefaultQueryEditor extends QueryEditor {
 	}
 
 	/**
-	 * 
+	 *
 	 * @see de.ims.icarus.ui.helper.Editor#setEditingItem(java.lang.Object)
 	 */
 	@Override
@@ -225,37 +226,37 @@ public class DefaultQueryEditor extends QueryEditor {
 		if(contentPanel==null) {
 			buildContentPanel();
 		}
-		
+
 		if(searchDescriptor!=null && searchDescriptor.equals(this.searchDescriptor)) {
 			return;
 		}
-		
+
 		this.searchDescriptor = searchDescriptor;
-		
+
 		SearchQuery searchQuery = searchDescriptor==null ? null : searchDescriptor.getQuery();
-		
+
 		if(searchQuery==null) {
 			graphPresenter.clear();
 			queryPane.setText(null);
 			return;
 		}
 
-		graphPresenter.setConstraintContext(searchDescriptor.getSearchFactory().getConstraintContext());
+		graphPresenter.setConstraintContext(searchQuery.getConstraintContext());
 		SearchGraph graph = searchQuery.getSearchGraph();
 		if(graph!=null) {
 			try {
 				graphPresenter.present(searchQuery.getSearchGraph(), null);
 			} catch (UnsupportedPresentationDataException e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to forward presentation of search graph for query:\n"+searchQuery.getQueryString(), e); //$NON-NLS-1$
 				graph = null;
 			}
 		}
-		
+
 		if(graph==null){
 			graphPresenter.clear();
 		}
-			
+
 		queryPane.setText(searchQuery.getQueryString());
 
 		UndoManager undoManager = UIUtil.getUndoManager(queryPane);
@@ -263,92 +264,92 @@ public class DefaultQueryEditor extends QueryEditor {
 			undoManager.discardAllEdits();
 		}
 	}
-	
+
 	public void synchronizeQuery() throws Exception {
 		if(searchDescriptor==null) {
 			return;
 		}
-					
+
 		SearchQuery searchQuery = searchDescriptor.getQuery();
 		if(searchQuery==null) {
 			return;
 		}
-		
+
 		SearchGraph searchGraph = graphPresenter.snapshot();
 		if(searchGraph==null) {
 			searchGraph = new DefaultSearchGraph();
 		}
-		
+
 		searchQuery.setSearchGraph(searchGraph);
-		
+
 		queryPane.setText(searchQuery.getQueryString());
 	}
-	
+
 	public void synchronizeGraph() throws Exception {
 		if(searchDescriptor==null) {
 			return;
-		}			
-		
+		}
+
 		SearchQuery searchQuery = searchDescriptor.getQuery();
 		if(searchQuery==null) {
 			return;
 		}
-		
+
 		String query = queryPane.getText();
 		if(query==null || query.isEmpty()) {
 			return;
 		}
-		
+
 		searchQuery.parseQueryString(query);
-		
+
 		graphPresenter.present(searchQuery.getSearchGraph(), null);
 	}
-	
+
 	protected void showError(Throwable t) {
-		DialogFactory.getGlobalFactory().showError(null, 
+		DialogFactory.getGlobalFactory().showError(null,
 				"plugins.core.icarusCorePlugin.errorDialog.title",  //$NON-NLS-1$
 				"plugins.core.icarusCorePlugin.errorDialog.message",  //$NON-NLS-1$
 				t.getMessage());
 	}
-	
+
 	public class CallbackHandler {
 		protected CallbackHandler() {
 			// no-op
 		}
-		
+
 		public void commit(ActionEvent e) {
 			try {
 				DefaultQueryEditor.this.synchronizeQuery();
 				DefaultQueryEditor.this.commit();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to commit query", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void synchronizeQuery(ActionEvent e) {
 			try {
 				DefaultQueryEditor.this.synchronizeQuery();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to synchronize query", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}
-		
+
 		public void synchronizeGraph(ActionEvent e) {
 			try {
 				DefaultQueryEditor.this.synchronizeGraph();
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to synchronize graph", ex); //$NON-NLS-1$
 				UIUtil.beep();
-				
+
 				showError(ex);
 			}
 		}

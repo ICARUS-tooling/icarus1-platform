@@ -278,4 +278,22 @@ public class ConstraintContext {
 
 		return edgeFactoryCache;
 	}
+
+	public void addAll(ConstraintContext other) {
+		if (other == null)
+			throw new NullPointerException("Invalid other");  //$NON-NLS-1$
+
+		tokens.addAll(other.tokens);
+		requiredTokens.addAll(other.requiredTokens);
+		aliases.putAll(other.aliases);
+		for(Entry<String, Object> entry : other.factories.entrySet()) {
+			if(factories.containsKey(entry.getKey()))
+				throw new IllegalStateException("Constraint already registered in context "+getContentType().getId()+": "+entry.getKey()); //$NON-NLS-1$ //$NON-NLS-2$
+
+			factories.put(entry.getKey(), entry.getValue());
+		}
+
+		nodeFactoryCache = null;
+		edgeFactoryCache = null;
+	}
 }

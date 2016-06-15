@@ -51,6 +51,7 @@ import de.ims.icarus.config.ConfigListener;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.io.Reader;
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotation;
 import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.plugins.coref.io.CONLL12Utils;
@@ -867,27 +868,31 @@ public final class CoreferenceUtils implements CorefConstants {
 	static {
 
 		// Word level
-		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(TAG_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(PARSE_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(LEMMA_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(SENSE_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(ENTITY_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(FRAMESET_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler);
+		ContentType contentType = LanguageUtils.getSentenceDataContentType();
+		Object level = SharedPropertyRegistry.WORD_LEVEL;
+		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(TAG_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PARSE_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(LEMMA_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SENSE_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(ENTITY_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(FRAMESET_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler, contentType, level);
 
 		// Mention level
-		SharedPropertyRegistry.registerHandler(MENTION_HEAD_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(MENTION_SIZE_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(BEGIN_INDEX_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(END_INDEX_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(CLUSTER_ID_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(NUMBER_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(GENDER_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(MENTION_TYPE, ValueHandler.stringHandler);
+		contentType = CoreferenceUtils.getCoreferenceDocumentContentType();
+		level = SharedPropertyRegistry.SPAN_LEVEL;
+		SharedPropertyRegistry.registerHandler(MENTION_HEAD_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(MENTION_SIZE_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(BEGIN_INDEX_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(END_INDEX_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(CLUSTER_ID_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(NUMBER_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(GENDER_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(MENTION_TYPE, ValueHandler.stringHandler, contentType, level);
 
 		// Edge level
-		SharedPropertyRegistry.registerHandler(EDGE_TYPE, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(EDGE_TYPE, ValueHandler.stringHandler, contentType, "edge"); //$NON-NLS-1$
 	}
 
 	private static final String[] defaultSpanPropertyKeys = {

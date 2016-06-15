@@ -32,7 +32,7 @@ import de.ims.icarus.language.SentenceData;
  * @version $Id$
  *
  */
-public interface DependencyData extends SentenceData {
+public interface DependencySentenceData extends SentenceData {
 
 	int getHead(int index);
 

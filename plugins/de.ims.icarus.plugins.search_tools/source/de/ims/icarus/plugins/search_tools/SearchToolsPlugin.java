@@ -57,7 +57,7 @@ public class SearchToolsPlugin extends Plugin {
 	@Override
 	protected void doStart() throws Exception {
 		registerSearchOperators();
-		registerConstraintFactories();
+		registerSearchConstraints();
 	}
 
 	private void registerSearchOperators() {
@@ -89,61 +89,117 @@ public class SearchToolsPlugin extends Plugin {
 	/**
 	 * Load and register all content types that are defined at plug-in manifest level
 	 */
-	private void registerConstraintFactories() {
-		for(Extension extension : getDescriptor().getExtensionPoint("ConstraintContext").getConnectedExtensions()) { //$NON-NLS-1$
+	private void registerSearchConstraints() {
+		for(Extension extension : getDescriptor().getExtensionPoint("SearchConstraint").getConnectedExtensions()) { //$NON-NLS-1$
 			try {
 
 				Extension.Parameter contentTypeParam = extension.getParameter("contentType"); //$NON-NLS-1$
 				ContentType contentType = ContentTypeRegistry.getInstance().getType(contentTypeParam.valueAsExtension());
 
-				ConstraintContext context = SearchManager.getInstance().getConstraintContext(contentType);
+				ConstraintContext context = SearchManager.getInstance().getBasicConstraintContext(contentType);
 
-				for(Extension.Parameter tokenParam : extension.getParameters("token")) { //$NON-NLS-1$
-					String token = tokenParam.valueAsString();
+				Extension.Parameter tokenParam = extension.getParameter("token"); //$NON-NLS-1$
+				String token = tokenParam.valueAsString();
+				try {
+					context.addToken(token);
+				}catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Failed to add token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
+				Extension.Parameter requiredParam = tokenParam.getSubParameter("required"); //$NON-NLS-1$
+				if(requiredParam!=null && requiredParam.valueAsBoolean()) {
+					context.addRequiredToken(token);
+				}
+
+				for(Extension.Parameter aliasParam : extension.getParameters("alias")) { //$NON-NLS-1$
+					String alias = aliasParam.valueAsString();
 					try {
-						context.addToken(token);
+						context.addAlias(alias, token);
 					}catch(Exception e) {
 						LoggerFactory.log(this, Level.SEVERE,
-								"Failed to add token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-
-					Extension.Parameter requiredParam = tokenParam.getSubParameter("required"); //$NON-NLS-1$
-					if(requiredParam!=null && requiredParam.valueAsBoolean()) {
-						context.addRequiredToken(token);
-					}
-
-					for(Extension.Parameter aliasParam : tokenParam.getSubParameters("alias")) { //$NON-NLS-1$
-						String alias = aliasParam.valueAsString();
-						try {
-							context.addAlias(alias, token);
-						}catch(Exception e) {
-							LoggerFactory.log(this, Level.SEVERE,
-									"Failed to add alias '"+alias+"' for token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}
+								"Failed to add alias '"+alias+"' for token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}
 				}
 
 				PluginUtil.activatePlugin(extension);
 				ClassLoader loader = PluginUtil.getClassLoader(extension);
 
-				for(Extension.Parameter factoryParam : extension.getParameter("factories").getSubParameters()) {  //$NON-NLS-1$
-					String token = factoryParam.getId();
-					String factoryClassName = factoryParam.rawValue();
-					try {
-						ClassProxy proxy = new ClassProxy(factoryClassName, loader);
-						context.registerFactory(token, proxy);
-					} catch(Exception e) {
-						LoggerFactory.log(this, Level.SEVERE,
-								"Failed to register factory '"+factoryClassName+"' for token '"+token+" in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					}
+				Extension.Parameter factoryParam = extension.getParameter("factory"); //$NON-NLS-1$
+				String factoryClassName = factoryParam.rawValue();
+				try {
+					ClassProxy proxy = new ClassProxy(factoryClassName, loader);
+					context.registerFactory(token, proxy);
+				} catch(Exception e) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Failed to register factory '"+factoryClassName+"' for token '"+token+" in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 
 			} catch(Exception e) {
 				LoggerFactory.log(this, Level.SEVERE,
-						"Failed to register constraint context: "+extension.getUniqueId(), e); //$NON-NLS-1$
+						"Failed to register search constraint: "+extension.getUniqueId(), e); //$NON-NLS-1$
 			}
 		}
 	}
+
+//	/**
+//	 * Load and register all content types that are defined at plug-in manifest level
+//	 */
+//	private void registerConstraintFactories() {
+//		for(Extension extension : getDescriptor().getExtensionPoint("ConstraintContext").getConnectedExtensions()) { //$NON-NLS-1$
+//			try {
+//
+//				Extension.Parameter contentTypeParam = extension.getParameter("contentType"); //$NON-NLS-1$
+//				ContentType contentType = ContentTypeRegistry.getInstance().getType(contentTypeParam.valueAsExtension());
+//
+//				ConstraintContext context = SearchManager.getInstance().getConstraintContext(contentType);
+//
+//				for(Extension.Parameter tokenParam : extension.getParameters("token")) { //$NON-NLS-1$
+//					String token = tokenParam.valueAsString();
+//					try {
+//						context.addToken(token);
+//					}catch(Exception e) {
+//						LoggerFactory.log(this, Level.SEVERE,
+//								"Failed to add token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$
+//					}
+//
+//					Extension.Parameter requiredParam = tokenParam.getSubParameter("required"); //$NON-NLS-1$
+//					if(requiredParam!=null && requiredParam.valueAsBoolean()) {
+//						context.addRequiredToken(token);
+//					}
+//
+//					for(Extension.Parameter aliasParam : tokenParam.getSubParameters("alias")) { //$NON-NLS-1$
+//						String alias = aliasParam.valueAsString();
+//						try {
+//							context.addAlias(alias, token);
+//						}catch(Exception e) {
+//							LoggerFactory.log(this, Level.SEVERE,
+//									"Failed to add alias '"+alias+"' for token '"+token+"' in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//						}
+//					}
+//				}
+//
+//				PluginUtil.activatePlugin(extension);
+//				ClassLoader loader = PluginUtil.getClassLoader(extension);
+//
+//				for(Extension.Parameter factoryParam : extension.getParameter("factories").getSubParameters()) {  //$NON-NLS-1$
+//					String token = factoryParam.getId();
+//					String factoryClassName = factoryParam.rawValue();
+//					try {
+//						ClassProxy proxy = new ClassProxy(factoryClassName, loader);
+//						context.registerFactory(token, proxy);
+//					} catch(Exception e) {
+//						LoggerFactory.log(this, Level.SEVERE,
+//								"Failed to register factory '"+factoryClassName+"' for token '"+token+" in extension: "+extension.getUniqueId(), e); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//					}
+//				}
+//
+//			} catch(Exception e) {
+//				LoggerFactory.log(this, Level.SEVERE,
+//						"Failed to register constraint context: "+extension.getUniqueId(), e); //$NON-NLS-1$
+//			}
+//		}
+//	}
 
 	/**
 	 * @see org.java.plugin.Plugin#doStop()

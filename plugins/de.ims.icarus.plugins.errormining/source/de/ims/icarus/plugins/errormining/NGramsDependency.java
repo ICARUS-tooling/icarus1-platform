@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.util.Options;
@@ -69,7 +69,7 @@ public class NGramsDependency {
 	protected Map<String,ArrayList<Integer>> nilLexiconCache;
 
 
-	protected List<DependencyData> corpus;
+	protected List<DependencySentenceData> corpus;
 	
 
 	private Search search;
@@ -105,7 +105,7 @@ public class NGramsDependency {
 //		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 //
 //		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
-//		corpus = new ArrayList<DependencyData>();
+//		corpus = new ArrayList<DependencySentenceData>();
 //
 //		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
 //		nilLexiconCache = new LinkedHashMap<String,ArrayList<Integer>>();
@@ -131,7 +131,7 @@ public class NGramsDependency {
 		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
-		corpus = new ArrayList<DependencyData>();
+		corpus = new ArrayList<DependencySentenceData>();
 
 		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
 		nilLexiconCache = new LinkedHashMap<String,ArrayList<Integer>>();
@@ -156,7 +156,7 @@ public class NGramsDependency {
 		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 
 		nGramCache = new LinkedHashMap<String,ArrayList<DependencyItemInNuclei>>();
-		corpus = new ArrayList<DependencyData>();
+		corpus = new ArrayList<DependencySentenceData>();
 
 		nilCache = new LinkedHashMap<Integer,ArrayList<Integer>>();
 		nilLexiconCache = new LinkedHashMap<String,ArrayList<Integer>>();
@@ -258,7 +258,7 @@ public class NGramsDependency {
 	 * @param dd
 	 * @param sentenceNr
 	 */
-	public void initializeUniGrams(DependencyData dd, int sentenceNr) {
+	public void initializeUniGrams(DependencySentenceData dd, int sentenceNr) {
 
 		corpus.add(dd);
 
@@ -471,7 +471,7 @@ public class NGramsDependency {
 //						System.out.println(sameSentenceIDList
 //											+ " :"	+ sentenceNr);
 						for (Integer sentenceIndex : sameSentenceIDList) {
-							DependencyData dd = corpus.get(sentenceIndex);
+							DependencySentenceData dd = corpus.get(sentenceIndex);
 							int nucleiIndex = dsi.getNucleiIndex() - 1;
 							//System.out.println(checkForNumber(dd.getForm(nucleiIndex))+dd.getHead(nucleiIndex));
 							int headIndex = dsi.getSentenceHeadIndex() - 1;
@@ -596,7 +596,7 @@ public class NGramsDependency {
 		return false;
 	}
 
-	private StringBuilder rebuildGapTag(int startIndex, DependencySentenceInfo si, DependencyData dd){
+	private StringBuilder rebuildGapTag(int startIndex, DependencySentenceInfo si, DependencySentenceData dd){
 		StringBuilder sb = new StringBuilder();
 		for (int i = startIndex; i < si.getSentenceHeadIndex(); i++){
 			//sb.append(checkForNumber(dd.getForm(i))).append(" "); //$NON-NLS-1$
@@ -610,7 +610,7 @@ public class NGramsDependency {
 		return sb;
 	}
 
-	private String rebuildTag(int startIndex, DependencySentenceInfo si, DependencyData dd){
+	private String rebuildTag(int startIndex, DependencySentenceInfo si, DependencySentenceData dd){
 		StringBuilder sb = new StringBuilder();
 		for (int i = startIndex; i < si.getSentenceEnd(); i++){
 			if(i < (si.getSentenceEnd()-1)){
@@ -656,7 +656,7 @@ public class NGramsDependency {
 
 
 					//start sentencecount at 1 so decrement
-					DependencyData dd = corpus.get(si.getSentenceNr());
+					DependencySentenceData dd = corpus.get(si.getSentenceNr());
 					int startIndex = si.getSentenceBegin()-1;
 					int endIndex = si.getSentenceEnd()-1;
 
@@ -1200,7 +1200,7 @@ public class NGramsDependency {
 	 * @param dd
 	 * @return
 	 */
-	private String getNucleiForm(int i, DependencyData dd) {
+	private String getNucleiForm(int i, DependencySentenceData dd) {
 		int headIndex = dd.getHead(i);
 		String nucleiTag = null;
 
@@ -1224,7 +1224,7 @@ public class NGramsDependency {
 	 * @param i
 	 * @param dd
 	 */
-	private boolean newNucleiCheck(int i, DependencyData dd) {
+	private boolean newNucleiCheck(int i, DependencySentenceData dd) {
 		int headIndex = dd.getHead(i);
 		String nucleiTag = null;
 
@@ -1529,7 +1529,7 @@ public class NGramsDependency {
 				for (int i = 0; i < list.size(); i++) {
 					int corpusIndex = list.get(i);
 
-					DependencyData dd = corpus.get(corpusIndex);
+					DependencySentenceData dd = corpus.get(corpusIndex);
 					// System.out.println("CI"+corpus.indexOf(dd));
 
 					List<DependencyItemInNuclei> diinL = ngrams.get(key);
@@ -1632,7 +1632,7 @@ public class NGramsDependency {
 	 * @return
 	 * @return
 	 */
-	private NilItem checkNIL(DependencyData dd, String key, DependencyItemInNuclei diin) {
+	private NilItem checkNIL(DependencySentenceData dd, String key, DependencyItemInNuclei diin) {
 
 		String[] keySplit = key.split(" "); //$NON-NLS-1$
 
@@ -1700,7 +1700,7 @@ public class NGramsDependency {
 	 * @param indexOfTokens
 	 * @return
 	 */
-	private int getIndex2Key(DependencyData dd, String key, List<Integer> list) {
+	private int getIndex2Key(DependencySentenceData dd, String key, List<Integer> list) {
 		for(Integer i : list){
 			if(checkForNumber(dd.getForm(i)).equals(key)){
 				return i+1;
@@ -1715,7 +1715,7 @@ public class NGramsDependency {
 	 * @param indexOfTokens
 	 * @param indexOfTokens2
 	 */
-	private boolean recieveHead(DependencyData dd, List<Integer> l1,
+	private boolean recieveHead(DependencySentenceData dd, List<Integer> l1,
 			List<Integer> l2) {
 		for (Integer i : l1) {
 			if (dd.getHead(i) != -1) {
@@ -1754,16 +1754,16 @@ public class NGramsDependency {
 	 * @param tmp
 	 */
 	private List<Integer> sentenceMultipleOccurence(int snr, List<Integer> tmp) {
-		DependencyData dd = corpus.get(snr);
+		DependencySentenceData dd = corpus.get(snr);
 
 		List<Integer> equalSentences = new ArrayList<Integer>();
 
 		for(int i = 0; i < tmp.size(); i++){
 			//dont compare same sentences
 			if(snr != tmp.get(i)){
-				DependencyData ddTemp = corpus.get(tmp.get(i));
+				DependencySentenceData ddTemp = corpus.get(tmp.get(i));
 
-				if(isEqualDependencyData(dd,ddTemp)){
+				if(isEqualDependencySentenceData(dd,ddTemp)){
 					equalSentences.add(tmp.get(i));
 				}
 				//System.out.println("snr " + snr + " compare " + tmp.get(i));
@@ -1778,7 +1778,7 @@ public class NGramsDependency {
 	 * @param ddTemp
 	 * @return
 	 */
-	private boolean isEqualDependencyData(DependencyData dd, DependencyData ddTemp) {
+	private boolean isEqualDependencySentenceData(DependencySentenceData dd, DependencySentenceData ddTemp) {
 
 		int midIndex = dd.length()/2;
 
@@ -1851,7 +1851,7 @@ public class NGramsDependency {
 //			conellReader.init(dloc, on);
 //			//while (cr.next() != null) {
 //			for(int i = 0; i < sentencesToRead; i++){
-//				DependencyData dd = (DependencyData) conellReader.next();
+//				DependencySentenceData dd = (DependencySentenceData) conellReader.next();
 //				ngrams.initializeUniGrams(dd, sentenceNr);
 //				sentenceNr++;
 //			}

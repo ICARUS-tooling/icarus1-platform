@@ -39,7 +39,7 @@ import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataReader;
 import de.ims.icarus.language.dependency.CompoundDependencyData;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Options;
@@ -105,7 +105,7 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 
 		SentenceData09 input;
 
-		DependencyData resultdd = null;
+		DependencySentenceData resultdd = null;
 
 		// more sentences left?
 		if ((input = reader.getNext()) != null) {

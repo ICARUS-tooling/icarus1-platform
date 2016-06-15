@@ -30,7 +30,7 @@ import javax.swing.JComponent;
 import com.mxgraph.model.mxIGraphModel;
 
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyNodeData;
 import de.ims.icarus.language.dependency.MutableDependencyData;
 import de.ims.icarus.language.dependency.MutableDependencyData.DependencyDataEntry;
@@ -152,7 +152,7 @@ public class DependencyCellEditor extends HeavyWeightCellEditor {
 		
 			FormBuilder formBuilder = getVertexEditor();
 			DependencyNodeData nodeData = (DependencyNodeData) value;
-			DependencyData data = getPresenter().getData();
+			DependencySentenceData data = getPresenter().getData();
 			
 			NavigationFormEntry indexEntry = (NavigationFormEntry) formBuilder.getEntry("index"); //$NON-NLS-1$
 			indexEntry.setMinimumValue(1);

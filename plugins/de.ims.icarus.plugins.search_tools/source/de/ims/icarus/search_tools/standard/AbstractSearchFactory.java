@@ -26,8 +26,10 @@
 package de.ims.icarus.search_tools.standard;
 
 import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
+import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.search_tools.SearchFactory;
+import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Options;
@@ -58,5 +60,14 @@ public abstract class AbstractSearchFactory implements SearchFactory {
 	@Override
 	public String getQueryLabel(SearchQuery query) {
 		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.SearchFactory#createQuery()
+	 */
+	@Override
+	public SearchQuery createQuery() {
+		ConstraintContext constraintContext = SearchManager.getInstance().getConstraintContext(getContentType());
+		return new DefaultSearchQuery(constraintContext);
 	}
 }

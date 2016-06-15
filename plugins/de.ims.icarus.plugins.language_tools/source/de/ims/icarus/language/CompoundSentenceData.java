@@ -195,4 +195,13 @@ public class CompoundSentenceData implements SentenceData, Cloneable {
 		SentenceData data = getFirstSet();
 		return data==null ? 0L : data.getFlags(index);
 	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getProperty(java.lang.String)
+	 */
+	@Override
+	public Object getProperty(String key) {
+		SentenceData data = getFirstSet();
+		return data==null ? null : data.getProperty(key);
+	}
 }

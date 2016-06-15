@@ -30,10 +30,8 @@ import java.util.Map;
 
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.SearchGraph;
-import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.util.UnsupportedFormatException;
-import de.ims.icarus.util.data.ContentType;
 
 
 /**
@@ -49,28 +47,20 @@ public class DefaultSearchQuery implements SearchQuery, Cloneable {
 	protected Map<String, Object> properties;
 
 	protected DefaultQueryParser parser;
-	protected final ContentType contentType;
+	protected final ConstraintContext constraintContext;
 
-	public DefaultSearchQuery(ContentType contentType) {
-		if(contentType==null)
-			throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
+	public DefaultSearchQuery(ConstraintContext constraintContext) {
+		if(constraintContext==null)
+			throw new NullPointerException("Invalid constraint context"); //$NON-NLS-1$
 
-		this.contentType = contentType;
+		this.constraintContext = constraintContext;
 
 		graph = new DefaultSearchGraph();
 		query = ""; //$NON-NLS-1$
 	}
 
 	protected DefaultQueryParser createParser() throws Exception {
-		ConstraintContext context = SearchManager.getInstance().getConstraintContext(getContentType());
-		if(context==null)
-			throw new IllegalStateException("Unable to fetch constraint-context for content-type: "+getContentType().getId()); //$NON-NLS-1$
-
-		return new DefaultQueryParser(context, null);
-	}
-
-	public final ContentType getContentType() {
-		return contentType;
+		return new DefaultQueryParser(getConstraintContext(), null);
 	}
 
 	/**
@@ -182,7 +172,7 @@ public class DefaultSearchQuery implements SearchQuery, Cloneable {
 
 	@Override
 	public SearchQuery clone() {
-		DefaultSearchQuery clone = new DefaultSearchQuery(getContentType());
+		DefaultSearchQuery clone = new DefaultSearchQuery(getConstraintContext());
 		clone.graph = graph.clone();
 		clone.query = query;
 		clone.parser = parser;
@@ -194,4 +184,11 @@ public class DefaultSearchQuery implements SearchQuery, Cloneable {
 		return clone;
 	}
 
+	/**
+	 * @see de.ims.icarus.search_tools.SearchQuery#getConstraintContext()
+	 */
+	@Override
+	public ConstraintContext getConstraintContext() {
+		return constraintContext;
+	}
 }

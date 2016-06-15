@@ -142,7 +142,7 @@ import de.ims.icarus.config.ConfigRegistry.Handle;
 import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.annotation.AnnotatedDependencyData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
@@ -2070,7 +2070,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		for(int n = 0; n < dsi.getNucleiIndexListSize(); n++){
 
 			//DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-			//DependencyData dd = (DependencyData) dl.get(0);
+			//DependencySentenceData dd = (DependencySentenceData) dl.get(0);
 
 			//FIXME painting
 			int head = dsi.getSentenceHeadIndex();
@@ -2112,7 +2112,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	 */
 	private int getHeadIndexFromNucleus(int nucleusIndex, int sentenceNo){
 		DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-		DependencyData dd = (DependencyData) dl.get(sentenceNo);
+		DependencySentenceData dd = (DependencySentenceData) dl.get(sentenceNo);
 		return dd.getHead(nucleusIndex);
 	}
 
@@ -2225,7 +2225,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								.getSentenceNr();
 
 						AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-								(DependencyData) dl.get(sentenceNr));
+								(DependencySentenceData) dl.get(sentenceNr));
 
 						List<Integer> hlIndex = new ArrayList<Integer>();
 						hlIndex.add(iin.getSentenceInfoAt(s).getNucleiIndex() - 1);
@@ -2262,7 +2262,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						// sentenceDataDetailedList.add(sentenceData);
 
 						AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-								(DependencyData) dl.get(sentenceNr));
+								(DependencySentenceData) dl.get(sentenceNr));
 
 						List<Integer> hlIndex = new ArrayList<Integer>();
 						List<String> nucleusList = getNucleusList(key, involvedSentences((String) key));
@@ -2328,7 +2328,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 					// System.out.println(sentenceData.getText() + "TEXT");
 
 					AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-							(DependencyData) dl.get(sentenceNr));
+							(DependencySentenceData) dl.get(sentenceNr));
 
 					int start = diin.getSentenceInfoAt(s).getSentenceBegin()-1;
 					int end = diin.getSentenceInfoAt(s).getSentenceEnd()-1;
@@ -2433,7 +2433,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 									.getSentenceNr();
 
 							AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-									(DependencyData) dl.get(sentenceNr));
+									(DependencySentenceData) dl.get(sentenceNr));
 
 							List<Integer> hlIndex = new ArrayList<Integer>();
 							hlIndex.add(iin.getSentenceInfoAt(s).getNucleiIndex() - 1);
@@ -2469,7 +2469,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 							// sentenceDataDetailedList.add(sentenceData);
 
 							AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-									(DependencyData) dl.get(sentenceNr));
+									(DependencySentenceData) dl.get(sentenceNr));
 
 							List<Integer> hlIndex = new ArrayList<Integer>();
 							List<String> nucleusList = getNucleusList(key,
@@ -2535,7 +2535,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 						// System.out.println(sentenceData.getText() + "TEXT");
 
 						AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-								(DependencyData) dl.get(sentenceNr));
+								(DependencySentenceData) dl.get(sentenceNr));
 
 						int start = diin.getSentenceInfoAt(s).getSentenceBegin()-1;
 						int end = diin.getSentenceInfoAt(s).getSentenceEnd()-1;
@@ -2629,7 +2629,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								// sentenceDataDetailedList.add(sentenceData);
 
 								AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-										(DependencyData) dl.get(sentenceNr));
+										(DependencySentenceData) dl.get(sentenceNr));
 
 								List<Integer> hlIndex = new ArrayList<Integer>();
 								List<String> nucleusList = getNucleusList(key,
@@ -2713,7 +2713,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 								// "TEXT");
 
 								AnnotatedDependencyData annoDepData = new AnnotatedDependencyData(
-										(DependencyData) dl.get(sentenceNr));
+										(DependencySentenceData) dl.get(sentenceNr));
 
 								List<Integer> hlIndex = null;
 
@@ -3097,7 +3097,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		protected Object getCombinedDependencyTag(DependencyItemInNuclei iinD, int sentenceNo, int dependentIndex) {
 			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-			DependencyData dd = (DependencyData) dl.get(sentenceNo);
+			DependencySentenceData dd = (DependencySentenceData) dl.get(sentenceNo);
 			dependentIndex = dependentIndex-1;
 
 	//		System.out.println("SNR "+ sentenceNo
@@ -3129,7 +3129,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 
 	protected Object getHeadTag(DependencyItemInNuclei iinD, int sentenceNo, Integer dependentIndex) {
 			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-			DependencyData dd = (DependencyData) dl.get(sentenceNo);
+			DependencySentenceData dd = (DependencySentenceData) dl.get(sentenceNo);
 
 			dependentIndex = dependentIndex-1;
 			int headIndex = dd.getHead(dependentIndex);
@@ -3153,7 +3153,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	protected Object getDependentTag(DependencyItemInNuclei iinD,
 			int sentenceNo, Integer dependentIndex) {
 		DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-		DependencyData dd = (DependencyData) dl.get(sentenceNo);
+		DependencySentenceData dd = (DependencySentenceData) dl.get(sentenceNo);
 
 		dependentIndex = dependentIndex - 1;
 		int headIndex = dd.getHead(dependentIndex);
@@ -3179,7 +3179,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 	protected Object getNilNode(DependencyItemInNuclei iinD,
 			int sentenceNo, Integer nodeIndex) {
 		DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-		DependencyData dd = (DependencyData) dl.get(sentenceNo);
+		DependencySentenceData dd = (DependencySentenceData) dl.get(sentenceNo);
 
 
 		// System.out.println("SNR "+ sentenceNo
@@ -4938,7 +4938,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		private String getTag(Integer wordIndex, int sentenceNr) {
 			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-			DependencyData dd = (DependencyData) dl.get(sentenceNr);
+			DependencySentenceData dd = (DependencySentenceData) dl.get(sentenceNr);
 
 			return NGrams.getInstance().getTag(dd,
 									wordIndex,
@@ -4952,7 +4952,7 @@ public class ErrorMiningSearchPresenter extends SearchResultPresenter {
 		 */
 		private String getHead(Integer wordIndex, int sentenceNr) {
 			DataList<?> dl = ((AbstractSearchResult) searchResult).getTarget();
-			DependencyData dd = (DependencyData) dl.get(sentenceNr);
+			DependencySentenceData dd = (DependencySentenceData) dl.get(sentenceNr);
 			if(dd.getHead(wordIndex) != -1){
 				return dd.getForm(dd.getHead(wordIndex));
 			} else {

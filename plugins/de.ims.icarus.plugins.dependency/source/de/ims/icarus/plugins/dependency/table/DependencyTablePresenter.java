@@ -40,7 +40,7 @@ import de.ims.icarus.language.MutableSentenceData;
 import de.ims.icarus.language.SentenceDataEvent;
 import de.ims.icarus.language.SentenceDataListener;
 import de.ims.icarus.language.dependency.DependencyConstants;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.MutableDependencyData;
 import de.ims.icarus.language.dependency.MutableDependencyData.DependencyDataEntry;
@@ -103,7 +103,7 @@ public class DependencyTablePresenter extends TablePresenter implements Sentence
 		} else {
 			newData = new MutableDependencyData();
 			if(data!=null) {
-				newData.copyFrom((DependencyData)data);
+				newData.copyFrom((DependencySentenceData)data);
 			}
 		}
 		

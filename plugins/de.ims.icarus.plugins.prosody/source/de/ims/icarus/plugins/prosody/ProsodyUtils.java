@@ -44,57 +44,71 @@ public class ProsodyUtils implements ProsodyConstants {
 	static {
 
 		// Syllable level
-		SharedPropertyRegistry.registerHandler(SYLLABLE_DURATION_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_ENDPITCH_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_LABEL_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_FORM_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_MIDPITCH_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_OFFSET_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_STARTPITCH_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_STRESS_KEY, ValueHandler.booleanHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_VOWEL_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(CODA_SIZE_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(CODA_TYPE_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(VOWEL_DURATION_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(ONSET_SIZE_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(ONSET_TYPE_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(PHONEME_COUNT_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(PAINTE_A1_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(PAINTE_A2_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(PAINTE_B_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(PAINTE_C1_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(PAINTE_C2_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(PAINTE_D_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(PAINTE_MAX_C_KEY, ValueHandler.doubleHandler);
+		ContentType contentType = ProsodyUtils.getProsodySentenceContentType();
+		Object level = SharedPropertyRegistry.SYLLABLE_LEVEL;
+		SharedPropertyRegistry.registerHandler(SYLLABLE_DURATION_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_ENDPITCH_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_LABEL_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_FORM_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_MIDPITCH_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_OFFSET_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_STARTPITCH_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_STRESS_KEY, ValueHandler.booleanHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_VOWEL_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(CODA_SIZE_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(CODA_TYPE_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(VOWEL_DURATION_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(ONSET_SIZE_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(ONSET_TYPE_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PHONEME_COUNT_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PAINTE_A1_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PAINTE_A2_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PAINTE_B_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PAINTE_C1_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PAINTE_C2_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PAINTE_D_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PAINTE_MAX_C_KEY, ValueHandler.doubleHandler, contentType, level);
 
-		SharedPropertyRegistry.registerHandler(TOBI_LABEL, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(TOBI_TONE, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(NEXT_SYL_LEXICAL_STRESS, ValueHandler.booleanHandler);
-		SharedPropertyRegistry.registerHandler(PREV_SYL_LEXICAL_STRESS, ValueHandler.booleanHandler);
-		SharedPropertyRegistry.registerHandler(NUM_SYL_NEXT_STRESS, ValueHandler.booleanHandler);
-		SharedPropertyRegistry.registerHandler(NUM_SYL_LAST_STRESS, ValueHandler.booleanHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_POSITION_TYPE, ValueHandler.stringHandler);
+		SharedPropertyRegistry.registerHandler(TOBI_LABEL, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(TOBI_TONE, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(NEXT_SYL_LEXICAL_STRESS, ValueHandler.booleanHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(PREV_SYL_LEXICAL_STRESS, ValueHandler.booleanHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(NUM_SYL_NEXT_STRESS, ValueHandler.booleanHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(NUM_SYL_LAST_STRESS, ValueHandler.booleanHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_POSITION_TYPE, ValueHandler.stringHandler, contentType, level);
 
 		// Word level
-		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(POS_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(LEMMA_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(FEATURES_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(DEPREL_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(HEAD_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(TONAL_PROMINENCE_KEY, ValueHandler.booleanHandler);
-		SharedPropertyRegistry.registerHandler(STRESS_KEY, ValueHandler.booleanHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(FLAGS_KEY, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(SYLLABLE_COUNT, ValueHandler.integerHandler);
-		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(SPEAKER_FEATURES_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(ENTITY_KEY, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(BEGIN_TS_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(END_TS_KEY, ValueHandler.floatHandler);
-		SharedPropertyRegistry.registerHandler(IS_LEX, ValueHandler.stringHandler);
-		SharedPropertyRegistry.registerHandler(IS_REF, ValueHandler.stringHandler);
+		level = SharedPropertyRegistry.WORD_LEVEL;
+		SharedPropertyRegistry.registerHandler(FORM_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(POS_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(LEMMA_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(FEATURES_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(DEPREL_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(HEAD_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(TONAL_PROMINENCE_KEY, ValueHandler.booleanHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(STRESS_KEY, ValueHandler.booleanHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_TIMESTAMP_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(FLAGS_KEY, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SYLLABLE_COUNT, ValueHandler.integerHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(SPEAKER_FEATURES_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(ENTITY_KEY, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(BEGIN_TS_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(END_TS_KEY, ValueHandler.floatHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(IS_LEX, ValueHandler.stringHandler, contentType, level);
+		SharedPropertyRegistry.registerHandler(IS_REF, ValueHandler.stringHandler, contentType, level);
+
+		// Sentence level
+		level = SharedPropertyRegistry.SENTENCE_LEVEL;
+		SharedPropertyRegistry.registerHandler(SPEAKER_KEY, ValueHandler.stringHandler, null, level);
+		SharedPropertyRegistry.registerHandler(SENTENCE_NUMBER_KEY, ValueHandler.stringHandler, null, level);
+
+		// Document level
+		level = SharedPropertyRegistry.DOCUMENT_LEVEL;
+		SharedPropertyRegistry.registerHandler(DOCUMENT_ID, ValueHandler.stringHandler, null, level);
+		SharedPropertyRegistry.registerHandler(AUDIO_FILE_KEY, ValueHandler.stringHandler, null, level);
+		SharedPropertyRegistry.registerHandler(AUDIO_OFFSET_KEY, ValueHandler.stringHandler, null, level);
 	}
 
 //	private static Cursor speakerCursor;

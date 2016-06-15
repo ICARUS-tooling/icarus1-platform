@@ -71,7 +71,7 @@ import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
 import de.ims.icarus.plugins.ExtensionListModel;
@@ -569,7 +569,7 @@ public class ErrorMiningView extends View {
 			for(int i = 0; i < sentencesToRead; i++){
 				SentenceData sd = conellReader.next();
 				corpus.add(sd);
-				ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
+				ngrams.initializeUniGrams((DependencySentenceData) sd, sentenceNr);
 				sentenceNr++;
 			}
 
@@ -578,7 +578,7 @@ public class ErrorMiningView extends View {
 			while (sd != null) {
 				//System.out.println(sentenceNr + " - " + sd.getText());
 				corpus.add(sd);
-				ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
+				ngrams.initializeUniGrams((DependencySentenceData) sd, sentenceNr);
 				sd = conellReader.next();
 				sentenceNr++;
 			}
@@ -653,7 +653,7 @@ public class ErrorMiningView extends View {
 			for(int i = 0; i < sentencesToRead; i++){
 				SentenceData sd = conellReader.next();
 				corpus.add(sd);
-				ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
+				ngrams.initializeUniGrams((DependencySentenceData) sd, sentenceNr);
 				sentenceNr++;
 			}
 
@@ -662,7 +662,7 @@ public class ErrorMiningView extends View {
 			while (sd != null) {
 				//System.out.println(sentenceNr + " - " + sd.getText());
 				corpus.add(sd);
-				ngrams.initializeUniGrams((DependencyData) sd, sentenceNr);
+				ngrams.initializeUniGrams((DependencySentenceData) sd, sentenceNr);
 				sd = conellReader.next();
 				sentenceNr++;
 			}
@@ -837,7 +837,7 @@ public class ErrorMiningView extends View {
 			}
 
 			try {
-				ContentType contentType = factory.getConstraintContext().getContentType();
+				ContentType contentType = factory.getContentType();
 				SearchTargetDialog dialog = new SearchTargetDialog(contentType);
 				dialog.showDialog();
 

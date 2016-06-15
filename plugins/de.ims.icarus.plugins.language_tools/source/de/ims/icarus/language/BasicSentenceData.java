@@ -90,6 +90,7 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 		return (P) new CompactProperties();
 	}
 
+	@Override
 	public Object getProperty(String key) {
 		switch (key) {
 		case SIZE_KEY:

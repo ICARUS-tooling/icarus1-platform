@@ -68,7 +68,7 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getForm(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getForm(int)
 	 */
 	@Override
 	public String getForm(int index) {

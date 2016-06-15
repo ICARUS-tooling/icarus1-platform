@@ -68,7 +68,7 @@ public class DependencyGrammar implements Grammar {
 	 */
 	@Override
 	public Class<? extends SentenceData> getBaseClass() {
-		return DependencyData.class;
+		return DependencySentenceData.class;
 	}
 
 }

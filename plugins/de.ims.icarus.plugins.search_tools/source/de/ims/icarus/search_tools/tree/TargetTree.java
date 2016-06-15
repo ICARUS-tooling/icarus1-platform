@@ -203,6 +203,9 @@ public interface TargetTree {
 
 	Object getProperty(String key);
 
+	int getDirection();
+	int getDistance();
+
 	// Locking methods
 
 	void lockNode();

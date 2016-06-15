@@ -30,6 +30,7 @@ import de.ims.icarus.plugins.search_tools.view.editor.QueryEditor;
 import de.ims.icarus.ui.helper.Editor;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
+import de.ims.icarus.util.data.ContentType;
 
 /**
  * @author Markus Gärtner
@@ -60,11 +61,10 @@ public interface SearchFactory {
 
 	Search createExampleSearch() throws Exception;
 
-	ConstraintContext getConstraintContext();
+	ContentType getContentType();
 
 	/**
-	 * Creates an empty query usable for setting up
-	 * a search.
+	 * Creates an empty query usable for setting up a search.
 	 */
 	SearchQuery createQuery();
 

@@ -92,7 +92,7 @@ public class MatcherBuilder {
 
 		SearchGraph graph = search.getQuery().getSearchGraph();
 		graph = SearchUtils.instantiate(graph,
-				search.getFactory().getConstraintContext(),
+				search.getQuery().getConstraintContext(),
 				search.getParameters());
 		boolean isDisjunction = graph.getRootOperator()==SearchGraph.OPERATOR_DISJUNCTION;
 

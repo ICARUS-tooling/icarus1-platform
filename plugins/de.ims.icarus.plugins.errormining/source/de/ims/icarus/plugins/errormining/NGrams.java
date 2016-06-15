@@ -37,7 +37,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.search_tools.Search;
 import de.ims.icarus.ui.dialog.DialogFactory;
@@ -63,7 +63,7 @@ public class NGrams {
 	protected List<NGramQAttributes> queryList;
 	protected Options options;
 	
-	protected List<DependencyData> corpus;
+	protected List<DependencySentenceData> corpus;
 	
 	private boolean usedFringe = false;
 	private static Pattern numberPattern = Pattern.compile("^[0-9]"); //$NON-NLS-1$
@@ -106,7 +106,7 @@ public class NGrams {
 //		this.useFringe = options.getBoolean("UseFringe"); //$NON-NLS-1$
 //		
 //		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
-//		corpus = new ArrayList<DependencyData>();
+//		corpus = new ArrayList<DependencySentenceData>();
 	}
 	
 	
@@ -141,7 +141,7 @@ public class NGrams {
 		this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 				
 		nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
-		corpus = new ArrayList<DependencyData>();
+		corpus = new ArrayList<DependencySentenceData>();
 		
 		miningMode = setMiningMode();
 		System.out.println(miningMode);
@@ -174,7 +174,7 @@ public class NGrams {
 			this.useNumberWildcard = options.getBoolean("UseNumberWildcard"); //$NON-NLS-1$
 			
 			nGramCache = new LinkedHashMap<String,ArrayList<ItemInNuclei>>();
-			corpus = new ArrayList<DependencyData>();
+			corpus = new ArrayList<DependencySentenceData>();
 		}
 
 
@@ -319,7 +319,7 @@ public class NGrams {
 	 * @param dd
 	 * @param sentenceNr
 	 */
-	public void initializeUniGrams(DependencyData dd, int sentenceNr) {
+	public void initializeUniGrams(DependencySentenceData dd, int sentenceNr) {
 		
 		//TODO should be removed later
 		corpus.add(dd);
@@ -376,7 +376,7 @@ public class NGrams {
 	}
 	
 	
-	public String getTag(DependencyData dd, int wordIndex, int mode) {
+	public String getTag(DependencySentenceData dd, int wordIndex, int mode) {
 		this.miningMode = mode;
 		return getTag(dd, wordIndex);
 	}
@@ -386,7 +386,7 @@ public class NGrams {
 	 * @param wordIndex
 	 * @return
 	 */
-	private String getTag(DependencyData dd, int wordIndex) {
+	private String getTag(DependencySentenceData dd, int wordIndex) {
 		
 		switch (miningMode) {
 		
@@ -464,7 +464,7 @@ public class NGrams {
 	 * @param wordIndex
 	 * @return
 	 */
-	private String getDependencyLabel(DependencyData dd, int wordIndex) {
+	private String getDependencyLabel(DependencySentenceData dd, int wordIndex) {
 
 		int offset = wordIndex - dd.getHead(wordIndex);
 		StringBuilder sb = new StringBuilder();
@@ -819,7 +819,7 @@ public class NGrams {
 					//System.out.println("SISIZE"+si.getNucleiIndexListSize());
 					
 					//start sentencecount at 1 so decrement
-					DependencyData dd = corpus.get(si.getSentenceNr());
+					DependencySentenceData dd = corpus.get(si.getSentenceNr());
 					int startIndex = si.getSentenceBegin()-1;
 					int endIndex = si.getSentenceEnd()-1;
 					
@@ -1504,7 +1504,7 @@ public class NGrams {
 //							tempSentenceNumber.add(si.getSentenceNr());	
 //						}
 
-						DependencyData dd = corpus.get(si.getSentenceNr());
+						DependencySentenceData dd = corpus.get(si.getSentenceNr());
 
 //						System.out.println(key);
 //						System.out.println("Start " + start + " Ende " + end);
@@ -1688,7 +1688,7 @@ public class NGrams {
 //			int sentenceNr = 0;
 //			
 //			for(int i = 0; i < sentencesToRead; i++){
-//				DependencyData dd = (DependencyData) conellReader.next();
+//				DependencySentenceData dd = (DependencySentenceData) conellReader.next();
 //				
 //				ngrams.initializeUniGrams(dd, sentenceNr);
 //				sentenceNr++;				

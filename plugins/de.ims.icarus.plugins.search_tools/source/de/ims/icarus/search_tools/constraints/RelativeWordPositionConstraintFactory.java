@@ -27,7 +27,6 @@ package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.plugins.prosody.ui.geom.Axis.Integer;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;

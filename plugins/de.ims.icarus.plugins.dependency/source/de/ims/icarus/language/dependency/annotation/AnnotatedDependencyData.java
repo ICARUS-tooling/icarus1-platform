@@ -27,7 +27,7 @@ package de.ims.icarus.language.dependency.annotation;
 
 import de.ims.icarus.language.Grammar;
 import de.ims.icarus.language.annotation.AnnotatedSentenceData;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.annotation.Annotation;
 
@@ -36,14 +36,14 @@ import de.ims.icarus.util.annotation.Annotation;
  * @version $Id$
  *
  */
-public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenceData, Wrapper<DependencyData>, Cloneable {
+public class AnnotatedDependencyData implements DependencySentenceData, AnnotatedSentenceData, Wrapper<DependencySentenceData>, Cloneable {
 
 	private static final long serialVersionUID = -883053201659702672L;
 
-	private final DependencyData source;
+	private final DependencySentenceData source;
 	private Annotation annotation;
 
-	public AnnotatedDependencyData(DependencyData source, Annotation annotation) {
+	public AnnotatedDependencyData(DependencySentenceData source, Annotation annotation) {
 		if(source==null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
 
@@ -51,7 +51,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 		this.annotation = annotation;
 	}
 
-	public AnnotatedDependencyData(DependencyData source) {
+	public AnnotatedDependencyData(DependencySentenceData source) {
 		this(source, null);
 	}
 
@@ -97,7 +97,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getForm(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getForm(int)
 	 */
 	@Override
 	public String getForm(int index) {
@@ -105,7 +105,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getPos(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getPos(int)
 	 */
 	@Override
 	public String getPos(int index) {
@@ -113,7 +113,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getRelation(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getRelation(int)
 	 */
 	@Override
 	public String getRelation(int index) {
@@ -121,7 +121,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getLemma(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getLemma(int)
 	 */
 	@Override
 	public String getLemma(int index) {
@@ -129,7 +129,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getFeatures(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFeatures(int)
 	 */
 	@Override
 	public String getFeatures(int index) {
@@ -137,7 +137,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getHead(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getHead(int)
 	 */
 	@Override
 	public int getHead(int index) {
@@ -145,7 +145,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#isFlagSet(int, long)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#isFlagSet(int, long)
 	 */
 	@Override
 	public boolean isFlagSet(int index, long flag) {
@@ -153,7 +153,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getFlags(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFlags(int)
 	 */
 	@Override
 	public long getFlags(int index) {
@@ -173,7 +173,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getIndex()
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getIndex()
 	 */
 	@Override
 	public int getIndex() {
@@ -184,7 +184,7 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	 * @see de.ims.icarus.util.Wrapper#get()
 	 */
 	@Override
-	public DependencyData get() {
+	public DependencySentenceData get() {
 		return source;
 	}
 
@@ -199,5 +199,13 @@ public class AnnotatedDependencyData implements DependencyData, AnnotatedSentenc
 	@Override
 	public String toString() {
 		return source.toString();
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getProperty(java.lang.String)
+	 */
+	@Override
+	public Object getProperty(String key) {
+		return source.getProperty(key);
 	}
 }

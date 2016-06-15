@@ -32,7 +32,7 @@ import java.util.logging.Level;
 
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.errormining.DependencyItemInNuclei;
@@ -397,7 +397,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 				// System.out.print(dd.getForm(j) + " " + dd.getPos(j) + " ");
 				// }
 				// System.out.println();
-				ngrams.initializeUniGrams((DependencyData) sd, i);
+				ngrams.initializeUniGrams((DependencySentenceData) sd, i);
 				progress = (double) i / maxSentences * 50d;
 				setProgress((int) progress);
 
@@ -405,7 +405,7 @@ public class NGramSearch extends AbstractParallelSearch implements
 					return;
 				}
 
-				posFilter.initializeUniGrams((DependencyData) sd, i);
+				posFilter.initializeUniGrams((DependencySentenceData) sd, i);
 			}
 
 			//Test Stuff
@@ -590,8 +590,8 @@ public class NGramSearch extends AbstractParallelSearch implements
 				// " ");
 				// }
 				// System.out.println();
-				ngrams.initializeUniGrams((DependencyData) sd, i);
-				// NGrams.getInstance().initializeUniGrams((DependencyData) sd,
+				ngrams.initializeUniGrams((DependencySentenceData) sd, i);
+				// NGrams.getInstance().initializeUniGrams((DependencySentenceData) sd,
 				// sentenceNr);
 				progress = (double) i / maxSentences * 50d;
 				setProgress((int) progress);

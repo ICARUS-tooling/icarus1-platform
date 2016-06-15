@@ -53,7 +53,7 @@ import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceDataEvent;
 import de.ims.icarus.language.SentenceDataListener;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyDataEvent;
 import de.ims.icarus.language.dependency.DependencyNodeData;
 import de.ims.icarus.language.dependency.DependencyUtils;
@@ -215,7 +215,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		} else {
 			newData = new MutableDependencyData();
 			if(data!=null) {
-				newData.copyFrom((DependencyData)data);
+				newData.copyFrom((DependencySentenceData)data);
 			}
 		}
 
@@ -335,7 +335,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 	protected void syncToData() {
 		pauseChangeHandling();
 		try {
-			DependencyData snapshot = snapshot();
+			DependencySentenceData snapshot = snapshot();
 
 			// Empty graph -> clear data and abort
 			if(snapshot==null) {
@@ -348,7 +348,7 @@ public class DependencyGraphPresenter extends GraphPresenter {
 		}
 	}
 
-	public DependencyData snapshot() {
+	public DependencySentenceData snapshot() {
 		Object parent = graph.getDefaultParent();
 		mxIGraphModel model = graph.getModel();
 		int childCount = model.getChildCount(parent);

@@ -108,7 +108,7 @@ public class DependencyNodeData implements CloneableObject, Cloneable,
 		}
 	}
 
-	public DependencyNodeData(DependencyData source, int index) {
+	public DependencyNodeData(DependencySentenceData source, int index) {
 		Exceptions.testNullArgument(source, "source"); //$NON-NLS-1$
 
 		this.index = index;

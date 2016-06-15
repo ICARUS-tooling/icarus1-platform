@@ -45,7 +45,7 @@ import javax.swing.text.StyleContext;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceData;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.annotation.AnnotatedDependencyData;
 import de.ims.icarus.language.dependency.annotation.DependencyAnnotationManager;
 import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
@@ -71,7 +71,7 @@ import de.ims.icarus.util.strings.StringUtil;
  *
  */
 public class DependencyListCellRenderer extends DummyTextPane
-		implements ListCellRenderer<DependencyData>, Installable {
+		implements ListCellRenderer<DependencySentenceData>, Installable {
 
 	private static final long serialVersionUID = 7392683584037946715L;
 
@@ -131,7 +131,7 @@ public class DependencyListCellRenderer extends DummyTextPane
 	 */
 	@Override
 	public Component getListCellRendererComponent(
-			JList<? extends DependencyData> list, DependencyData value,
+			JList<? extends DependencySentenceData> list, DependencySentenceData value,
 			int index, boolean isSelected, boolean cellHasFocus) {
 
         setComponentOrientation(list.getComponentOrientation());

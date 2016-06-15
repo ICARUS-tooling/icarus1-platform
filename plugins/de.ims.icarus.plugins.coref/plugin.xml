@@ -209,7 +209,7 @@
 		<!-- CAPABILITIES -->
 		<parameter id="capabilities">
 			<parameter id="clear" />
-			<parameter id="present" value="CoreferenceDocumentDataContentType" />
+			<parameter id="present" value="DocumentDataContentType" />
 		</parameter>
 	</extension>
 	
@@ -290,7 +290,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter" />
-		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
 		<parameter id="interface" value="de.ims.icarus.ui.view.AWTPresenter" />
 	</extension>
 	
@@ -301,7 +301,7 @@
 			</doc-text>
 		</doc>
 		<parameter id="class" value="de.ims.icarus.plugins.coref.view.DocumentListCellRenderer" />
-		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
 		<parameter id="interface" value="javax.swing.ListCellRenderer" />
 	</extension>
 	
@@ -327,7 +327,7 @@
 		<parameter id="contentClass" value="de.ims.icarus.language.coref.CoreferenceData" />
 	</extension>
 	
-	<extension id="CoreferenceDocumentDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+	<extension id="DocumentDataContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
 				Content type based on de.ims.icarus.language.coref.DocumentData
@@ -336,7 +336,7 @@
 		<parameter id="contentClass" value="de.ims.icarus.language.coref.DocumentData" />
 	</extension>
 	
-	<extension id="CoreferenceDocumentSetContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
+	<extension id="DocumentSetContentType" plugin-id="de.ims.icarus.core" point-id="ContentType">
 		<doc>
 			<doc-text>
 				Content type based on de.ims.icarus.language.coref.DocumentSet
@@ -384,7 +384,7 @@
 	<!-- CONSTRAINT CONTEXT AND FACTORY  -->
 	
 	<extension id="CoreferenceConstraintContext" plugin-id="de.ims.icarus.searchTools" point-id="ConstraintContext">
-		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
 		<parameter id="token" value="begin" />
 		<parameter id="token" value="end" />
 		<parameter id="token" value="range" />
@@ -409,8 +409,19 @@
 		</parameter>
 	</extension>
 	
+	<!--
+	<extension id="DocumentSearchFactory" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="class" value="de.ims.icarus.plugins.coref.search.DocumentSearchFactory" />
+		<parameter id="name" value="plugins.coref.documentSearchFactory.identity.name" />
+		<parameter id="description" value="plugins.coref.documentSearchFactory.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="icon" value="de/ims/icarus/plugins/coref/search/document-search-factory.gif" />
+	</extension>
+	-->
+	
 	<extension id="CoreferenceSearchFactory" plugin-id="de.ims.icarus.searchTools" point-id="SearchFactory">
-		<parameter id="contentType" value="de.ims.icarus.coref@CoreferenceDocumentDataContentType" />
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
 		<parameter id="class" value="de.ims.icarus.plugins.coref.search.CoreferenceDocumentSearchFactory" />
 		<parameter id="name" value="plugins.coref.corefSearchFactory.identity.name" />
 		<parameter id="description" value="plugins.coref.corefSearchFactory.identity.description" />
@@ -423,6 +434,62 @@
 		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
 		<parameter id="name" value="plugins.coref.coreferenceDocumentSetTargetSelector.identity.name" />
 		<parameter id="description" value="plugins.coref.coreferenceDocumentSetTargetSelector.identity.name" />
+	</extension>
+	
+	<!-- SEARCH CONSTRAINTS -->
+	
+	<extension id="SpanBeginIndexConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="begin" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceBeginIndexConstraintFactory" />
+	</extension>
+	
+	<extension id="SpanEndIndexConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="end" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceEndIndexConstraintFactory" />
+	</extension>
+	
+	<extension id="SpanRangeConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="range" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceRangeConstraintFactory" />
+	</extension>
+	
+	<extension id="ClusterIdConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="id" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceClusterIdConstraintFactory" />
+	</extension>
+	
+	<extension id="CoreferenceDirectionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="direction" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceDirectionConstraintFactory" />
+	</extension>
+	
+	<extension id="SpanPropertyConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="spanProperty" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceSpanPropertyConstraintFactory" />
+	</extension>
+	
+	<extension id="EdgePropertyConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="edgeProperty" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceEdgePropertyConstraintFactory" />
+	</extension>
+	
+	<extension id="SentencePropertyConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="sentenceProperty" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceWordPropertyConstraintFactory" />
+	</extension>
+	
+	<extension id="HeadPropertyConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="headProperty" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceHeadPropertyConstraintFactory" />
 	</extension>
 	
 </plugin>

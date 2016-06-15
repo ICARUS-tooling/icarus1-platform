@@ -33,6 +33,7 @@ import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
+import de.ims.icarus.search_tools.util.SharedPropertyRegistry;
 import de.ims.icarus.util.Options;
 
 /**
@@ -52,9 +53,19 @@ public class ProsodySyllablePropertyConstraintFactory extends AbstractConstraint
 				"plugins.prosody.constraints.syllableProperty.description"); //$NON-NLS-1$
 	}
 
+//	@Override
+//	public Object[] getSupportedSpecifiers() {
+//		return ProsodyUtils.getDefaultSyllablePropertyKeys();
+//	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractConstraintFactory#getSupportedSpecifiers()
+	 */
 	@Override
 	public Object[] getSupportedSpecifiers() {
-		return ProsodyUtils.getDefaultSyllablePropertyKeys();
+		return SharedPropertyRegistry.getSpecifiers(SharedPropertyRegistry.SYLLABLE_LEVEL,
+				SharedPropertyRegistry.INCLUDE_COMPATIBLE_TYPES | SharedPropertyRegistry.INCLUDE_GENERAL_LEVEL,
+				ProsodyUtils.getProsodySentenceContentType());
 	}
 
 	/**

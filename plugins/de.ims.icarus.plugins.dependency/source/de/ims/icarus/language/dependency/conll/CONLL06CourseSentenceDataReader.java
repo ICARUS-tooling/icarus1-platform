@@ -34,7 +34,7 @@ import java.util.logging.Level;
 import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataReader;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.util.Options;
@@ -95,7 +95,7 @@ public class CONLL06CourseSentenceDataReader implements SentenceDataReader {
 	@Override
 	public SentenceData next() throws IOException, UnsupportedFormatException {
 
-		DependencyData resultdd = null;
+		DependencySentenceData resultdd = null;
 
 		if (buffer.next()) {
 			try {

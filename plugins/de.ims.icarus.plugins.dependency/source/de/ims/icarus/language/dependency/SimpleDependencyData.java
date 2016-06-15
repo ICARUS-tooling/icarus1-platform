@@ -47,7 +47,7 @@ import de.ims.icarus.util.mem.Primitive;
 @HeapMember
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SimpleDependencyData extends BasicSentenceData<CompactProperties> implements DependencyData {
+public class SimpleDependencyData extends BasicSentenceData<CompactProperties> implements DependencySentenceData {
 
 	private static final long serialVersionUID = -6877590672027658180L;
 
@@ -90,7 +90,7 @@ public class SimpleDependencyData extends BasicSentenceData<CompactProperties> i
 		this.flags = flags;
 	}
 
-	public SimpleDependencyData(DependencyData source) {
+	public SimpleDependencyData(DependencySentenceData source) {
 		super(source);
 
 		int size = source.length();
@@ -207,7 +207,7 @@ public class SimpleDependencyData extends BasicSentenceData<CompactProperties> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getFlags(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFlags(int)
 	 */
 	@Override
 	public long getFlags(int index) {
@@ -215,7 +215,7 @@ public class SimpleDependencyData extends BasicSentenceData<CompactProperties> i
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getIndex()
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getIndex()
 	 */
 	@Override
 	public int getIndex() {

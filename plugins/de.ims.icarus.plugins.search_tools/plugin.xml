@@ -163,6 +163,10 @@
 		</parameter-def>
 	</extension-point>
 			
+	<extension-point id="SearchFactoryProxy" parent-point-id="SearchFactory" 
+			parent-plugin-id="de.ims.icarus.searchTools">
+	</extension-point>
+			
 	<extension-point id="SearchResultPresenter" parent-point-id="Localizable" 
 			parent-plugin-id="de.ims.icarus.core">
 		<doc>
@@ -526,12 +530,6 @@
 		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.ProjectivityConstraintFactory" />
 	</extension>
 	
-	<extension id="RelationConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
-		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
-		<parameter id="token" value="relation" />
-		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.RelationConstraintFactory" />
-	</extension>
-	
 	<extension id="RelativeWordPositionConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
 		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
 		<parameter id="token" value="section" />
@@ -542,5 +540,17 @@
 		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
 		<parameter id="token" value="wordPos" />
 		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.WordPositionConstraintFactory" />
+	</extension>
+	
+	<extension id="WordPropertyConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="wordProperty" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.WordPropertyConstraintFactory" />
+	</extension>
+	
+	<extension id="SentencePropertyConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.languageTools@SentenceDataContentType" />
+		<parameter id="token" value="sentenceProperty" />
+		<parameter id="factory" value="de.ims.icarus.search_tools.constraints.SentencePropertyConstraintFactory" />
 	</extension>
 </plugin>

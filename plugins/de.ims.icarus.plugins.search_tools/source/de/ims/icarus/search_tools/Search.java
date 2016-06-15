@@ -28,11 +28,13 @@ package de.ims.icarus.search_tools;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.search_tools.io.SearchResolver;
 import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.PropertyChangeSource;
+import de.ims.icarus.util.date.DateUtils;
 
 
 /**
@@ -58,6 +60,8 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 	private final SearchFactory factory;
 
 	private final Options parameters;
+
+	protected long beginTimestamp, endTimestamp;
 
 	protected Search(SearchFactory factory, SearchQuery query, Options parameters, Object target) {
 		if(factory==null)
@@ -195,6 +199,10 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 
 	public final void finish() {
 		setState(SearchState.RUNNING, SearchState.DONE);
+
+		endTimestamp = System.currentTimeMillis();
+
+		LoggerFactory.info(this, "Finished search "+getClass().getSimpleName()+" after "+DateUtils.formatMilliDuration(endTimestamp-beginTimestamp)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -207,6 +215,8 @@ public abstract class Search extends PropertyChangeSource implements SearchParam
 			throw new IllegalStateException("Cannot reuse search instance"); //$NON-NLS-1$
 
 		setState(SearchState.BLANK, SearchState.RUNNING);
+
+		beginTimestamp = System.currentTimeMillis();
 
 		if(!innerExecute() && isRunning()) {
 			setState(SearchState.RUNNING, SearchState.DONE);

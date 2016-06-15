@@ -23,16 +23,16 @@
  * $LastChangedRevision$
  * $LastChangedBy$
  */
-package de.ims.icarus.plugins.prosody.search.constraints;
+package de.ims.icarus.search_tools.constraints;
 
-import de.ims.icarus.plugins.prosody.ProsodyConstants;
-import de.ims.icarus.plugins.prosody.ProsodyUtils;
-import de.ims.icarus.plugins.prosody.search.ProsodyTargetTree;
+import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultCaseInsensitiveConstraint;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
+import de.ims.icarus.search_tools.tree.TargetTree;
+import de.ims.icarus.search_tools.util.SharedPropertyRegistry;
 import de.ims.icarus.util.Options;
 
 /**
@@ -40,19 +40,24 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFactory implements ProsodyConstants {
+public class WordPropertyConstraintFactory extends AbstractConstraintFactory {
 
 	public static final String TOKEN = "wordProperty"; //$NON-NLS-1$
 
-	public ProsodyWordPropertyConstraintFactory() {
+	public WordPropertyConstraintFactory() {
 		super(TOKEN, NODE_CONSTRAINT_TYPE,
-				"plugins.prosody.constraints.wordProperty.name",  //$NON-NLS-1$
-				"plugins.prosody.constraints.wordProperty.description"); //$NON-NLS-1$
+				"plugins.languageTools.constraints.wordProperty.name",  //$NON-NLS-1$
+				"plugins.languageTools.constraints.wordProperty.description"); //$NON-NLS-1$
 	}
 
+	/**
+	 * @see de.ims.icarus.search_tools.standard.AbstractConstraintFactory#getSupportedSpecifiers()
+	 */
 	@Override
 	public Object[] getSupportedSpecifiers() {
-		return ProsodyUtils.getDefaultWordPropertyKeys();
+		return SharedPropertyRegistry.getSpecifiers(SharedPropertyRegistry.WORD_LEVEL,
+				SharedPropertyRegistry.INCLUDE_COMPATIBLE_TYPES | SharedPropertyRegistry.INCLUDE_GENERAL_LEVEL,
+				LanguageUtils.getSentenceDataContentType());
 	}
 
 	/**
@@ -62,16 +67,16 @@ public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFact
 	public SearchConstraint createConstraint(Object value,
 			SearchOperator operator, Object specifier, Options options) {
 		if(options.get(SEARCH_CASESENSITIVE, DEFAULT_SEARCH_CASESENSITIVE))
-			return new ProsodyWordPropertyConstraint(value, operator, specifier);
+			return new WordPropertyConstraint(value, operator, specifier);
 		else
-			return new ProsodyWordPropertyIConstraint(value, operator, specifier);
+			return new WordPropertyIConstraint(value, operator, specifier);
 	}
 
-	private static class ProsodyWordPropertyConstraint extends DefaultConstraint {
+	private static class WordPropertyConstraint extends DefaultConstraint {
 
 		private static final long serialVersionUID = -2520716674648713610L;
 
-		public ProsodyWordPropertyConstraint(Object value, SearchOperator operator, Object specifier) {
+		public WordPropertyConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
 
@@ -81,20 +86,20 @@ public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFact
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((ProsodyTargetTree)value).getProperty(getKey());
+			return ((TargetTree)value).getProperty(getKey());
 		}
 
 		@Override
 		public SearchConstraint clone() {
-			return new ProsodyWordPropertyConstraint(getValue(), getOperator(), getSpecifier());
+			return new WordPropertyConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}
 
-	private static class ProsodyWordPropertyIConstraint extends DefaultCaseInsensitiveConstraint {
+	private static class WordPropertyIConstraint extends DefaultCaseInsensitiveConstraint {
 
 		private static final long serialVersionUID = -9209332012676323076L;
 
-		public ProsodyWordPropertyIConstraint(Object value, SearchOperator operator, Object specifier) {
+		public WordPropertyIConstraint(Object value, SearchOperator operator, Object specifier) {
 			super(TOKEN, value, operator, specifier);
 		}
 
@@ -104,13 +109,13 @@ public class ProsodyWordPropertyConstraintFactory extends AbstractConstraintFact
 
 		@Override
 		public Object getInstance(Object value) {
-			Object p = ((ProsodyTargetTree)value).getProperty(getKey());
+			Object p = ((TargetTree)value).getProperty(getKey());
 			return p==null ? null : p.toString().toLowerCase();
 		}
 
 		@Override
-		public ProsodyWordPropertyIConstraint clone() {
-			return new ProsodyWordPropertyIConstraint(getValue(), getOperator(), getSpecifier());
+		public WordPropertyIConstraint clone() {
+			return new WordPropertyIConstraint(getValue(), getOperator(), getSpecifier());
 		}
 	}
 }

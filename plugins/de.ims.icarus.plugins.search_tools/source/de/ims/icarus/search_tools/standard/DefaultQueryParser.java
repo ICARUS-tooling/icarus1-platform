@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.ConstraintFactory;
 import de.ims.icarus.search_tools.EdgeType;
@@ -363,7 +364,9 @@ public class DefaultQueryParser {
 			for(Map.Entry<String, Object> entry : properties.entrySet()) {
 				Order order = null;
 				try {
-					order = Order.parseOrder((String)entry.getValue());
+					String s = (String)entry.getValue();
+					int idx = s.indexOf(';');
+					order = Order.parseOrder(s.substring(0, idx));
 				} catch(Exception e) {
 					// ignore
 				}
@@ -391,6 +394,16 @@ public class DefaultQueryParser {
 						if(links.contains(link))
 							throw new ParseException("Duplicate link: "+link, index); //$NON-NLS-1$
 
+
+						String[] parts = ((String)entry.getValue()).split(";"); //$NON-NLS-1$
+						if(parts.length>1) {
+							SearchConstraint[] constraints = new SearchConstraint[parts.length-1];
+							for(int i=1; i<parts.length; i++) {
+								constraints[i-1] = parseDistanceConstraint(parts[i]);
+							}
+							edge.setConstraints(constraints);
+						}
+
 						node.addEdge(edge, node==edge.getTarget());
 						target.addEdge(edge, target==edge.getTarget());
 						edges.add(edge);
@@ -417,6 +430,23 @@ public class DefaultQueryParser {
 		reset();
 
 		return graph;
+	}
+
+	protected SearchConstraint parseDistanceConstraint(String s) {
+		if(s.startsWith(LanguageConstants.DISTANCE_KEY)) {
+			s = s.substring(LanguageConstants.DISTANCE_KEY.length());
+
+			for(int i=0; i<s.length(); i++) {
+				if(Character.isDigit(s.charAt(i))) {
+					SearchOperator operator = SearchOperator.getOperator(s.substring(0, i));
+					Integer value = Integer.parseInt(s.substring(i));
+
+					return new DefaultConstraint(LanguageConstants.DISTANCE_KEY, value, operator);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	protected String parseUnquotedText() throws ParseException {
@@ -565,7 +595,7 @@ public class DefaultQueryParser {
 		String key = parseId();
 		skipWS();
 
-		// ENsure existence of equality sign
+		// Ensure existence of equality sign
 		if(getAndStep()!=EQUALITY_SIGN)
 			throw new ParseException(errorMessage(
 					"Illegal character at index "+index+" - expected equality sign '='"), index); //$NON-NLS-1$ //$NON-NLS-2$
@@ -895,6 +925,22 @@ public class DefaultQueryParser {
 		return id;
 	}
 
+	protected String escapeEdgeConstraints(Order order, SearchConstraint[] constraints) {
+		if(constraints==null || constraints.length==0) {
+			return order.getToken();
+		}
+
+		StringBuilder sb = new StringBuilder().append('"').append(order.getToken());
+
+		for(SearchConstraint constraint : constraints) {
+			sb.append(';').append(constraint.getToken()).append(constraint.getOperator().getSymbol()).append(constraint.getValue());
+		}
+
+		sb.append('"');
+
+		return sb.toString();
+	}
+
 	protected void appendNode(SearchNode node, SearchEdge head, Set<SearchNode> idSet, Map<SearchNode, String> assignedIds) {
 		buffer.append(SQUAREBRAKET_OPENING);
 
@@ -911,7 +957,7 @@ public class DefaultQueryParser {
 			SearchEdge edge = node.getOutgoingEdgeAt(i);
 			if(edge.getEdgeType()==EdgeType.PRECEDENCE) {
 				String targetId = getId(edge.getTarget(), assignedIds);
-				properties.put(targetId, Order.AFTER.getToken());
+				properties.put(targetId, escapeEdgeConstraints(Order.AFTER, edge.getConstraints()));
 			}
 		}
 		if(node.getNodeType()!=NodeType.GENERAL) {

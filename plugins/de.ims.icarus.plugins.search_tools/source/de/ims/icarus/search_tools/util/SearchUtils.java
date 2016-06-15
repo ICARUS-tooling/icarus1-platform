@@ -676,7 +676,15 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 		}
 	};
 
-	public static final Comparator<ConstraintFactory> factorySorter = new Comparator<ConstraintFactory>() {
+	public static final Comparator<ConstraintFactory> factoryTokenSorter = new Comparator<ConstraintFactory>() {
+
+		@Override
+		public int compare(ConstraintFactory o1, ConstraintFactory o2) {
+			return o1.getToken().compareTo(o2.getToken());
+		}
+	};
+
+	public static final Comparator<ConstraintFactory> factoryNameSorter = new Comparator<ConstraintFactory>() {
 
 		@Override
 		public int compare(ConstraintFactory o1, ConstraintFactory o2) {

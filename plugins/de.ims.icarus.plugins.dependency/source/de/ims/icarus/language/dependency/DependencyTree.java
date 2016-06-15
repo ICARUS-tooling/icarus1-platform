@@ -63,7 +63,7 @@ public class DependencyTree {
 		setData(data);
 	}
 	
-	public static DependencyTree[] createTree(DependencyData data) {
+	public static DependencyTree[] createTree(DependencySentenceData data) {
 		if(data.isEmpty())
 			return null;
 		

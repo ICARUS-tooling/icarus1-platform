@@ -82,7 +82,8 @@ public final class SearchManager {
 
 	};
 
-	private Map<ContentType, ConstraintContext> contexts;
+	private Map<ContentType, ConstraintContext> rawContexts = new HashMap<>();
+	private Map<ContentType, ConstraintContext> mergedContexts = new HashMap<>();
 
 	// Maps strings to their compiled Pattern instance.
 	// We use a weak hash map here since we only need the Pattern
@@ -108,18 +109,35 @@ public final class SearchManager {
 		// no-op
 	}
 
+	public synchronized ConstraintContext getBasicConstraintContext(ContentType contentType) {
+		if(contentType==null)
+			throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
+
+		ConstraintContext context = rawContexts.get(contentType);
+		if(context==null) {
+			context = new ConstraintContext(contentType);
+			rawContexts.put(contentType, context);
+		}
+
+		return context;
+	}
+
 	public synchronized ConstraintContext getConstraintContext(ContentType contentType) {
 		if(contentType==null)
 			throw new NullPointerException("Invalid content-type"); //$NON-NLS-1$
 
-		if(contexts==null) {
-			contexts = new HashMap<>();
-		}
-
-		ConstraintContext context = contexts.get(contentType);
+		ConstraintContext context = mergedContexts.get(contentType);
 		if(context==null) {
+
 			context = new ConstraintContext(contentType);
-			contexts.put(contentType, context);
+
+			for(ConstraintContext other : rawContexts.values()) {
+				if(ContentTypeRegistry.isCompatible(other.getContentType(), contentType)) {
+					context.addAll(other);
+				}
+			}
+
+			mergedContexts .put(contentType, context);
 		}
 
 		return context;
@@ -190,6 +208,12 @@ public final class SearchManager {
 	public static Collection<Extension> getSearchFactoryExtensions() {
 		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
 				SearchToolsConstants.SEARCH_TOOLS_PLUGIN_ID, "SearchFactory"); //$NON-NLS-1$
+		return extensionPoint.getConnectedExtensions();
+	}
+
+	public static Collection<Extension> getSearchFactoryProxyExtensions() {
+		ExtensionPoint extensionPoint = PluginUtil.getPluginRegistry().getExtensionPoint(
+				SearchToolsConstants.SEARCH_TOOLS_PLUGIN_ID, "SearchFactoryProxy"); //$NON-NLS-1$
 		return extensionPoint.getConnectedExtensions();
 	}
 

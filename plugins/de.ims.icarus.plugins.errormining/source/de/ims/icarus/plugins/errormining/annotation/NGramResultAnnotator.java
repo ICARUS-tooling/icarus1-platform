@@ -28,7 +28,7 @@ package de.ims.icarus.plugins.errormining.annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.annotation.AnnotatedDependencyData;
 import de.ims.icarus.language.dependency.annotation.DependencyAnnotation;
 import de.ims.icarus.language.dependency.annotation.DependencyHighlighting;
@@ -101,7 +101,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 	@Override
 	protected boolean supports(Object data) {
 		//System.out.println(data);
-		return ((DependencyData) data instanceof DependencyData);
+		return ((DependencySentenceData) data instanceof DependencySentenceData);
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 	 */
 	@Override
 	protected AnnotatedData createAnnotatedData(Object data, ResultEntry entry) {
-		return new LazyAnnotatedNGramData((DependencyData) data, entry);
+		return new LazyAnnotatedNGramData((DependencySentenceData) data, entry);
 	}
 
 	@Override
@@ -281,7 +281,7 @@ public class NGramResultAnnotator extends AbstractLazyResultAnnotator {
 		private static final long serialVersionUID = 2141988696554570730L;
 		private final ResultEntry entry;
 
-		public LazyAnnotatedNGramData(DependencyData source, ResultEntry entry) {
+		public LazyAnnotatedNGramData(DependencySentenceData source, ResultEntry entry) {
 			super(source);
 			this.entry = entry;
 		}

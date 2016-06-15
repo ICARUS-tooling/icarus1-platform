@@ -39,7 +39,7 @@ import de.ims.icarus.language.DataType;
 import de.ims.icarus.language.Grammar;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.SentenceDataList;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.plugins.errormining.ItemInNuclei;
 import de.ims.icarus.util.data.ContentType;
@@ -317,10 +317,10 @@ public class NGramDataList implements SentenceDataList {
 //
 //		protected Annotation annotation = null; // TODO change to default value?
 //
-//		DependencyData dd;
+//		DependencySentenceData dd;
 //
 //		public NewNGramSentenceData(int index){
-//			dd = (DependencyData) corpus.get(index);
+//			dd = (DependencySentenceData) corpus.get(index);
 //
 //
 //		}
@@ -398,16 +398,16 @@ public class NGramDataList implements SentenceDataList {
 	 */
 
 
-	private class NewNGramSentenceData implements DependencyData {
+	private class NewNGramSentenceData implements DependencySentenceData {
 
 
 		private static final long serialVersionUID = 4937843525979650838L;
 
-		DependencyData dd;
+		DependencySentenceData dd;
 
 		public NewNGramSentenceData(int index) {
 
-			dd = (DependencyData) corpus.get(index);
+			dd = (DependencySentenceData) corpus.get(index);
 
 		}
 
@@ -448,7 +448,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getForm(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getForm(int)
 		 */
 		@Override
 		public String getForm(int index) {
@@ -456,7 +456,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getPos(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getPos(int)
 		 */
 		@Override
 		public String getPos(int index) {
@@ -464,7 +464,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getRelation(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getRelation(int)
 		 */
 		@Override
 		public String getRelation(int index) {
@@ -472,7 +472,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getLemma(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getLemma(int)
 		 */
 		@Override
 		public String getLemma(int index) {
@@ -480,7 +480,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getFeatures(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFeatures(int)
 		 */
 		@Override
 		public String getFeatures(int index) {
@@ -488,7 +488,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getHead(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getHead(int)
 		 */
 		@Override
 		public int getHead(int index) {
@@ -496,7 +496,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#isFlagSet(int, long)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#isFlagSet(int, long)
 		 */
 		@Override
 		public boolean isFlagSet(int index, long flag) {
@@ -504,7 +504,7 @@ public class NGramDataList implements SentenceDataList {
 		}
 
 		/**
-		 * @see de.ims.icarus.language.dependency.DependencyData#getFlags(int)
+		 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFlags(int)
 		 */
 		@Override
 		public long getFlags(int index) {
@@ -524,6 +524,14 @@ public class NGramDataList implements SentenceDataList {
 		 */
 		@Override
 		public Object getProperty(int index, String key) {
+			return null;
+		}
+
+		/**
+		 * @see de.ims.icarus.language.SentenceData#getProperty(java.lang.String)
+		 */
+		@Override
+		public Object getProperty(String key) {
 			return null;
 		}
 

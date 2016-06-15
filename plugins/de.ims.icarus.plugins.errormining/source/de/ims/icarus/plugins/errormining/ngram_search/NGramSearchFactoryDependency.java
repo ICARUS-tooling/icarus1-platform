@@ -67,8 +67,9 @@ public class NGramSearchFactoryDependency extends AbstractSearchFactory {
 		return new NGramSearch(this, query, options, target);
 	}
 
+	@Override
 	public ContentType getContentType() {
-		//return ContentTypeRegistry.getInstance().getTypeForClass(DependencyData.class);
+		//return ContentTypeRegistry.getInstance().getTypeForClass(DependencySentenceData.class);
 		return DependencyUtils.getDependencyContentType();
 	}
 
@@ -77,14 +78,13 @@ public class NGramSearchFactoryDependency extends AbstractSearchFactory {
 	 */
 	@Override
 	public SearchQuery createQuery() {
-		return new DefaultSearchQuery(getContentType());
+		return new DefaultSearchQuery(getConstraintContext());
 	}
 
 
 	/**
 	 * @see de.ims.icarus.search_tools.SearchFactory#getConstraintContext()
 	 */
-	@Override
 	public ConstraintContext getConstraintContext() {
 		return SearchManager.getInstance().getConstraintContext(getContentType());
 	}

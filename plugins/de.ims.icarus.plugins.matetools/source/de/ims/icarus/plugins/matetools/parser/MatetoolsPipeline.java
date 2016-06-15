@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import de.ims.icarus.config.ConfigRegistry;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.matetools.conll.MatetoolsCONLLUtils;
 import de.ims.icarus.resources.ResourceManager;
@@ -136,7 +136,7 @@ public class MatetoolsPipeline {
 		return running.get();
 	}
 
-	public DependencyData runPipeline(String[] tokens, ModelStorage storage, Options options) throws Exception {
+	public DependencySentenceData runPipeline(String[] tokens, ModelStorage storage, Options options) throws Exception {
 		if(!running.compareAndSet(false, true))
 			throw new IllegalStateException("Pipeline already running"); //$NON-NLS-1$
 
@@ -220,7 +220,7 @@ public class MatetoolsPipeline {
 			SentenceData09 data = new SentenceData09();
 			data.init(tokens);
 
-			DependencyData output = null;
+			DependencySentenceData output = null;
 
 			// Now load tools if required and apply pipeline
 
@@ -366,6 +366,6 @@ public class MatetoolsPipeline {
 	public interface PipelineOwner {
 		String getName();
 
-		void outputChanged(DependencyData currentOutput);
+		void outputChanged(DependencySentenceData currentOutput);
 	}
 }

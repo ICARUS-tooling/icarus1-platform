@@ -50,7 +50,7 @@ import de.ims.icarus.util.annotation.Annotation;
  *
  */
 public class MutableDependencyData extends AbstractMutableSentenceData
-		implements DependencyConstants, AnnotatedSentenceData, DependencyData, Cloneable {
+		implements DependencyConstants, AnnotatedSentenceData, DependencySentenceData, Cloneable {
 
 	private static final long serialVersionUID = 8905987553461570238L;
 
@@ -228,10 +228,10 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 	public void copyFrom(SentenceData source) {
 		if(source==null)
 			throw new NullPointerException("Invalid source"); //$NON-NLS-1$
-		if (!(source instanceof DependencyData))
+		if (!(source instanceof DependencySentenceData))
 			throw new UnsupportedSentenceDataException("Unsupported type: "+source.getClass()); //$NON-NLS-1$
 
-		DependencyData data = (DependencyData) source;
+		DependencySentenceData data = (DependencySentenceData) source;
 		items.clear();
 		for (int i = 0; i < data.length(); i++) {
 			items.add(this.new DependencyDataEntry(data, i));
@@ -527,7 +527,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			copyFrom(source);
 		}
 
-		public DependencyDataEntry(DependencyData source, int index) {
+		public DependencyDataEntry(DependencySentenceData source, int index) {
 			copyFrom(source, index);
 		}
 
@@ -542,7 +542,7 @@ public class MutableDependencyData extends AbstractMutableSentenceData
 			flags = source.flags;
 		}
 
-		protected void copyFrom(DependencyData source, int idx) {
+		protected void copyFrom(DependencySentenceData source, int idx) {
 			form = source.getForm(idx);
 			lemma = source.getLemma(idx);
 			features = source.getFeatures(idx);

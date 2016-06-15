@@ -27,12 +27,12 @@ package de.ims.icarus.search_tools.constraints;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.language.dependency.search.DependencyTargetTree;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchOperator;
 import de.ims.icarus.search_tools.standard.AbstractConstraintFactory;
 import de.ims.icarus.search_tools.standard.DefaultConstraint;
 import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
+import de.ims.icarus.search_tools.tree.TargetTree;
 import de.ims.icarus.util.Options;
 
 /**
@@ -94,7 +94,7 @@ public class DistanceConstraintFactory extends AbstractConstraintFactory {
 
 		@Override
 		public Object getInstance(Object value) {
-			return ((DependencyTargetTree)value).getDistance();
+			return ((TargetTree)value).getDistance();
 		}
 
 		@Override

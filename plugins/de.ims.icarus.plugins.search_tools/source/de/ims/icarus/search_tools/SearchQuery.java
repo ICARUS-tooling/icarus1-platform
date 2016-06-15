@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools;
@@ -42,11 +42,13 @@ public interface SearchQuery {
 	 * should be thrown.
 	 * <p>
 	 * Note the special requirements mentioned at {@link #getQueryString()}
-	 * 
+	 *
 	 * @see #getQueryString()
 	 */
 	void parseQueryString(String query) throws UnsupportedFormatException;
-	
+
+	ConstraintContext getConstraintContext();
+
 	/**
 	 * Returns a textual representation of this {@code SearchQuery} instance.
 	 * If it was created using a {@code query} string then this method should
@@ -55,7 +57,7 @@ public interface SearchQuery {
 	 * <p>
 	 * <b>Note:</b> It is required that all implementations honor the following
 	 * special convention. A {@code query} string obtained from a call to
-	 * {@link #getQueryString()} on some {@code SearchQuery} <i>A</i> must 
+	 * {@link #getQueryString()} on some {@code SearchQuery} <i>A</i> must
 	 * result in exactly the same collection of constraint objects when passed
 	 * to the {@link #parseQueryString(String)} method of some other {@code SearchQuery}
 	 * instance <i>B</i>. This holds as long as both instances operate on the
@@ -64,28 +66,29 @@ public interface SearchQuery {
 	 * string matches the current collection of constraints.
 	 * <p>
 	 * This special convention applies only in a <i>one-way</i> manner! It is
-	 * <b>not</b> required that an implementation guarantees consistency of 
+	 * <b>not</b> required that an implementation guarantees consistency of
 	 * {@link #getQueryString()} results in regard to the original input
-	 * passed to {@link #parseQueryString(String)}! 
-	 * 
+	 * passed to {@link #parseQueryString(String)}!
+	 *
 	 * @see #parseQueryString(String)
 	 */
 	String getQueryString();
-	
+
 	/**
 	 * Tests this {@code SearchQuery} instance for equality with the given object.
 	 * Equality in terms of {@code SearchQuery} objects is defined by equality of the
 	 * strings returned by calls to their respective {@link #getQueryString()} methods!
 	 */
+	@Override
 	boolean equals(Object obj);
-	
+
 	void setProperty(String key, Object value);
-	
+
 	Object getProperty(String key);
-	
+
 	SearchGraph getSearchGraph();
-	
+
 	void setSearchGraph(SearchGraph graph) throws UnsupportedFormatException;
-	
+
 	SearchQuery clone();
 }

@@ -43,8 +43,6 @@ import de.ims.icarus.language.LanguageUtils;
 import de.ims.icarus.language.SentenceData;
 import de.ims.icarus.language.dependency.annotation.DependencyAnnotation;
 import de.ims.icarus.language.treebank.Treebank;
-import de.ims.icarus.search_tools.ConstraintContext;
-import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchMode;
 import de.ims.icarus.search_tools.SearchParameters;
 import de.ims.icarus.util.Exceptions;
@@ -89,7 +87,7 @@ public class DependencyUtils implements DependencyConstants, LanguageConstants {
 		return options;
 	}
 
-	public static DependencyData createEmptySentenceData() {
+	public static DependencySentenceData createEmptySentenceData() {
 		return new SimpleDependencyData();
 	}
 
@@ -97,7 +95,7 @@ public class DependencyUtils implements DependencyConstants, LanguageConstants {
 		return "[pos=<*>[form=the]][pos=NN]"; //$NON-NLS-1$
 	}
 
-	public static DependencyData createExampleSentenceData() {
+	public static DependencySentenceData createExampleSentenceData() {
 		return new SimpleDependencyData(
 				-1,
 				new String[] { "That", "thing", "I", "will", "never", "forget" },  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
@@ -317,7 +315,7 @@ public class DependencyUtils implements DependencyConstants, LanguageConstants {
 	}
 
 	public static ContentType getDependencyContentType() {
-		return ContentTypeRegistry.getInstance().getTypeForClass(DependencyData.class);
+		return ContentTypeRegistry.getInstance().getTypeForClass(DependencySentenceData.class);
 	}
 
 	public static ContentType getDependencyNodeContentType() {
@@ -330,10 +328,6 @@ public class DependencyUtils implements DependencyConstants, LanguageConstants {
 
 	public static String getForm(DependencyNodeData item) {
 		return item.hasChildren() ? item.getForm2() : item.getForm();
-	}
-
-	public static ConstraintContext getDependencyContext() {
-		return SearchManager.getInstance().getConstraintContext(getDependencyContentType());
 	}
 
 	public static String getForms(DependencyNodeData[] items) {

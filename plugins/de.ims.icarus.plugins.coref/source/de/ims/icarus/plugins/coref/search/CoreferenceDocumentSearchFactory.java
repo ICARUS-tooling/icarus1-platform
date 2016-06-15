@@ -29,12 +29,9 @@ import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.registry.AllocationDescriptor;
 import de.ims.icarus.language.coref.registry.CoreferenceRegistry;
 import de.ims.icarus.language.coref.registry.DocumentSetDescriptor;
-import de.ims.icarus.search_tools.ConstraintContext;
 import de.ims.icarus.search_tools.Search;
-import de.ims.icarus.search_tools.SearchManager;
 import de.ims.icarus.search_tools.SearchQuery;
 import de.ims.icarus.search_tools.standard.AbstractSearchFactory;
-import de.ims.icarus.search_tools.standard.DefaultSearchQuery;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.UnsupportedFormatException;
 import de.ims.icarus.util.data.ContentType;
@@ -60,24 +57,9 @@ public class CoreferenceDocumentSearchFactory extends AbstractSearchFactory {
 		return new CoreferenceDocumentSearch(this, query, options, target);
 	}
 
+	@Override
 	public ContentType getContentType() {
 		return ContentTypeRegistry.getInstance().getTypeForClass(DocumentData.class);
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#createQuery()
-	 */
-	@Override
-	public SearchQuery createQuery() {
-		return new DefaultSearchQuery(getContentType());
-	}
-
-	/**
-	 * @see de.ims.icarus.search_tools.SearchFactory#getConstraintContext()
-	 */
-	@Override
-	public ConstraintContext getConstraintContext() {
-		return SearchManager.getInstance().getConstraintContext(getContentType());
 	}
 
 	/**

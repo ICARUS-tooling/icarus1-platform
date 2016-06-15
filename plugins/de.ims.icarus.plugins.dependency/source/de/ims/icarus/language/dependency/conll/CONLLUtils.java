@@ -26,7 +26,7 @@
 package de.ims.icarus.language.dependency.conll;
 
 import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
 import de.ims.icarus.util.strings.CharTableBuffer;
@@ -87,7 +87,7 @@ public class CONLLUtils {
 	private static final String DELIMITER = "\\s+"; //$NON-NLS-1$
 	private static final String EMPTY = ""; //$NON-NLS-1$
 
-	public static DependencyData readGold09(CharTableBuffer buffer, int corpusIndex) {
+	public static DependencySentenceData readGold09(CharTableBuffer buffer, int corpusIndex) {
 		if(buffer.isEmpty())
 			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
 
@@ -142,7 +142,7 @@ public class CONLLUtils {
 		return new SimpleDependencyData(index, forms, lemmas, features, poss, relations, heads, flags);
 	}
 
-	public static DependencyData readPredicted09(CharTableBuffer buffer, int corpusIndex) {
+	public static DependencySentenceData readPredicted09(CharTableBuffer buffer, int corpusIndex) {
 		if(buffer.isEmpty())
 			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
 
@@ -197,7 +197,7 @@ public class CONLLUtils {
 		return new SimpleDependencyData(index, forms, lemmas, features, poss, relations, heads, flags);
 	}
 
-	public static DependencyData readCourse06(CharTableBuffer buffer, int corpusIndex) {
+	public static DependencySentenceData readCourse06(CharTableBuffer buffer, int corpusIndex) {
 		if(buffer.isEmpty())
 			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
 
@@ -252,7 +252,7 @@ public class CONLLUtils {
 		return new SimpleDependencyData(index, forms, lemmas, features, poss, relations, heads, flags);
 	}
 
-	public static DependencyData readFine06(CharTableBuffer buffer, int corpusIndex) {
+	public static DependencySentenceData readFine06(CharTableBuffer buffer, int corpusIndex) {
 		if(buffer.isEmpty())
 			throw new IllegalArgumentException("No rows to read in buffer"); //$NON-NLS-1$
 

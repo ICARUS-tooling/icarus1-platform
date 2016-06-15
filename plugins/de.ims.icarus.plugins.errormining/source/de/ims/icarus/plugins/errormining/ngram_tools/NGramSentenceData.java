@@ -102,7 +102,6 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 		return annotation;
 	}
 
-
 	/**
 	 * @see de.ims.icarus.ui.text.ikarus_systems.icarus.ui.helper.TextItem#getText()
 	 */
@@ -110,8 +109,6 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 	public String getText() {
 		return null;
 	}
-
-
 
 	/**
 	 * @see de.ims.icarus.language.SentenceData#getIndex()
@@ -121,13 +118,61 @@ public class NGramSentenceData implements AnnotatedSentenceData {
 		return -1;
 	}
 
-
-
 	/**
 	 * @see de.ims.icarus.language.SentenceData#getProperty(int, java.lang.String)
 	 */
 	@Override
 	public Object getProperty(int index, String key) {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getPos(int)
+	 */
+	@Override
+	public String getPos(int index) {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getLemma(int)
+	 */
+	@Override
+	public String getLemma(int index) {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getFeatures(int)
+	 */
+	@Override
+	public String getFeatures(int index) {
+		return null;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#isFlagSet(int, long)
+	 */
+	@Override
+	public boolean isFlagSet(int index, long flag) {
+		return false;
+	}
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getFlags(int)
+	 */
+	@Override
+	public long getFlags(int index) {
+		return 0;
+	}
+
+
+
+	/**
+	 * @see de.ims.icarus.language.SentenceData#getProperty(java.lang.String)
+	 */
+	@Override
+	public Object getProperty(String key) {
 		return null;
 	}
 

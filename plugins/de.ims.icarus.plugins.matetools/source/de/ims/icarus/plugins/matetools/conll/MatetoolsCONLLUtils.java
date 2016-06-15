@@ -27,7 +27,7 @@ package de.ims.icarus.plugins.matetools.conll;
 
 import is2.data.SentenceData09;
 import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.dependency.DependencyData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyUtils;
 import de.ims.icarus.language.dependency.SimpleDependencyData;
 import de.ims.icarus.util.strings.StringUtil;
@@ -46,7 +46,7 @@ public final class MatetoolsCONLLUtils {
 		// no-op
 	}
 
-	public static DependencyData readGold(SentenceData09 input, int corpusIndex, boolean skipRoot, boolean inferProjectivityFlags) {
+	public static DependencySentenceData readGold(SentenceData09 input, int corpusIndex, boolean skipRoot, boolean inferProjectivityFlags) {
 		int size = input.forms.length;
 		if(skipRoot) {
 			size--;
@@ -96,7 +96,7 @@ public final class MatetoolsCONLLUtils {
 				poss, relations, heads, flags);
 	}
 
-	public static DependencyData readPredicted(SentenceData09 input, int corpusIndex, boolean skipRoot, boolean inferProjectivityFlags) {
+	public static DependencySentenceData readPredicted(SentenceData09 input, int corpusIndex, boolean skipRoot, boolean inferProjectivityFlags) {
 		int size = input.forms.length;
 		if(skipRoot) {
 			size--;

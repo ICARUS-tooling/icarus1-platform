@@ -99,6 +99,7 @@ public abstract class AbstractSentenceTargetTree<E extends SentenceData> extends
 				LanguageConstants.DATA_UNDEFINED_VALUE : Math.abs(head-nodePointer);
 	}
 
+	@Override
 	public int getDirection() {
 		/*if(edgePointer==-1)
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/

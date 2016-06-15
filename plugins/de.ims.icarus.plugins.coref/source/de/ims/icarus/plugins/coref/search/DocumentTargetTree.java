@@ -32,8 +32,8 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
@@ -215,6 +215,7 @@ public class DocumentTargetTree extends AbstractTargetTree<DocumentData> {
 		return getEdge().getProperty(key);
 	}
 
+	@Override
 	public int getDirection() {
 		/*if(edgePointer==-1)
 			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
@@ -225,6 +226,15 @@ public class DocumentTargetTree extends AbstractTargetTree<DocumentData> {
 
 		return edge.getTarget().compareTo(edge.getSource())>0 ?
 				LanguageConstants.DATA_LEFT_VALUE : LanguageConstants.DATA_RIGHT_VALUE;
+	}
+
+	/**
+	 * @see de.ims.icarus.search_tools.tree.TargetTree#getDistance()
+	 */
+	@Override
+	public int getDistance() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 	// DOCUMENT METHODS
@@ -270,5 +280,10 @@ public class DocumentTargetTree extends AbstractTargetTree<DocumentData> {
 		Span span = getSpan();
 		int head = span.getHead();
 		return sentence.getProperty(head, key);
+	}
+
+	@Override
+	public Object getProperty(String key) {
+		return getSpanProperty(key);
 	}
 }

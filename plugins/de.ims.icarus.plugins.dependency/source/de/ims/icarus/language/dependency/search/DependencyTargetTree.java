@@ -25,9 +25,8 @@
  */
 package de.ims.icarus.language.dependency.search;
 
-import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.dependency.DependencyData;
-import de.ims.icarus.search_tools.tree.AbstractTargetTree;
+import de.ims.icarus.language.dependency.DependencySentenceData;
+import de.ims.icarus.search_tools.tree.AbstractSentenceTargetTree;
 import de.ims.icarus.util.CorruptedStateException;
 
 
@@ -38,7 +37,7 @@ import de.ims.icarus.util.CorruptedStateException;
  * @version $Id$
  *
  */
-public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
+public class DependencyTargetTree extends AbstractSentenceTargetTree<DependencySentenceData> {
 
 	public DependencyTargetTree() {
 		super();
@@ -46,7 +45,7 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 
 	@Override
 	protected boolean supports(Object data) {
-		return data instanceof DependencyData;
+		return data instanceof DependencySentenceData;
 	}
 
 	@Override
@@ -63,6 +62,7 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 
 	// NODE METHODS
 
+	@Override
 	public String getForm() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
@@ -70,6 +70,7 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 		return data.getForm(nodePointer);
 	}
 
+	@Override
 	public String getPos() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
@@ -77,6 +78,7 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 		return data.getPos(nodePointer);
 	}
 
+	@Override
 	public String getLemma() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
@@ -87,6 +89,7 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 	/**
 	 * Returns an always non-null array of feature expressions
 	 */
+	@Override
 	public String getFeatures() {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$
@@ -105,36 +108,9 @@ public class DependencyTargetTree extends AbstractTargetTree<DependencyData> {
 		return data.getRelation(nodePointer);
 	}
 
-	public int getDistance() {
-		/*if(edgePointer==-1)
-			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
-		if(nodePointer==-1)
-			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-
-		int head = heads[nodePointer];
-
-		return head==LanguageConstants.DATA_HEAD_ROOT ?
-				LanguageConstants.DATA_UNDEFINED_VALUE : Math.abs(head-nodePointer);
-	}
-
-	public int getDirection() {
-		/*if(edgePointer==-1)
-			throw new IllegalStateException("Current scope is not on an edge"); //$NON-NLS-1$*/
-		if(nodePointer==-1)
-			throw new CorruptedStateException("Scope on edge but node pointer cleared"); //$NON-NLS-1$
-
-		int head = heads[nodePointer];
-
-		if(head==LanguageConstants.DATA_HEAD_ROOT) {
-			return LanguageConstants.DATA_UNDEFINED_VALUE;
-		}
-
-		return nodePointer<head ?
-				LanguageConstants.DATA_LEFT_VALUE : LanguageConstants.DATA_RIGHT_VALUE;
-	}
-
 	// GENERAL METHODS
 
+	@Override
 	public boolean isFlagSet(long flag) {
 		if(nodePointer==-1)
 			throw new IllegalStateException("Current scope is not on a node"); //$NON-NLS-1$

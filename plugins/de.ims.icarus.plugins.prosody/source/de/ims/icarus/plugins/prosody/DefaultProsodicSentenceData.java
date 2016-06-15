@@ -70,7 +70,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getPos(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getPos(int)
 	 */
 	@Override
 	public String getPos(int index) {
@@ -78,7 +78,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getRelation(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getRelation(int)
 	 */
 	@Override
 	public String getRelation(int index) {
@@ -86,7 +86,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getLemma(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getLemma(int)
 	 */
 	@Override
 	public String getLemma(int index) {
@@ -94,7 +94,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getFeatures(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFeatures(int)
 	 */
 	@Override
 	public String getFeatures(int index) {
@@ -102,7 +102,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getHead(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getHead(int)
 	 */
 	@Override
 	public int getHead(int index) {
@@ -111,7 +111,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#isFlagSet(int, long)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#isFlagSet(int, long)
 	 */
 	@Override
 	public boolean isFlagSet(int index, long flag) {
@@ -119,7 +119,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 	}
 
 	/**
-	 * @see de.ims.icarus.language.dependency.DependencyData#getFlags(int)
+	 * @see de.ims.icarus.language.dependency.DependencySentenceData#getFlags(int)
 	 */
 	@Override
 	public long getFlags(int index) {

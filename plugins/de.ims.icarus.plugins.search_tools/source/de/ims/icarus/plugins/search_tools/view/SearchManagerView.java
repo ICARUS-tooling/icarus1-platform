@@ -665,7 +665,7 @@ public class SearchManagerView extends View {
 			}
 
 			try {
-				ContentType contentType = factory.getConstraintContext().getContentType();
+				ContentType contentType = factory.getContentType();
 				SearchTargetDialog dialog = new SearchTargetDialog(contentType);
 				dialog.showDialog();
 
@@ -1580,22 +1580,23 @@ public class SearchManagerView extends View {
 
 		protected SearchEditor() {
 			Action a;
+			ActionManager actionManager = getDefaultActionManager();
 
 			formBuilder = FormBuilder.newLocalizingBuilder(new JPanel());
 			// Factory
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.selectFactoryAction"); //$NON-NLS-1$
+			a = actionManager.getAction("plugins.searchTools.searchManagerView.selectFactoryAction"); //$NON-NLS-1$
 			formBuilder.addEntry("factory", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.factory", null, a)); //$NON-NLS-1$
 			// Target
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.selectTargetAction"); //$NON-NLS-1$
+			a = actionManager.getAction("plugins.searchTools.searchManagerView.selectTargetAction"); //$NON-NLS-1$
 			formBuilder.addEntry("target", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.target", null, a)); //$NON-NLS-1$
 			// Query
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.editQueryAction"); //$NON-NLS-1$
+			a = actionManager.getAction("plugins.searchTools.searchManagerView.editQueryAction"); //$NON-NLS-1$
 			formBuilder.addEntry("query", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.query", null, a)); //$NON-NLS-1$
 			// Parameters
-			a = getDefaultActionManager().getAction("plugins.searchTools.searchManagerView.editParametersAction"); //$NON-NLS-1$
+			a = actionManager.getAction("plugins.searchTools.searchManagerView.editParametersAction"); //$NON-NLS-1$
 			formBuilder.addEntry("parameters", new SelectFormEntry( //$NON-NLS-1$
 					"plugins.searchTools.searchManagerView.searchEditor.labels.parameters", null, a)); //$NON-NLS-1$
 
@@ -1668,6 +1669,9 @@ public class SearchManagerView extends View {
 
 			// Parameters
 			// TODO provide any kind of textual representation?
+
+			ActionManager actionManager = getDefaultActionManager();
+			actionManager.setEnabled(descriptor.getTarget()!=null, "plugins.searchTools.searchManagerView.editQueryAction"); //$NON-NLS-1$
 		}
 
 		/**
