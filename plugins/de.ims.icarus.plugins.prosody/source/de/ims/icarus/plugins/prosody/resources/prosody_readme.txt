@@ -63,6 +63,7 @@ Supported header properties for the prosody reader:
 	markAccentOnWords				flag to indicate whether words should receive a marker when they are found to host an accented syllable
 	onlyConsiderStressedSylables	flag to indicate that only syllables should be considered for the above accent marking when they are also stressed
 	accentExcursion					excursion (min value of either c1 or c2) to be used as threshold when performing above mentioned accent marking
+	ignoreColumnCountMismatch		flag to ignore additional columns in the data file that are not covered by valid column definitions in the scheme header
 	
 Column format for the prosody reader's header section:
 	[property_key,type,level,role,separator]

@@ -15,20 +15,21 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
 
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 332 $
+ * $Date: 2014-12-16 13:55:39 +0100 (Di, 16 Dez 2014) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.prosody/source/de/ims/icarus/plugins/prosody/pattern/CorefAccessor.java $
  *
- * $LastChangedDate$
- * $LastChangedRevision$
- * $LastChangedBy$
+ * $LastChangedDate: 2014-12-16 13:55:39 +0100 (Di, 16 Dez 2014) $
+ * $LastChangedRevision: 332 $
+ * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.plugins.prosody.pattern;
+package de.ims.icarus.plugins.coref.pattern;
 
 import java.util.Map;
 
 import de.ims.icarus.Core;
-import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
+import de.ims.icarus.language.coref.Edge;
+import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.collections.CollectionUtils;
@@ -36,17 +37,17 @@ import de.ims.icarus.util.strings.pattern.Accessor;
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: CorefAccessor.java 332 2014-12-16 12:55:39Z mcgaerty $
  *
  */
-public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
+public abstract class CorefAccessor extends Accessor<CorefLevel> {
 
 	// Modifiers for values
 	protected String format;
 	protected int leftOffset = -1, rightOffset = -1, offset = -1;
 	protected int[] positions;
 
-	protected ProsodyAccessor(String source, String specifier, ProsodyLevel type) {
+	protected CorefAccessor(String source, String specifier, CorefLevel type) {
 		super(source, specifier, type);
 	}
 
@@ -92,7 +93,7 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 
 	@Override
 	protected Object fetchValue(Object data, Options env) {
-		return fetchProsodyValue((PatternDataProxy) data, env);
+		return fetchProsodyValue((CorefDataProxy) data, env);
 	}
 
 	@Override
@@ -106,9 +107,9 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 		}
 	}
 
-	protected abstract Object fetchProsodyValue(PatternDataProxy data, Options env);
+	protected abstract Object fetchProsodyValue(CorefDataProxy data, Options env);
 
-	public static ProsodyAccessor forLevel(ProsodyLevel level, String source, String specifier) {
+	public static CorefAccessor forLevel(CorefLevel level, String source, String specifier) {
 		if (level == null)
 			throw new NullPointerException("Invalid level"); //$NON-NLS-1$
 
@@ -119,8 +120,8 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 			return new DocumentAccessor(source, specifier);
 		case SENTENCE:
 			return new SentenceAccessor(source, specifier);
-		case SYLLABLE:
-			return new SyllableAccessor(source, specifier);
+		case SPAN:
+			return new SpanAccessor(source, specifier);
 		case WORD:
 			return new WordAccessor(source, specifier);
 
@@ -129,11 +130,11 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 		}
 	}
 
-	public static class WrappedProsodyAccessor extends ProsodyAccessor {
+	public static class WrappedProsodyAccessor extends CorefAccessor {
 
-		private final ProsodyTextSource textSource;
+		private final CorefTextSource textSource;
 
-		public WrappedProsodyAccessor(ProsodyTextSource textSource) {
+		public WrappedProsodyAccessor(CorefTextSource textSource) {
 			super("", "", textSource.getAccessor().getLevel()); //$NON-NLS-1$ //$NON-NLS-2$
 
 			this.textSource = textSource;
@@ -143,72 +144,85 @@ public abstract class ProsodyAccessor extends Accessor<ProsodyLevel> {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyAccessor#fetchProsodyValue(de.ims.icarus.plugins.prosody.pattern.PatternDataProxy, de.ims.icarus.util.Options)
 		 */
 		@Override
-		protected Object fetchProsodyValue(PatternDataProxy data, Options env) {
+		protected Object fetchProsodyValue(CorefDataProxy data, Options env) {
 			return textSource.getText(data, env);
 		}
 
 	}
 
-	public static class SyllableAccessor extends ProsodyAccessor {
-
-		public SyllableAccessor(String source, String specifier) {
-			super(source, specifier, ProsodyLevel.SYLLABLE);
-		}
-
-		@Override
-		public Object fetchProsodyValue(PatternDataProxy data, Options env) {
-			ProsodicSentenceData sentenceData = (ProsodicSentenceData) data.getSentence();
-			return sentenceData.getSyllableProperty(data.getWordIndex(), getSpecifier(), data.getSyllableIndex());
-		}
-	}
-
-	public static class WordAccessor extends ProsodyAccessor {
+	public static class WordAccessor extends CorefAccessor {
 
 		public WordAccessor(String source, String specifier) {
-			super(source, specifier, ProsodyLevel.WORD);
+			super(source, specifier, CorefLevel.WORD);
 		}
 
 		@Override
-		public Object fetchProsodyValue(PatternDataProxy data, Options env) {
+		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
 			return data.getSentence().getProperty(data.getWordIndex(), getSpecifier());
 		}
 
 	}
 
-	public static class SentenceAccessor extends ProsodyAccessor {
+	public static class SpanAccessor extends CorefAccessor {
 
-		public SentenceAccessor(String source, String specifier) {
-			super(source, specifier, ProsodyLevel.SENTENCE);
+		public SpanAccessor(String source, String specifier) {
+			super(source, specifier, CorefLevel.SPAN);
 		}
 
 		@Override
-		public Object fetchProsodyValue(PatternDataProxy data, Options env) {
+		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+			Span span = data.getSpan();
+			return span==null ? null : span.getProperty(getSpecifier());
+		}
+	}
+
+	public static class EdgeAccessor extends CorefAccessor {
+
+		public EdgeAccessor(String source, String specifier) {
+			super(source, specifier, CorefLevel.EDGE);
+		}
+
+		@Override
+		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+			Edge edge = data.getEdge();
+			return edge==null ? null : edge.getProperty(getSpecifier());
+		}
+	}
+
+	public static class SentenceAccessor extends CorefAccessor {
+
+		public SentenceAccessor(String source, String specifier) {
+			super(source, specifier, CorefLevel.SENTENCE);
+		}
+
+		@Override
+		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
 			return data.getSentence().getProperty(getSpecifier());
 		}
 
 	}
 
-	public static class DocumentAccessor extends ProsodyAccessor {
+	public static class DocumentAccessor extends CorefAccessor {
 
 		public DocumentAccessor(String source, String specifier) {
-			super(source, specifier, ProsodyLevel.DOCUMENT);
+			super(source, specifier, CorefLevel.DOCUMENT);
 		}
 
 		@Override
-		public Object fetchProsodyValue(PatternDataProxy data, Options env) {
+		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
 			return data.getDocument().getProperty(getSpecifier());
 		}
 
 	}
 
-	public static class EnvironmentAccessor extends ProsodyAccessor {
+	public static class EnvironmentAccessor extends CorefAccessor {
 
 		public EnvironmentAccessor(String source, String specifier) {
-			super(source, specifier, ProsodyLevel.ENVIRONMENT);
+			super(source, specifier, CorefLevel.ENVIRONMENT);
 		}
 
 		@Override
-		public Object fetchProsodyValue(PatternDataProxy data, Options env) {
+		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
 			Object value = env==null ? null : env.get(getSpecifier());
 			return value==null ? Core.getCore().getProperty(getSpecifier()) : value;
 		}

@@ -65,7 +65,7 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodyUtils;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
-import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.PatternDataProxy;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.sound.SoundException;
@@ -141,7 +141,7 @@ public class SentencePanel extends JPanel{
 			BorderFactory.createEmptyBorder(0, 1, 0, 1));
 
 
-	private static final ProsodyData patternProxy = new ProsodyData();
+	private static final PatternDataProxy patternProxy = new PatternDataProxy();
 
 	public SentencePanel(PanelConfig config) {
 		if (config == null)

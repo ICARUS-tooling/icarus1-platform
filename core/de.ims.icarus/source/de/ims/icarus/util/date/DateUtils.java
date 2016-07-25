@@ -48,26 +48,33 @@ public class DateUtils {
 		return format;
 	}
 
-	private static SimpleDateFormat dateInFormat = createFormat();
-	private static SimpleDateFormat dateOutFormat = createFormat();
-	private static SimpleDateFormat localDateFormat = new SimpleDateFormat(DATE_PATTERN);
+	private static ThreadLocal<SimpleDateFormat> dateFormat = new ThreadLocal<SimpleDateFormat>(){
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return createFormat();
+		}
+	};
+
+	private static ThreadLocal<SimpleDateFormat> localDateFormat = new ThreadLocal<SimpleDateFormat>(){
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat(DATE_PATTERN);
+		}
+	};
 
 	public static String formatDate(Date date) {
 		if(date==null) {
 			return null;
 		}
-		synchronized (dateOutFormat) {
-			return dateOutFormat.format(date);
-		}
+
+		return dateFormat.get().format(date);
 	}
 
 	public static String formatLocalDate(Date date) {
 		if(date==null) {
 			return null;
 		}
-		synchronized (localDateFormat) {
-			return localDateFormat.format(date);
-		}
+		return localDateFormat.get().format(date);
 	}
 
 	public static String formatDuration(long time) {
@@ -143,8 +150,6 @@ public class DateUtils {
 	}
 
 	public static Date parseDate(String s) throws ParseException {
-		synchronized (dateInFormat) {
-			return dateInFormat.parse(s);
-		}
+		return dateFormat.get().parse(s);
 	}
 }

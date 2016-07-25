@@ -2363,6 +2363,10 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 		 */
 		@Override
 		public void stateChanged(ChangeEvent e) {
+			if(graph==null) {
+				return;
+			}
+
 			// We delay reaction to config changes to give
 			// styles and other sub-tools registered to the config
 			// registry the chance for proper loading. Otherwise
@@ -2513,6 +2517,10 @@ public abstract class GraphPresenter extends mxGraphComponent implements AWTPres
 			// Only load general graph properties here
 			// All layout/style related fields should only be read
 			// by GraphStyle or GraphLayout implementations!
+
+			if(getGraph()==null) {
+				return;
+			}
 
 			setGridVisible(getBoolean("gridVisible")); //$NON-NLS-1$
 			getGraph().setGridEnabled(getBoolean("gridEnabled")); //$NON-NLS-1$

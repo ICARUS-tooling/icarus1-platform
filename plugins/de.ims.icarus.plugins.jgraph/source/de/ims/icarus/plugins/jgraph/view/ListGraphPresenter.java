@@ -191,7 +191,7 @@ public class ListGraphPresenter implements AWTPresenter {
 
 		// Ensure list presenter
 		ListPresenter listPresenter = this.listPresenter;
-		if(listPresenter==null || !PresenterUtils.presenterSupports(listPresenter, data)) {
+		if(listPresenter==null || true /*|| !PresenterUtils.presenterSupports(listPresenter, data)*/) {
 			listPresenter = UIHelperRegistry.globalRegistry().findHelper(ListPresenter.class, data);
 		}
 
@@ -207,7 +207,7 @@ public class ListGraphPresenter implements AWTPresenter {
 		ContentType entryType = dataList.getContentType();
 		//entryType = ContentTypeRegistry.getInstance().getType("DependencyDataContentType");
 		GraphBasedPresenter graphPresenter = this.graphPresenter;
-		if(graphPresenter==null || !PresenterUtils.presenterSupports(graphPresenter, entryType)) {
+		if(graphPresenter==null || true /*|| !PresenterUtils.presenterSupports(graphPresenter, entryType)*/) {
 			graphPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphBasedPresenter.class, entryType, true, true);
 		}
 
@@ -318,7 +318,7 @@ public class ListGraphPresenter implements AWTPresenter {
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
 
 		if(!PresenterUtils.presenterSupports(this, data))
-			throw new UnsupportedPresentationDataException("Cannot present data: "+data.getClass());
+			throw new UnsupportedPresentationDataException("Cannot present data: "+data.getClass()); //$NON-NLS-1$
 
 		displayData(data, options);
 	}

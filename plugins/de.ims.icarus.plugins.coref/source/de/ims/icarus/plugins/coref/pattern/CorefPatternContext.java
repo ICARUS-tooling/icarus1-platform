@@ -15,20 +15,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
 
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 459 $
+ * $Date: 2016-05-16 23:25:11 +0200 (Mo, 16 Mai 2016) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.prosody/source/de/ims/icarus/plugins/prosody/pattern/CorefPatternContext.java $
  *
- * $LastChangedDate$
- * $LastChangedRevision$
- * $LastChangedBy$
+ * $LastChangedDate: 2016-05-16 23:25:11 +0200 (Mo, 16 Mai 2016) $
+ * $LastChangedRevision: 459 $
+ * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.plugins.prosody.pattern;
+package de.ims.icarus.plugins.coref.pattern;
 
 import java.text.ParseException;
 import java.util.Map;
 
-import de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource.IndexIterator;
+import de.ims.icarus.plugins.coref.pattern.CorefTextSource.IndexIterator;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.util.strings.pattern.Accessor;
 import de.ims.icarus.util.strings.pattern.PatternContext;
@@ -37,53 +37,21 @@ import de.ims.icarus.util.strings.pattern.TextSource;
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: CorefPatternContext.java 459 2016-05-16 21:25:11Z mcgaerty $
  *
  */
-public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
+public class CorefPatternContext implements PatternContext<CorefLevel> {
 
-//	public static void main(String[] args) throws Exception {
-//		DocumentSet documentSet = new DocumentSet();
-//		DefaultProsodicDocumentData document = new DefaultProsodicDocumentData(documentSet, 0);
-//
-//		String[] forms = new String[]{"This", "is", "a", "test"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//		DefaultProsodicSentenceData sentence = new DefaultProsodicSentenceData(document, forms);
-//		sentence.setProperty("id", 1.234); //$NON-NLS-1$
-//
-//		for(int i=0; i<sentence.length(); i++) {
-//			sentence.setProperty(i, "form", sentence.getForm(i)); //$NON-NLS-1$
-//			sentence.setProperty(i, "lemma", sentence.getForm(i).toLowerCase()); //$NON-NLS-1$
-//		}
-//
-//		sentence.setProperty(0, "syllable_label", new String[]{"s0", "s1", "s2"}); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//		sentence.setProperty(0, "syllable_count", 3); //$NON-NLS-1$
-//
-//		String pattern = "{sent:id} {syl:syllable_label;pos=1,-2;pref=\\{;suf=\\}} {word:form;min=10} ({word:lemma}) {env:file}"; //$NON-NLS-1$
-//
-//		PatternFactory<CorefLevel> factory = new PatternFactory<>(new CorefPatternContext());
-//
-//		TextSource textSource = factory.parse(CorefLevel.WORD, pattern, null);
-//
-//		PatternDataProxy data = new PatternDataProxy();
-//
-//		data.set(sentence, 0);
-//
-//		Options options = new Options();
-//		options.put("file", "<some-file-some-where>"); //$NON-NLS-1$ //$NON-NLS-2$
-//
-//		System.out.println(textSource.getText(data, options));
-//	}
-
-	public static TextSource createTextSource(ProsodyLevel level, String pattern) throws ParseException {
+	public static TextSource createTextSource(CorefLevel level, String pattern) throws ParseException {
 		return createTextSource(level, pattern, null);
 	}
 
-	public static TextSource createTextSource(ProsodyLevel level, String pattern, Map<String, String> options) throws ParseException {
+	public static TextSource createTextSource(CorefLevel level, String pattern, Map<String, String> options) throws ParseException {
 		if(pattern==null || pattern.isEmpty()) {
 			return EMPTY_TEXT_SOURCE;
 		}
 
-		return new PatternFactory<>(new ProsodyPatternContext()).parse(level, pattern, null);
+		return new PatternFactory<>(new CorefPatternContext()).parse(level, pattern, null);
 	}
 
 	public static TextSource createTextSource(String pattern, Map<String, String> options) throws ParseException {
@@ -91,10 +59,10 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 			return EMPTY_TEXT_SOURCE;
 		}
 
-		return new PatternFactory<>(new ProsodyPatternContext()).parse(pattern, null);
+		return new PatternFactory<>(new CorefPatternContext()).parse(pattern, null);
 	}
 
-	public static String createStatement(ProsodyLevel level, String specifier) {
+	public static String createStatement(CorefLevel level, String specifier) {
 		return PatternFactory.ACCESSOR_BEGIN+level.getToken()+PatternFactory.TOKEN_DELIMITER+specifier+PatternFactory.ACCESSOR_END;
 	}
 
@@ -107,7 +75,7 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 		sb.append("<br>"); //$NON-NLS-1$
 		sb.append("{&lt;level&gt;:&lt;property-name&gt;[;option]}"); //$NON-NLS-1$
 
-		for(ProsodyLevel level: ProsodyLevel.values()) {
+		for(CorefLevel level: CorefLevel.values()) {
 			sb.append("<br>"); //$NON-NLS-1$
 			sb.append("<h4>").append(level.getName()).append("&nbsp;(").append(level.getToken()).append(")</h4>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			sb.append(level.getDescription());
@@ -139,14 +107,14 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 	 * @see de.ims.icarus.util.strings.pattern.PatternContext#ceateAccessor(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
 	 */
 	@Override
-	public Accessor<ProsodyLevel> ceateAccessor(String statement, String token,
+	public Accessor<CorefLevel> ceateAccessor(String statement, String token,
 			String specifier, Map<String, String> options) {
-		ProsodyLevel level = ProsodyLevel.parseLevel(token);
+		CorefLevel level = CorefLevel.parseLevel(token);
 
 		if(level==null)
 			throw new IllegalArgumentException("Not a valid prosody level token: "+token); //$NON-NLS-1$
 
-		ProsodyAccessor accessor = ProsodyAccessor.forLevel(level, statement, specifier);
+		CorefAccessor accessor = CorefAccessor.forLevel(level, statement, specifier);
 
 		if(accessor==null)
 			throw new IllegalArgumentException("No accessor found for token: "+token); //$NON-NLS-1$
@@ -160,12 +128,14 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 	 * @see de.ims.icarus.util.strings.pattern.PatternContext#createTextSource(java.lang.Enum, de.ims.icarus.util.strings.pattern.Accessor)
 	 */
 	@Override
-	public TextSource createTextSource(ProsodyLevel level,
-			Accessor<ProsodyLevel> accessor) {
+	public TextSource createTextSource(CorefLevel level,
+			Accessor<CorefLevel> accessor) {
 
+		//FIXME change this to take into account parallel levels (outsource it into a bi-directional search loop)
 		int dif = level.ordinal()-accessor.getLevel().ordinal();
-		if(accessor.getLevel()==ProsodyLevel.ENVIRONMENT) {
-			return new ProsodyTextSource.DirectProsodyTextSource((ProsodyAccessor) accessor);
+		if(accessor.getLevel()==CorefLevel.ENVIRONMENT
+				|| accessor.getLevel()==CorefLevel.EDGE) {
+			return new CorefTextSource.DirectCorefTextSource((CorefAccessor) accessor);
 		} else if(dif>1) {
 		// Cannot step over more than one hierarchical boundary downwards
 			return EMPTY_TEXT_SOURCE;
@@ -173,42 +143,39 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 			return new TextSource.DirectTextSource(accessor);
 		}
 
-		ProsodyAccessor prosodyAccessor = (ProsodyAccessor) accessor;
-
-//		boolean isSyllableLevel = level==CorefLevel.SYLLABLE;
-//		boolean isSyllableAccessor = accessor.getLevel()==CorefLevel.SYLLABLE;
+		CorefAccessor prosodyAccessor = (CorefAccessor) accessor;
 
 		if(level!=prosodyAccessor.getLevel()) {
-			ProsodyTextSource textSource = textSourceForLevel(prosodyAccessor.getLevel(), prosodyAccessor);
+			CorefTextSource textSource = textSourceForLevel(prosodyAccessor.getLevel(), prosodyAccessor);
 
 			IndexIterator indexIterator = iteratorForAccessor(prosodyAccessor);
 			if(indexIterator==null) {
-				indexIterator = new ProsodyTextSource.CompleteIndexIterator();
+				indexIterator = new CorefTextSource.CompleteIndexIterator();
 			}
 			textSource.setIndexIterator(indexIterator);
 
-			prosodyAccessor = new ProsodyAccessor.WrappedProsodyAccessor(textSource);
+			prosodyAccessor = new CorefAccessor.WrappedProsodyAccessor(textSource);
 		}
 
 		return textSourceForLevel(level, prosodyAccessor);
 	}
 
-	private static ProsodyTextSource textSourceForLevel(ProsodyLevel level, ProsodyAccessor prosodyAccessor) {
+	private static CorefTextSource textSourceForLevel(CorefLevel level, CorefAccessor prosodyAccessor) {
 		switch (level) {
-		case SYLLABLE: return new ProsodyTextSource.SyllableTextSource(prosodyAccessor);
-		case WORD: return new ProsodyTextSource.WordTextSource(prosodyAccessor);
-		case SENTENCE: return new ProsodyTextSource.SentenceTextSource(prosodyAccessor);
-		case DOCUMENT: return new ProsodyTextSource.DocumentTextSource(prosodyAccessor);
+		case SPAN: return new CorefTextSource.SpanTextSource(prosodyAccessor);
+		case WORD: return new CorefTextSource.WordTextSource(prosodyAccessor);
+		case SENTENCE: return new CorefTextSource.SentenceTextSource(prosodyAccessor);
+		case DOCUMENT: return new CorefTextSource.DocumentTextSource(prosodyAccessor);
 
 		default:
 			throw new IllegalArgumentException("Not a valid level: "+level); //$NON-NLS-1$
 		}
 	}
 
-	private IndexIterator iteratorForAccessor(ProsodyAccessor accessor) {
+	private IndexIterator iteratorForAccessor(CorefAccessor accessor) {
 		int scope = accessor.getOffset();
 		if(scope!=-1) {
-			return new ProsodyTextSource.ScopeIndexIterator(scope);
+			return new CorefTextSource.ScopeIndexIterator(scope);
 		}
 
 		int leftOffset = accessor.getLeftOffset();
@@ -221,12 +188,12 @@ public class ProsodyPatternContext implements PatternContext<ProsodyLevel> {
 				rightOffset = 0;
 			}
 
-			return new ProsodyTextSource.OffsetIndexIterator(leftOffset, rightOffset);
+			return new CorefTextSource.OffsetIndexIterator(leftOffset, rightOffset);
 		}
 
 		int[] positions = accessor.getPositions();
 		if(positions!=null && positions.length>0) {
-			return new ProsodyTextSource.FixedIndexIterator(positions);
+			return new CorefTextSource.FixedIndexIterator(positions);
 		}
 
 		return null;

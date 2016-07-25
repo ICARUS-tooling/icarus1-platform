@@ -91,7 +91,7 @@ import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.annotation.AnnotatedProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
-import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.PatternDataProxy;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.resources.ResourceManager;
@@ -489,7 +489,7 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 
 	private SearchResult searchResult;
 
-	private final ProsodyData dataDummy = new ProsodyData();
+	private final PatternDataProxy dataDummy = new PatternDataProxy();
 
 	/**
 	 * @see de.ims.icarus.search_tools.SearchResultExportHandler#exportResult(de.ims.icarus.search_tools.result.SearchResult)
@@ -976,7 +976,7 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 		private List<EntryInfo> items;
 		private SearchResult searchResult;
 		private Options environment;
-		protected final ProsodyData buffer = new ProsodyData();
+		protected final PatternDataProxy buffer = new PatternDataProxy();
 
 		public void init(SearchResult searchResult, List<EntryInfo> items, Options environment) {
 			this.searchResult = searchResult;
@@ -984,7 +984,7 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 			this.environment = environment;
 		}
 
-		public ProsodyData getBuffer() {
+		public PatternDataProxy getBuffer() {
 			return buffer;
 		}
 
@@ -1314,7 +1314,7 @@ public class ProsodySearchResultExportHandler implements SearchResultExportHandl
 
 	private static class PatternGroupSelector implements GroupSelector {
 
-		private final ProsodyData patternProxy = new ProsodyData();
+		private final PatternDataProxy patternProxy = new PatternDataProxy();
 
 		private final TextSource textSource;
 

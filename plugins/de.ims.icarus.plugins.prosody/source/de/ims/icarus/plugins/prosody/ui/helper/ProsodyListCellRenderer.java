@@ -50,7 +50,7 @@ import de.ims.icarus.plugins.prosody.annotation.AnnotatedProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
-import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.PatternDataProxy;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.ui.TextArea;
@@ -99,7 +99,7 @@ public class ProsodyListCellRenderer extends AbstractListCellRendererPanel<Objec
 	private float leftSyllableBound = PanelConfig.DEFAULT_LEFT_SYLLABLE_BOUND;
 	private float rightSyllableBound = PanelConfig.DEFAULT_RIGHT_SYLLABLE_BOUND;
 
-	private static final ProsodyData patternProxy = new ProsodyData();
+	private static final PatternDataProxy patternProxy = new PatternDataProxy();
 
 	private final ConfigListener configListener = new ConfigListener() {
 

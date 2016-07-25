@@ -15,33 +15,33 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see http://www.gnu.org/licenses.
 
- * $Revision$
- * $Date$
- * $URL$
+ * $Revision: 353 $
+ * $Date: 2015-02-27 15:21:56 +0100 (Fr, 27 Feb 2015) $
+ * $URL: https://subversion.assembla.com/svn/icarusplatform/trunk/Icarus/plugins/de.ims.icarus.plugins.prosody/source/de/ims/icarus/plugins/prosody/pattern/CorefTextSource.java $
  *
- * $LastChangedDate$
- * $LastChangedRevision$
- * $LastChangedBy$
+ * $LastChangedDate: 2015-02-27 15:21:56 +0100 (Fr, 27 Feb 2015) $
+ * $LastChangedRevision: 353 $
+ * $LastChangedBy: mcgaerty $
  */
-package de.ims.icarus.plugins.prosody.pattern;
+package de.ims.icarus.plugins.coref.pattern;
 
-import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
+import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.strings.pattern.TextSource.AggregatedTextSource;
 
 
 /**
  * @author Markus Gärtner
- * @version $Id$
+ * @version $Id: CorefTextSource.java 353 2015-02-27 14:21:56Z mcgaerty $
  *
  */
-public abstract class ProsodyTextSource extends AggregatedTextSource {
+public abstract class CorefTextSource extends AggregatedTextSource {
 
-	private final ProsodyAccessor accessor;
-	private final PatternDataProxy proxy = new PatternDataProxy();
+	private final CorefAccessor accessor;
+	private final CorefDataProxy proxy = new CorefDataProxy();
 	private IndexIterator indexIterator;
 
-	protected ProsodyTextSource(ProsodyAccessor accessor) {
+	protected CorefTextSource(CorefAccessor accessor) {
 		if (accessor == null)
 			throw new NullPointerException("Invalid accessor"); //$NON-NLS-1$
 
@@ -51,7 +51,7 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 	@Override
 	protected boolean aggregateText(Object data, Options env) {
 
-		PatternDataProxy rawData = (PatternDataProxy) data;
+		CorefDataProxy rawData = (CorefDataProxy) data;
 
 		proxy.set(rawData);
 
@@ -104,13 +104,13 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		return true;
 	}
 
-	protected abstract void setIndex(PatternDataProxy proxy, int index, PatternDataProxy rawData);
+	protected abstract void setIndex(CorefDataProxy proxy, int index, CorefDataProxy rawData);
 
-	protected abstract void prepareIndexIterator(IndexIterator indexIterator, PatternDataProxy rawData);
+	protected abstract void prepareIndexIterator(IndexIterator indexIterator, CorefDataProxy rawData);
 
-	protected abstract boolean indexValid(int index, PatternDataProxy rawData);
+	protected abstract boolean indexValid(int index, CorefDataProxy rawData);
 
-	public ProsodyAccessor getAccessor() {
+	public CorefAccessor getAccessor() {
 		return accessor;
 	}
 
@@ -265,9 +265,9 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		}
 	}
 
-	public static class DirectProsodyTextSource extends ProsodyTextSource {
+	public static class DirectCorefTextSource extends CorefTextSource {
 
-		public DirectProsodyTextSource(ProsodyAccessor accessor) {
+		public DirectCorefTextSource(CorefAccessor accessor) {
 			super(accessor);
 		}
 
@@ -275,7 +275,7 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#setIndex(int)
 		 */
 		@Override
-		protected void setIndex(PatternDataProxy proxy, int index, PatternDataProxy rawData) {
+		protected void setIndex(CorefDataProxy proxy, int index, CorefDataProxy rawData) {
 			throw new UnsupportedOperationException("Not designed to aggregate data!"); //$NON-NLS-1$
 		}
 
@@ -284,7 +284,7 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 */
 		@Override
 		protected void prepareIndexIterator(IndexIterator indexIterator,
-				PatternDataProxy rawData) {
+				CorefDataProxy rawData) {
 			throw new UnsupportedOperationException("Not designed to aggregate data!"); //$NON-NLS-1$
 		}
 
@@ -292,15 +292,15 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
 		 */
 		@Override
-		protected boolean indexValid(int index, PatternDataProxy rawData) {
+		protected boolean indexValid(int index, CorefDataProxy rawData) {
 			throw new UnsupportedOperationException("Not designed to aggregate data!"); //$NON-NLS-1$
 		}
 
 	}
 
-	public static class SyllableTextSource extends ProsodyTextSource {
+	public static class WordTextSource extends CorefTextSource {
 
-		public SyllableTextSource(ProsodyAccessor accessor) {
+		public WordTextSource(CorefAccessor accessor) {
 			super(accessor);
 		}
 
@@ -308,47 +308,8 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#setIndex(de.ims.icarus.plugins.prosody.pattern.PatternDataProxy, int, de.ims.icarus.plugins.prosody.pattern.PatternDataProxy)
 		 */
 		@Override
-		protected void setIndex(PatternDataProxy proxy, int index,
-				PatternDataProxy rawData) {
-			proxy.setSyllableIndex(index);
-		}
-
-		/**
-		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#prepareIndexIterator(de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource.IndexIterator, de.ims.icarus.plugins.prosody.pattern.PatternDataProxy)
-		 */
-		@Override
-		protected void prepareIndexIterator(IndexIterator indexIterator,
-				PatternDataProxy rawData) {
-
-			ProsodicSentenceData sentenceData = (ProsodicSentenceData) rawData.getSentence();
-
-			indexIterator.setCenter(rawData.getSyllableIndex());
-			indexIterator.refresh(sentenceData.getSyllableCount(rawData.getWordIndex()));
-		}
-
-		/**
-		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
-		 */
-		@Override
-		protected boolean indexValid(int index, PatternDataProxy rawData) {
-			ProsodicSentenceData sentenceData = (ProsodicSentenceData) rawData.getSentence();
-			return index<sentenceData.getSyllableCount(rawData.getWordIndex());
-		}
-
-	}
-
-	public static class WordTextSource extends ProsodyTextSource {
-
-		public WordTextSource(ProsodyAccessor accessor) {
-			super(accessor);
-		}
-
-		/**
-		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#setIndex(de.ims.icarus.plugins.prosody.pattern.PatternDataProxy, int, de.ims.icarus.plugins.prosody.pattern.PatternDataProxy)
-		 */
-		@Override
-		protected void setIndex(PatternDataProxy proxy, int index,
-				PatternDataProxy rawData) {
+		protected void setIndex(CorefDataProxy proxy, int index,
+				CorefDataProxy rawData) {
 			proxy.setWordIndex(index);
 		}
 
@@ -357,7 +318,7 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 */
 		@Override
 		protected void prepareIndexIterator(IndexIterator indexIterator,
-				PatternDataProxy rawData) {
+				CorefDataProxy rawData) {
 
 			indexIterator.setCenter(rawData.getWordIndex());
 			indexIterator.refresh(rawData.getSentence().length());
@@ -367,15 +328,47 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
 		 */
 		@Override
-		protected boolean indexValid(int index, PatternDataProxy rawData) {
+		protected boolean indexValid(int index, CorefDataProxy rawData) {
 			return index<rawData.getSentence().length();
 		}
 
 	}
 
-	public static class SentenceTextSource extends ProsodyTextSource {
+	public static class SpanTextSource extends CorefTextSource {
 
-		public SentenceTextSource(ProsodyAccessor accessor) {
+		public SpanTextSource(CorefAccessor accessor) {
+			super(accessor);
+		}
+
+		@Override
+		protected void setIndex(CorefDataProxy proxy, int index,
+				CorefDataProxy rawData) {
+			proxy.setWordIndex(index);
+		}
+
+		@Override
+		protected void prepareIndexIterator(IndexIterator indexIterator,
+				CorefDataProxy rawData) {
+
+			Span span = rawData.getSpan();
+
+			indexIterator.setCenter(span.getBeginIndex());
+			indexIterator.refresh(span.getRange());
+		}
+
+		/**
+		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
+		 */
+		@Override
+		protected boolean indexValid(int index, CorefDataProxy rawData) {
+			return index<rawData.getSpan().getRange();
+		}
+
+	}
+
+	public static class SentenceTextSource extends CorefTextSource {
+
+		public SentenceTextSource(CorefAccessor accessor) {
 			super(accessor);
 		}
 
@@ -383,8 +376,8 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#setIndex(de.ims.icarus.plugins.prosody.pattern.PatternDataProxy, int, de.ims.icarus.plugins.prosody.pattern.PatternDataProxy)
 		 */
 		@Override
-		protected void setIndex(PatternDataProxy proxy, int index,
-				PatternDataProxy rawData) {
+		protected void setIndex(CorefDataProxy proxy, int index,
+				CorefDataProxy rawData) {
 			proxy.setSentenceIndex(index);
 		}
 
@@ -393,7 +386,7 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 */
 		@Override
 		protected void prepareIndexIterator(IndexIterator indexIterator,
-				PatternDataProxy rawData) {
+				CorefDataProxy rawData) {
 
 			indexIterator.setCenter(rawData.getSentenceIndex());
 			indexIterator.refresh(rawData.getDocument().size());
@@ -403,15 +396,15 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
 		 */
 		@Override
-		protected boolean indexValid(int index, PatternDataProxy rawData) {
+		protected boolean indexValid(int index, CorefDataProxy rawData) {
 			return index<rawData.getDocument().size();
 		}
 
 	}
 
-	public static class DocumentTextSource extends ProsodyTextSource {
+	public static class DocumentTextSource extends CorefTextSource {
 
-		public DocumentTextSource(ProsodyAccessor accessor) {
+		public DocumentTextSource(CorefAccessor accessor) {
 			super(accessor);
 		}
 
@@ -419,8 +412,8 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#setIndex(de.ims.icarus.plugins.prosody.pattern.PatternDataProxy, int, de.ims.icarus.plugins.prosody.pattern.PatternDataProxy)
 		 */
 		@Override
-		protected void setIndex(PatternDataProxy proxy, int index,
-				PatternDataProxy rawData) {
+		protected void setIndex(CorefDataProxy proxy, int index,
+				CorefDataProxy rawData) {
 			proxy.setDocumentIndex(index);
 		}
 
@@ -429,7 +422,7 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 */
 		@Override
 		protected void prepareIndexIterator(IndexIterator indexIterator,
-				PatternDataProxy rawData) {
+				CorefDataProxy rawData) {
 
 			indexIterator.setCenter(rawData.getDocumentIndex());
 			indexIterator.refresh(rawData.getDocumentSet().size());
@@ -439,7 +432,7 @@ public abstract class ProsodyTextSource extends AggregatedTextSource {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyTextSource#indexValid(int)
 		 */
 		@Override
-		protected boolean indexValid(int index, PatternDataProxy rawData) {
+		protected boolean indexValid(int index, CorefDataProxy rawData) {
 			return index<rawData.getDocumentSet().size();
 		}
 

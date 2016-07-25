@@ -82,7 +82,11 @@ public class ProsodySearchFactory extends DependencySearchFactory {
 
 		DocumentSetDescriptor documentSet = CoreferenceRegistry.getInstance().getDocumentSet(target);
 
-		return new DocumentSetDelegate(documentSet);
+		if(documentSet!=null) {
+			return new DocumentSetDelegate(documentSet);
+		} else {
+			return super.resolveTarget(target);
+		}
 	}
 
 	/**
@@ -90,8 +94,14 @@ public class ProsodySearchFactory extends DependencySearchFactory {
 	 */
 	@Override
 	public String getSerializedTarget(Search search) {
-		DocumentSetDelegate bundle = (DocumentSetDelegate) search.getTarget();
+		Object target = search.getTarget();
 
-		return bundle.getDescriptor().getId();
+		if(target instanceof DocumentSetDelegate) {
+			DocumentSetDelegate bundle = (DocumentSetDelegate) target;
+
+			return bundle.getDescriptor().getId();
+		} else {
+			return super.getSerializedTarget(search);
+		}
 	}
 }

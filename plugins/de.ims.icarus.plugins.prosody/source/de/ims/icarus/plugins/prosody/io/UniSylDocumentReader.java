@@ -29,6 +29,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -45,8 +46,8 @@ import de.ims.icarus.io.IOUtil;
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
@@ -121,7 +122,16 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		buffer = new CharLineBuffer();
 		buffer.startReading(IOUtil.getReader(location.openInputStream(), IOUtil.getCharset(options)));
 
-		config = UniSylIOUtils.readConfig(buffer);
+		String scheme = options.getString(UniSylIOUtils.KEY_SCHEME);
+		if(scheme!=null) {
+			CharLineBuffer b = new CharLineBuffer();
+			b.startReading(new StringReader(scheme));
+			config = UniSylIOUtils.readConfig(b);
+		}
+
+		if(config==null) {
+			config = UniSylIOUtils.readConfig(buffer);
+		}
 
 		separator = UniSylIOUtils.resolveConstant(config.separator);
 		colPayload = new Object[config.columns.length];
@@ -233,7 +243,7 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 
 				if(isDataLine) {
 					int colCount = buffer.split(separator);
-					if(colCount!=config.columns.length)
+					if(!config.ignoreColumnCountMismatch && colCount!=config.columns.length)
 						throw new IllegalStateException("Insufficient number of data columns encountered at line "+(buffer.getLineNumber()+1) //$NON-NLS-1$
 								+" (expected "+config.columns.length+" - got "+colCount+"): "+buffer); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 

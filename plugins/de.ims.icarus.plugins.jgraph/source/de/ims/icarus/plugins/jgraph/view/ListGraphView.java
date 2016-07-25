@@ -49,7 +49,6 @@ import de.ims.icarus.ui.helper.Outline;
 import de.ims.icarus.ui.helper.UIHelperRegistry;
 import de.ims.icarus.ui.view.AWTPresenter.GraphBasedPresenter;
 import de.ims.icarus.ui.view.ListPresenter;
-import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
@@ -198,7 +197,7 @@ public class ListGraphView extends View implements Outline {
 
 		// Ensure list presenter
 		ListPresenter listPresenter = this.listPresenter;
-		if(listPresenter==null || !PresenterUtils.presenterSupports(listPresenter, data)) {
+		if(listPresenter==null || true /*|| !PresenterUtils.presenterSupports(listPresenter, data)*/) {
 			listPresenter = UIHelperRegistry.globalRegistry().findHelper(ListPresenter.class, data);
 		}
 
@@ -214,7 +213,7 @@ public class ListGraphView extends View implements Outline {
 		ContentType entryType = dataList.getContentType();
 		//entryType = ContentTypeRegistry.getInstance().getType("DependencyDataContentType");
 		GraphBasedPresenter graphPresenter = this.graphPresenter;
-		if(graphPresenter==null || !PresenterUtils.presenterSupports(graphPresenter, entryType)) {
+		if(graphPresenter==null || true /*|| !PresenterUtils.presenterSupports(graphPresenter, entryType)*/) {
 			graphPresenter = UIHelperRegistry.globalRegistry().findHelper(GraphBasedPresenter.class, entryType, true, true);
 		}
 

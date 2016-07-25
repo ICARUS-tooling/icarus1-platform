@@ -939,4 +939,23 @@ public final class CoreferenceUtils implements CorefConstants {
 	public static String[] getDefaultWordPropertyKeys() {
 		return defaultWordPropertyKeys.clone();
 	}
+
+	private static final String[] defaultSentencePropertyKeys = {
+		SIZE_KEY,
+		INDEX_KEY,
+	};
+
+	public static String[] getDefaultSentencePropertyKeys() {
+		return defaultSentencePropertyKeys.clone();
+	}
+
+	private static final String[] defaultDocumentPropertyKeys = {
+		SIZE_KEY,
+		ID_KEY,
+		INDEX_KEY,
+	};
+
+	public static String[] getDefaultDocumentPropertyKeys() {
+		return defaultDocumentPropertyKeys.clone();
+	}
 }

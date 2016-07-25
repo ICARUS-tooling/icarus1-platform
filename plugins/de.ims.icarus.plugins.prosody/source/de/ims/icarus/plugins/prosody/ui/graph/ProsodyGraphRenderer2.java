@@ -57,7 +57,7 @@ import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotation;
 import de.ims.icarus.plugins.prosody.annotation.ProsodicAnnotationManager;
 import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
-import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.PatternDataProxy;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.ui.TextArea;
@@ -94,7 +94,7 @@ public class ProsodyGraphRenderer2 extends GraphRenderer implements mxITextShape
 	protected TextArea textArea = new TextArea();
 	protected SentenceInfo sentenceInfo;
 
-	private final ProsodyData patternProxy = new ProsodyData();
+	private final PatternDataProxy patternProxy = new PatternDataProxy();
 
 
 	protected TextSource nodeTextPattern;

@@ -49,7 +49,7 @@ public class UniSylSentenceReader implements SentenceDataReader {
 	private DocumentSet documentSet;
 	private DocumentData document;
 
-	private boolean doRead = true;
+	private boolean doRead;
 
 	private int documentIndex;
 	private int sentenceIndex;
@@ -63,6 +63,11 @@ public class UniSylSentenceReader implements SentenceDataReader {
 
 		reader = new UniSylDocumentReader();
 		documentSet = (DocumentSet) reader.create();
+
+		documentIndex = 0;
+		sentenceIndex = 0;
+		doRead = true;
+		document = null;
 
 		options.put("documentSet", documentSet); //$NON-NLS-1$
 		reader.init(location, options);
@@ -78,14 +83,20 @@ public class UniSylSentenceReader implements SentenceDataReader {
 			doRead = false;
 		}
 
-		if(documentIndex>=documentSet.size()) {
-			return null;
+		if(document!=null && sentenceIndex>=document.size()) {
+			document = null;
 		}
 
-		if(document==null || sentenceIndex>=document.size()) {
+		if(document==null && documentIndex<documentSet.size()) {
 			document = documentSet.get(documentIndex++);
 			sentenceIndex = 0;
 		}
+
+		if(document==null) {
+			return null;
+		}
+
+//		System.out.println("returning sentence "+sentenceIndex+" of "+document.size()); //$NON-NLS-1$
 
 		return document.get(sentenceIndex++);
 	}

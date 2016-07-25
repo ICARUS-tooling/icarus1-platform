@@ -82,7 +82,7 @@ import de.ims.icarus.plugins.prosody.annotation.ProsodyHighlighting;
 import de.ims.icarus.plugins.prosody.painte.PaIntEConstraintParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEParams;
 import de.ims.icarus.plugins.prosody.painte.PaIntEUtils;
-import de.ims.icarus.plugins.prosody.pattern.ProsodyData;
+import de.ims.icarus.plugins.prosody.pattern.PatternDataProxy;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyLevel;
 import de.ims.icarus.plugins.prosody.pattern.ProsodyPatternContext;
 import de.ims.icarus.plugins.prosody.search.constraints.painte.PaIntEConstraint;
@@ -160,7 +160,7 @@ public class ProsodySentenceDetailPresenter implements AWTPresenter.TableBasedPr
 
 	private static final Axis.Double dummyAxis = new Axis.Double(false);
 
-	private static final ProsodyData patternProxy = new ProsodyData();
+	private static final PatternDataProxy patternProxy = new PatternDataProxy();
 
 	private JComboBox<Object> syllablePatternSelect;
 	private JLabel patternSelectInfo;
