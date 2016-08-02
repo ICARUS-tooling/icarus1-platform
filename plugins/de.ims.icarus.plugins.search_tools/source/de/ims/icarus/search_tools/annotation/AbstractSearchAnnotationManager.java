@@ -19,15 +19,14 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools.annotation;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.annotation.AnnotationDisplayMode;
 import de.ims.icarus.util.annotation.AnnotationManager;
@@ -38,11 +37,11 @@ import de.ims.icarus.util.annotation.AnnotationManager;
  *
  */
 public abstract class AbstractSearchAnnotationManager extends AnnotationManager {
-	
+
 	protected AbstractSearchAnnotationManager() {
 		// no-op
 	}
-	
+
 	protected AnnotationDelegate getDelegate() {
 		return (AnnotationDelegate) delegate;
 	}
@@ -60,7 +59,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? -1 : delegate.getGroupId(
 				this, index);
 	}
-	
+
 	public int getGroupId(int index, String token) {
 		if(!hasAnnotation()) {
 			return -1;
@@ -69,7 +68,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? -1 : delegate.getGroupId(
 				this, index);
 	}
-	
+
 	public boolean isHighlighted(int index) {
 		if(!hasAnnotation()) {
 			return false;
@@ -78,7 +77,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? false : delegate.isHighlighted(
 				this, index);
 	}
-	
+
 	public boolean isNodeHighlighted(int index) {
 		if(!hasAnnotation()) {
 			return false;
@@ -87,7 +86,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? false : delegate.isNodeHighlighted(
 				this, index);
 	}
-	
+
 	public boolean isEdgeHighlighted(int index) {
 		if(!hasAnnotation()) {
 			return false;
@@ -96,7 +95,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? false : delegate.isEdgeHighlighted(
 				this, index);
 	}
-	
+
 	public boolean isTransitiveHighlighted(int index) {
 		if(!hasAnnotation()) {
 			return false;
@@ -105,7 +104,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? false : delegate.isTransitiveHighlighted(
 				this, index);
 	}
-	
+
 	public long getHighlight(int index) {
 		if(!hasAnnotation()) {
 			return 0L;
@@ -114,7 +113,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? 0L : delegate.getHighlight(
 				this, index);
 	}
-	
+
 	public boolean isTokenHighlighted(int index, String token) {
 		if(!hasAnnotation()) {
 			return false;
@@ -123,7 +122,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		return delegate==null ? false : delegate.isTokenHighlighted(
 				this, index, token);
 	}
-	
+
 	protected abstract long createCompositeHighlight(long[] highlights);
 
 	@Override
@@ -131,7 +130,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		switch (displayMode) {
 		case SELECTED:
 			return selectedAnnotationDelegate;
-			
+
 		case FIRST_ONLY:
 			return firstAnnotationDelegate;
 
@@ -145,9 +144,9 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 			return noneAnnotationDelegate;
 		}
 	}
-	
+
 	protected abstract static class AnnotationDelegate {
-		
+
 		protected boolean setId(AbstractSearchAnnotationManager manager) {
 			// for subclasses
 			return true;
@@ -160,7 +159,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 				return -1;
 			}
 		}
-		
+
 		public int getGroupId(AbstractSearchAnnotationManager manager, int index, String token) {
 			if(manager.hasAnnotation() && setId(manager)) {
 				return manager.getAnnotation().getGroupId(index, token);
@@ -168,7 +167,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 				return -1;
 			}
 		}
-		
+
 		public boolean isHighlighted(AbstractSearchAnnotationManager manager, int index) {
 			if(manager.hasAnnotation() && setId(manager)) {
 				return manager.getAnnotation().isHighlighted(index);
@@ -176,7 +175,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 				return false;
 			}
 		}
-		
+
 		public boolean isNodeHighlighted(AbstractSearchAnnotationManager manager, int index) {
 			if(manager.hasAnnotation() && setId(manager)) {
 				return manager.getAnnotation().isNodeHighlighted(index);
@@ -184,7 +183,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 				return false;
 			}
 		}
-		
+
 		public boolean isEdgeHighlighted(AbstractSearchAnnotationManager manager, int index) {
 			if(manager.hasAnnotation() && setId(manager)) {
 				return manager.getAnnotation().isEdgeHighlighted(index);
@@ -192,7 +191,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 				return false;
 			}
 		}
-		
+
 		public boolean isTransitiveHighlighted(AbstractSearchAnnotationManager manager, int index) {
 			if(manager.hasAnnotation() && setId(manager)) {
 				return manager.getAnnotation().isTransitiveHighlighted(index);
@@ -200,7 +199,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 				return false;
 			}
 		}
-		
+
 		public long getHighlight(AbstractSearchAnnotationManager manager, int index) {
 			if(manager.hasAnnotation() && setId(manager)) {
 				return manager.getAnnotation().getHighlight(index);
@@ -208,7 +207,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 				return 0L;
 			}
 		}
-		
+
 		public boolean isTokenHighlighted(AbstractSearchAnnotationManager manager, int index, String token) {
 			if(manager.hasAnnotation() && setId(manager)) {
 				return manager.getAnnotation().isTokenHighlighted(index, token);
@@ -217,7 +216,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 			}
 		}
 	}
-	
+
 	protected static final AnnotationDelegate firstAnnotationDelegate = new AnnotationDelegate() {
 
 		@Override
@@ -225,9 +224,9 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 			manager.getAnnotation().moveToAnnotation(0);
 			return true;
 		}
-		
+
 	};
-	
+
 	protected static final AnnotationDelegate lastAnnotationDelegate = new AnnotationDelegate() {
 
 		@Override
@@ -236,9 +235,9 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 			annotation.moveToAnnotation(annotation.getAnnotationCount()-1);
 			return true;
 		}
-		
+
 	};
-	
+
 	protected static final AnnotationDelegate selectedAnnotationDelegate = new AnnotationDelegate() {
 
 		@Override
@@ -246,22 +245,22 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 			manager.getAnnotation().moveToAnnotation(manager.getPosition());
 			return true;
 		}
-		
+
 	};
-	
+
 	protected static final AnnotationDelegate noneAnnotationDelegate = new AnnotationDelegate() {
 
 		@Override
 		protected boolean setId(AbstractSearchAnnotationManager manager) {
 			return false;
 		}
-		
+
 	};
-	
+
 	protected static final AnnotationDelegate allAnnotationDelegate = new AnnotationDelegate() {
-		
-		protected List<Long> buffer;
-		
+
+		protected TLongList buffer;
+
 		@Override
 		public int getGroupId(AbstractSearchAnnotationManager manager, int index) {
 			SearchAnnotation annotation = manager.getAnnotation();
@@ -345,7 +344,7 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 		@Override
 		public long getHighlight(AbstractSearchAnnotationManager manager, int index) {
 			if(buffer==null) {
-				buffer = new ArrayList<>();
+				buffer = new TLongArrayList();
 			}
 
 			SearchAnnotation annotation = manager.getAnnotation();
@@ -356,19 +355,15 @@ public abstract class AbstractSearchAnnotationManager extends AnnotationManager 
 					buffer.add(highlight);
 				}
 			}
-			
+
 			annotation.moveToAnnotation(manager.getPosition());
-			
+
 			if(buffer.isEmpty()) {
 				return 0L;
 			} else {
-				int size = buffer.size();
-				long[] highlights = new long[size];
-				for(int i=0; i<size; i++) {
-					highlights[i] = buffer.get(i);
-				}
+				long[] highlights = buffer.toArray();
 				buffer.clear();
-				
+
 				return manager.createCompositeHighlight(highlights);
 			}
 		}

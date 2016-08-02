@@ -257,6 +257,7 @@ public class Matcher implements Cloneable, Comparable<Matcher> {
 
 	protected boolean matchesNext() {
 		if(next!=null) {
+			// Delegate to next matcher
 			return next.matches();
 		} else if(!exclusionMember) {
 			// ONLY cache here if this matcher is not a

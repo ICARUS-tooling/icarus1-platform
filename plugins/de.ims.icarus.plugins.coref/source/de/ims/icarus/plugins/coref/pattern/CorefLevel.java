@@ -94,6 +94,35 @@ public enum CorefLevel implements Identity {
 	},
 	;
 
+	public static int dif(CorefLevel from, CorefLevel to) {
+		int result = dif0(from, to);
+		if(result==-1) {
+			result = -dif0(to, from);
+		}
+		return result;
+	}
+
+	private static int dif0(CorefLevel from, CorefLevel to) {
+		int dif = -1;
+
+		CorefLevel parent = from;
+		while(true) {
+			parent = parent.up();
+
+			if(parent==null) {
+				break;
+			}
+
+			dif++;
+
+			if(parent==to) {
+				return dif;
+			}
+		}
+
+		return -1;
+	}
+
 	private final String token;
 	private final String key;
 
@@ -128,22 +157,18 @@ public enum CorefLevel implements Identity {
 		return tokenMap.get(s);
 	}
 
-	private static volatile CorefLevel[] values;
+	private static final CorefLevel[] values = values();
 
-	private CorefLevel[] sharedValues() {
-		if(values==null) {
-			values = values();
-		}
-
-		return values;
+	private CorefLevel forOrdinal(int index) {
+		return (index>=0 && index<values.length) ? values[index] : null;
 	}
 
 	public CorefLevel up() {
-		return sharedValues()[ordinal()+1];
+		return forOrdinal(ordinal()+1);
 	}
 
 	public CorefLevel down() {
-		return sharedValues()[ordinal()-1];
+		return forOrdinal(ordinal()-1);
 	}
 
 	/**
@@ -160,7 +185,7 @@ public enum CorefLevel implements Identity {
 	@Override
 	public String getName() {
 		return ResourceManager.getInstance().get(
-				"plugins.prosody.pattern."+token+".name"); //$NON-NLS-1$ //$NON-NLS-2$
+				"plugins.coref.pattern."+token+".name"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -169,7 +194,7 @@ public enum CorefLevel implements Identity {
 	@Override
 	public String getDescription() {
 		return ResourceManager.getInstance().get(
-				"plugins.prosody.pattern."+token+".description"); //$NON-NLS-1$ //$NON-NLS-2$
+				"plugins.coref.pattern."+token+".description"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**

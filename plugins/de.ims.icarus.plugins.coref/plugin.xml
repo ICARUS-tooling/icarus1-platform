@@ -492,4 +492,10 @@
 		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceHeadPropertyConstraintFactory" />
 	</extension>
 	
+	<extension id="CoreferenceVirtualNodeConstraint" plugin-id="de.ims.icarus.searchTools" point-id="SearchConstraint">
+		<parameter id="contentType" value="de.ims.icarus.coref@DocumentDataContentType" />
+		<parameter id="token" value="virtualNode" />
+		<parameter id="factory" value="de.ims.icarus.plugins.coref.search.constraints.CoreferenceVirtualNodeConstraintFactory" />
+	</extension>
+	
 </plugin>

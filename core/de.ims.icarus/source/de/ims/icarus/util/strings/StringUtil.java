@@ -156,6 +156,10 @@ public final class StringUtil {
 
 	public static int hash(CharSequence cs) {
 
+		if(cs==null) {
+			return 0;
+		}
+
 		int h = 0;
 
         for (int i = 0; i < cs.length(); i++) {

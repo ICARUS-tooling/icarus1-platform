@@ -54,6 +54,7 @@ public class CoreferenceDocumentSearch extends AbstractTreeSearch {
 		AllocationDescriptor alloc = getSearchTarget().getAllocation();
 		if(alloc!=null) {
 			allocation = alloc.get();
+			getParameters().put("allocationName", alloc.getName()); //$NON-NLS-1$
 		}
 
 		getParameters().put("goldAllocation", allocation); //$NON-NLS-1$

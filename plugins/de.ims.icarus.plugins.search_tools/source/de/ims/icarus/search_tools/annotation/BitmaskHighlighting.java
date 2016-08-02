@@ -105,6 +105,24 @@ public abstract class BitmaskHighlighting {
 		this(DEFAULT_BLOCK_SIZE);
 	}
 
+	/**
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb =  new StringBuilder(100)
+		.append(getClass().getSimpleName()).append(":") //$NON-NLS-1$
+		.append(" generalBits=").append(GENERAL_OFFSET) //$NON-NLS-1$
+		.append(" blockOffset=").append(BLOCK_SIZE) //$NON-NLS-1$
+		.append(" blockMask=").append(Long.toBinaryString(BLOCK_MASK)) //$NON-NLS-1$
+		.append(" groupMask=").append(Long.toBinaryString(GROUP_MASK)); //$NON-NLS-1$
+
+		//TODO
+		sb.append(" tokens=").append(offsetMap); //$NON-NLS-1$
+
+		return sb.toString();
+	}
+
 	public String getAlias(String token) {
 		String alias = tokenAliases.get(token);
 		return alias==null ? token : alias;
@@ -316,14 +334,13 @@ public abstract class BitmaskHighlighting {
 		sb.append(" node=").append((highlight & NODE_HIGHLIGHT) !=0L); //$NON-NLS-1$
 		sb.append(" edge=").append((highlight & EDGE_HIGHLIGHT) !=0L); //$NON-NLS-1$
 		sb.append(" trans=").append((highlight & TRANSITIVE_HIGHLIGHT) !=0L); //$NON-NLS-1$
-		sb.append(" minGroup=").append(GROUP_MASK & (highlight >> GENERAL_OFFSET)); //$NON-NLS-1$
+		sb.append(" minGroup=").append(getGroupId(highlight)); //$NON-NLS-1$
 		for(String token : tokens) {
 			sb.append(" ").append(token).append("="); //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append((highlight & getHighlight(token)) !=0L);
+			sb.append(isTokenHighlighted(highlight, token));
 
-			int offset = getOffset(token) + 1;
-			int groupId = (int) (GROUP_MASK & (highlight >> offset));
-			if(groupId>0) {
+			int groupId = getGroupId(highlight, token);
+			if(groupId>-1) {
 				sb.append("(gp=").append(groupId).append(")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
@@ -596,6 +613,7 @@ public abstract class BitmaskHighlighting {
 	public long createCompositeHighlight(long[] highlights) {
 		long result = 0L;
 		for(long highlight : highlights) {
+//			System.out.println(dumpHighlight(highlight));
 			result |= (highlight & HEADER_MASK);
 		}
 

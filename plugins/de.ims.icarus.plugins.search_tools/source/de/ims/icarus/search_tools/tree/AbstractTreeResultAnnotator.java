@@ -100,6 +100,10 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 		// First pass -> plain copying of highlight info
 		for(int i=0; i<hit.getIndexCount(); i++) {
 			indexMap.add(hit.getIndex(i));
+
+			//DEBUG
+//			getHighlighting().dumpHighlight(baseHighlights[i]);
+
 			highlights.add(baseHighlights[i]);
 
 			SearchEdge edge = matchers[i].getEdge();
@@ -153,6 +157,14 @@ public abstract class AbstractTreeResultAnnotator extends AbstractLazyResultAnno
 			_indexMap[i] = indexMap.get(i);
 			_highlights[i] = highlights.get(i);
 		}
+
+//		//DEBUG
+//		System.out.println("----------------------NEW HIGHLIGHT-------------------------");
+//		System.out.println(indexMap);
+//		System.out.println("highlights="+Arrays.toString(_highlights));
+//		for(long highlight : _highlights) {
+//			System.out.println(getHighlighting().dumpHighlight(highlight));
+//		}
 
 		return new DefaultHighlight(_indexMap, _highlights);
 	}

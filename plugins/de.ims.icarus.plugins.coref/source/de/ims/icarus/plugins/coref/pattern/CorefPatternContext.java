@@ -71,7 +71,7 @@ public class CorefPatternContext implements PatternContext<CorefLevel> {
 		ResourceManager rm = ResourceManager.getInstance();
 
 		sb.append("<html>"); //$NON-NLS-1$
-		sb.append("<h3>").append(rm.get("plugins.prosody.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append("<h3>").append(rm.get("plugins.coref.labelPattern.info")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sb.append("<br>"); //$NON-NLS-1$
 		sb.append("{&lt;level&gt;:&lt;property-name&gt;[;option]}"); //$NON-NLS-1$
 
@@ -101,7 +101,7 @@ public class CorefPatternContext implements PatternContext<CorefLevel> {
 		return sb.toString();
 	}
 
-	private static final TextSource EMPTY_TEXT_SOURCE = new TextSource.StaticTextSource(PatternFactory.DEFAULT_EMPTY_TEXT);
+	private static final TextSource EMPTY_TEXT_SOURCE = new TextSource.StaticTextSource(""); //$NON-NLS-1$
 
 	/**
 	 * @see de.ims.icarus.util.strings.pattern.PatternContext#ceateAccessor(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
@@ -131,8 +131,7 @@ public class CorefPatternContext implements PatternContext<CorefLevel> {
 	public TextSource createTextSource(CorefLevel level,
 			Accessor<CorefLevel> accessor) {
 
-		//FIXME change this to take into account parallel levels (outsource it into a bi-directional search loop)
-		int dif = level.ordinal()-accessor.getLevel().ordinal();
+		int dif = CorefLevel.dif(level, accessor.getLevel());
 		if(accessor.getLevel()==CorefLevel.ENVIRONMENT
 				|| accessor.getLevel()==CorefLevel.EDGE) {
 			return new CorefTextSource.DirectCorefTextSource((CorefAccessor) accessor);
@@ -143,29 +142,29 @@ public class CorefPatternContext implements PatternContext<CorefLevel> {
 			return new TextSource.DirectTextSource(accessor);
 		}
 
-		CorefAccessor prosodyAccessor = (CorefAccessor) accessor;
+		CorefAccessor corefAccessor = (CorefAccessor) accessor;
 
-		if(level!=prosodyAccessor.getLevel()) {
-			CorefTextSource textSource = textSourceForLevel(prosodyAccessor.getLevel(), prosodyAccessor);
+		if(level!=corefAccessor.getLevel()) {
+			CorefTextSource textSource = textSourceForLevel(corefAccessor.getLevel(), corefAccessor);
 
-			IndexIterator indexIterator = iteratorForAccessor(prosodyAccessor);
+			IndexIterator indexIterator = iteratorForAccessor(corefAccessor);
 			if(indexIterator==null) {
 				indexIterator = new CorefTextSource.CompleteIndexIterator();
 			}
 			textSource.setIndexIterator(indexIterator);
 
-			prosodyAccessor = new CorefAccessor.WrappedProsodyAccessor(textSource);
+			corefAccessor = new CorefAccessor.WrappedCorefAccessor(textSource);
 		}
 
-		return textSourceForLevel(level, prosodyAccessor);
+		return textSourceForLevel(level, corefAccessor);
 	}
 
-	private static CorefTextSource textSourceForLevel(CorefLevel level, CorefAccessor prosodyAccessor) {
+	private static CorefTextSource textSourceForLevel(CorefLevel level, CorefAccessor corefAccessor) {
 		switch (level) {
-		case SPAN: return new CorefTextSource.SpanTextSource(prosodyAccessor);
-		case WORD: return new CorefTextSource.WordTextSource(prosodyAccessor);
-		case SENTENCE: return new CorefTextSource.SentenceTextSource(prosodyAccessor);
-		case DOCUMENT: return new CorefTextSource.DocumentTextSource(prosodyAccessor);
+		case SPAN: return new CorefTextSource.SpanTextSource(corefAccessor);
+		case WORD: return new CorefTextSource.WordTextSource(corefAccessor);
+		case SENTENCE: return new CorefTextSource.SentenceTextSource(corefAccessor);
+		case DOCUMENT: return new CorefTextSource.DocumentTextSource(corefAccessor);
 
 		default:
 			throw new IllegalArgumentException("Not a valid level: "+level); //$NON-NLS-1$

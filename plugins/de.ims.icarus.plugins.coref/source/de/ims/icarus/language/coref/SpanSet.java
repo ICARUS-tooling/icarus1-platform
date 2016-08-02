@@ -57,14 +57,15 @@ public class SpanSet extends CorefListMember<Span> {
 		// no-op
 	}
 
+	public void finish() {
+		Collections.sort(items);
+	}
+
 	public Span[] getSpans(int sentenceIndex) {
 		return blockMap==null ? null : blockMap.get(sentenceIndex);
 	}
 
-	public void setSpans(int sentenceIndex, Span[] spans) {
-		if(blockMap==null) {
-			blockMap = new TIntObjectHashMap<>();
-		}
+	private void addSpan(Span span) {
 		if(spanMap==null) {
 			spanMap = new LinkedHashMap<>();
 		}
@@ -72,14 +73,31 @@ public class SpanSet extends CorefListMember<Span> {
 			items = new ArrayList<>();
 		}
 
+		span.setIndex(items.size());
+		items.add(span);
+		spanMap.put(Span.asString(span), span);
+	}
+
+	public void setSpans(int sentenceIndex, Span[] spans) {
+		if(blockMap==null) {
+			blockMap = new TIntObjectHashMap<>();
+		}
+
 		// Ensure sorted spans array!
 		Arrays.sort(spans);
 
 		blockMap.put(sentenceIndex, spans);
 		for(Span span : spans) {
-			spanMap.put(Span.asString(span), span);
-			items.add(span);
+			addSpan(span);
 		}
+	}
+
+	public boolean contains(String id) {
+		return spanMap!=null && spanMap.containsKey(id);
+	}
+
+	public void registerSpan(Span span) {
+		addSpan(span);
 	}
 
 	public boolean contains(Span span) {

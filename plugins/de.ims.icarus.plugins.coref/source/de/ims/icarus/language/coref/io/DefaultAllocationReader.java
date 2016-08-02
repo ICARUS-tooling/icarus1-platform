@@ -77,6 +77,10 @@ public class DefaultAllocationReader implements AllocationReader {
 
 	private String documentId;
 
+	//FIXME add option in configuration to switch this flag!!!
+	private boolean allowNamedNodes = true;
+	private boolean allowIncompleteAllocations = true;
+
 	public DefaultAllocationReader() {
 		// no-op
 	}
@@ -105,7 +109,7 @@ public class DefaultAllocationReader implements AllocationReader {
 		try {
 			Set<String> ids = new HashSet<>();
 			boolean checkIds = false;
-			if(documentSet!=null) {
+			if(documentSet!=null && !allowIncompleteAllocations) {
 				ids.addAll(documentSet.getDocumentIds());
 				checkIds = true;
 			}
@@ -208,7 +212,7 @@ public class DefaultAllocationReader implements AllocationReader {
 				readProperty(spanSet);
 			} else {
 
-				Span span = Span.parse(buffer);
+				Span span = Span.parse(buffer, allowNamedNodes);
 				if(span.isROOT()) {
 					continue;
 				}
@@ -217,7 +221,14 @@ public class DefaultAllocationReader implements AllocationReader {
 					throw new IllegalArgumentException(
 							errMsg("Duplicate span declaration: "+span)); //$NON-NLS-1$
 
-				if(span.getSentenceIndex()!=sentenceId && !buffer.isEmpty()) {
+				// Nothing to do besides registering the span if it is virtual
+				if(span.isVirtual()) {
+					spanSet.registerSpan(span);
+					continue;
+				}
+
+				// For "real" spans do all the sentence id related stuff to aggregate them into blocks
+				if(span.getSentenceIndex()!=sentenceId && !spanBuffer.isEmpty()) {
 					Span[] spans = new Span[spanBuffer.size()];
 					spanBuffer.toArray(spans);
 					spanSet.setSpans(sentenceId, spans);
@@ -246,6 +257,8 @@ public class DefaultAllocationReader implements AllocationReader {
 			throw new IllegalArgumentException(errMsg(String.format(
 					"Missing '%s' statement to close '%s' at line %d", //$NON-NLS-1$
 					END_NODES, BEGIN_NODES, beginLine)));
+
+		spanSet.finish();
 
 		return spanSet;
 	}

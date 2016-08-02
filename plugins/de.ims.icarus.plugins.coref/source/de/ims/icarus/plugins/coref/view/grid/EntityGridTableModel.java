@@ -48,11 +48,10 @@ import de.ims.icarus.language.coref.CorefComparison;
 import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.language.coref.SpanCache;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.util.Installable;
@@ -81,7 +80,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 
 	protected AnnotationController annotationController;
 
-	protected SpanCache cache;
+//	protected SpanCache cache;
 
 	public EntityGridTableModel() {
 		// no-op
@@ -207,12 +206,12 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 
 		CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, filterSingletons);
 
-		if(cache==null) {
-			cache = new SpanCache();
-		} else {
-			cache.clear();
-		}
-		cache.cacheEdges(comparison.getEdgeSet().getEdges());
+//		if(cache==null) {
+//			cache = new SpanCache();
+//		} else {
+//			cache.clear();
+//		}
+//		cache.cacheEdges(comparison.getEdgeSet().getEdges());
 
 		// Finally merge all edges into one list
 		List<Span> spans = new ArrayList<>();
@@ -232,6 +231,9 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 		Map<Integer, List<CorefErrorType>> typeBuffer = new HashMap<>();
 
 		for(Span span : spans) {
+			if(span.isVirtual()) {
+				continue;
+			}
 			int row = span.getSentenceIndex();
 
 			// Process buffered node data
@@ -358,7 +360,7 @@ public class EntityGridTableModel extends AbstractTableModel implements Installa
 				highlightColors = new Color[size];
 				for(int i=0; i<size; i++) {
 					Span span = spans[i];
-					int index = cache.getIndex(span);
+					int index = span.getIndex();
 					long highlight = annotationManager.getHighlight(index);
 					if(!CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
 						continue;

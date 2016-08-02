@@ -50,7 +50,7 @@ public class DummyGroupConstraint implements SearchConstraint, Cloneable {
 	/**
 	 * Instead of doing a match check this implementation
 	 * directly delegates to the underlying {@code GroupCache}'s
-	 * {@link GroupCache#cacheGroupInstance(int, Object)} method.
+	 * {@link GroupCache#cacheGroupInstance(int, Object, boolean)} method.
 	 *
 	 * @see de.ims.icarus.search_tools.standard.DefaultConstraint#matches(java.lang.Object)
 	 * @see GroupCache#cacheGroupInstance(int, Object)
@@ -60,6 +60,7 @@ public class DummyGroupConstraint implements SearchConstraint, Cloneable {
 		if(source.isMultiplexing()) {
 			source.group(cache,  getGroupId(), value);
 		} else {
+			//FIXME changed 'replace' value back to false, need to verify if that broke caching again
 			cache.cacheGroupInstance(getGroupId(), getLabel(getInstance(value)), true);
 		}
 

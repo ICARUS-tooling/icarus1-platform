@@ -56,8 +56,8 @@ import javax.swing.table.TableColumn;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.logging.LoggerFactory;
@@ -153,10 +153,12 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 
 		if(document!=null && member instanceof Span) {
 			Span span = (Span)member;
-			CoreferenceData sentence = document.get(span.getSentenceIndex());
-			sentenceProperties = CorefProperties.subset(
-					sentence.getProperties(),
-					span.getHead());
+			if(!span.isVirtual()) {
+				CoreferenceData sentence = document.get(span.getSentenceIndex());
+				sentenceProperties = CorefProperties.subset(
+						sentence.getProperties(),
+						span.getHead());
+			}
 		}
 
 		tableModel.setProperties(memberProperties, sentenceProperties);
@@ -199,6 +201,10 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 	}
 
 	private void appendSpan(StringBuilder sb, Span span) {
+		if(span.isVirtual()) {
+			sb.append("<virtual>"); //$NON-NLS-1$
+		}
+
 		ResourceManager rm = ResourceManager.getInstance();
 
 		String text = CoreferenceUtils.getSpanText(span, document);

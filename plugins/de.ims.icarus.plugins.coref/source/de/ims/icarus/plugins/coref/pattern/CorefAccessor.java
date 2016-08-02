@@ -93,7 +93,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 
 	@Override
 	protected Object fetchValue(Object data, Options env) {
-		return fetchProsodyValue((CorefDataProxy) data, env);
+		return fetchValue0((CorefDataProxy) data, env);
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		}
 	}
 
-	protected abstract Object fetchProsodyValue(CorefDataProxy data, Options env);
+	protected abstract Object fetchValue0(CorefDataProxy data, Options env);
 
 	public static CorefAccessor forLevel(CorefLevel level, String source, String specifier) {
 		if (level == null)
@@ -122,19 +122,21 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 			return new SentenceAccessor(source, specifier);
 		case SPAN:
 			return new SpanAccessor(source, specifier);
+		case EDGE:
+			return new EdgeAccessor(source, specifier);
 		case WORD:
 			return new WordAccessor(source, specifier);
 
 		default:
-			throw new CorruptedStateException("Impossible switch branch"); //$NON-NLS-1$
+			throw new CorruptedStateException("Impossible switch branch: "+level); //$NON-NLS-1$
 		}
 	}
 
-	public static class WrappedProsodyAccessor extends CorefAccessor {
+	public static class WrappedCorefAccessor extends CorefAccessor {
 
 		private final CorefTextSource textSource;
 
-		public WrappedProsodyAccessor(CorefTextSource textSource) {
+		public WrappedCorefAccessor(CorefTextSource textSource) {
 			super("", "", textSource.getAccessor().getLevel()); //$NON-NLS-1$ //$NON-NLS-2$
 
 			this.textSource = textSource;
@@ -144,7 +146,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		 * @see de.ims.icarus.plugins.prosody.pattern.ProsodyAccessor#fetchProsodyValue(de.ims.icarus.plugins.prosody.pattern.PatternDataProxy, de.ims.icarus.util.Options)
 		 */
 		@Override
-		protected Object fetchProsodyValue(CorefDataProxy data, Options env) {
+		protected Object fetchValue0(CorefDataProxy data, Options env) {
 			return textSource.getText(data, env);
 		}
 
@@ -157,7 +159,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		}
 
 		@Override
-		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+		public Object fetchValue0(CorefDataProxy data, Options env) {
 			return data.getSentence().getProperty(data.getWordIndex(), getSpecifier());
 		}
 
@@ -170,7 +172,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		}
 
 		@Override
-		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+		public Object fetchValue0(CorefDataProxy data, Options env) {
 			Span span = data.getSpan();
 			return span==null ? null : span.getProperty(getSpecifier());
 		}
@@ -183,7 +185,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		}
 
 		@Override
-		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+		public Object fetchValue0(CorefDataProxy data, Options env) {
 			Edge edge = data.getEdge();
 			return edge==null ? null : edge.getProperty(getSpecifier());
 		}
@@ -196,7 +198,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		}
 
 		@Override
-		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+		public Object fetchValue0(CorefDataProxy data, Options env) {
 			return data.getSentence().getProperty(getSpecifier());
 		}
 
@@ -209,7 +211,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		}
 
 		@Override
-		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+		public Object fetchValue0(CorefDataProxy data, Options env) {
 			return data.getDocument().getProperty(getSpecifier());
 		}
 
@@ -222,7 +224,7 @@ public abstract class CorefAccessor extends Accessor<CorefLevel> {
 		}
 
 		@Override
-		public Object fetchProsodyValue(CorefDataProxy data, Options env) {
+		public Object fetchValue0(CorefDataProxy data, Options env) {
 			Object value = env==null ? null : env.get(getSpecifier());
 			return value==null ? Core.getCore().getProperty(getSpecifier()) : value;
 		}

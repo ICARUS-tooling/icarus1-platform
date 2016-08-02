@@ -28,12 +28,12 @@ package de.ims.icarus.plugins.coref.view.graph;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import javax.swing.JComboBox;
@@ -59,20 +59,19 @@ import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.language.coref.SpanCache;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.helper.SpanFilters;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.PluginUtil;
+import de.ims.icarus.plugins.coref.pattern.CorefLevel;
+import de.ims.icarus.plugins.coref.pattern.CorefPatternContext;
 import de.ims.icarus.plugins.coref.view.CoreferenceDocumentDataPresenter;
 import de.ims.icarus.plugins.coref.view.PatternExample;
-import de.ims.icarus.plugins.coref.view.graph.labels.CellLabelBuilder;
-import de.ims.icarus.plugins.coref.view.graph.labels.PatternLabelBuilder;
 import de.ims.icarus.plugins.jgraph.layout.GraphLayout;
 import de.ims.icarus.plugins.jgraph.layout.GraphRenderer;
 import de.ims.icarus.plugins.jgraph.layout.GraphStyle;
@@ -92,11 +91,12 @@ import de.ims.icarus.ui.dialog.FormBuilder;
 import de.ims.icarus.ui.list.ListUtils;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Filter;
-import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.AnnotationControl;
 import de.ims.icarus.util.data.ContentType;
+import de.ims.icarus.util.strings.pattern.PatternFactory;
+import de.ims.icarus.util.strings.pattern.TextSource;
 
 /**
  * @author Markus Gärtner
@@ -128,12 +128,17 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 	protected CoreferenceDocumentDataPresenter.PresenterMenu presenterMenu;
 
-	protected SpanCache cache = new SpanCache();
+//	protected SpanCache cache = new SpanCache();
 
-	protected PatternLabelBuilder labelBuilder = new PatternLabelBuilder(
-			"$form$\\\\ns-b-e", ""); //$NON-NLS-1$ //$NON-NLS-2$
+//	protected PatternLabelBuilder labelBuilder = new PatternLabelBuilder(
+//			"$form$\\\\ns-b-e", ""); //$NON-NLS-1$ //$NON-NLS-2$
+
+	protected TextSource nodeTextPattern;
+	protected TextSource virtualNodeTextPattern;
+	protected TextSource edgeTextPattern;
 
 	protected JComboBox<Object> nodePatternSelect;
+	protected JComboBox<Object> virtualNodePatternSelect;
 	protected JComboBox<Object> edgePatternSelect;
 	protected JLabel patternSelectInfo;
 
@@ -166,7 +171,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 	@Override
 	protected GraphRenderer createDefaultGraphRenderer() {
-		return new CoreferenceGraphRenderer();
+		return new CoreferenceGraphRenderer2();
 	}
 
 	/**
@@ -319,28 +324,30 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	}
 
 	protected String createPatternSelectTooltip() {
-		StringBuilder sb = new StringBuilder(300);
-		ResourceManager rm = ResourceManager.getInstance();
+		return CorefPatternContext.getInfoText();
 
-		sb.append("<html>"); //$NON-NLS-1$
-		sb.append("<h3>").append(rm.get("plugins.coref.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		sb.append("<table>"); //$NON-NLS-1$
-		sb.append("<tr><th>") //$NON-NLS-1$
-			.append(rm.get("plugins.coref.labelPattern.character")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
-			.append(rm.get("plugins.coref.labelPattern.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		Map<Object, Object> mc = PatternLabelBuilder.magicCharacters;
-		for(Entry<Object, Object> entry : mc.entrySet()) {
-			String c = entry.getKey().toString();
-			String key = entry.getValue().toString();
-
-			sb.append("<tr><td>").append(HtmlUtils.escapeHTML(c)) //$NON-NLS-1$
-			.append("</td><td>").append(rm.get(key)).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-
-		sb.append("</table>"); //$NON-NLS-1$
-
-		return sb.toString();
+//		StringBuilder sb = new StringBuilder(300);
+//		ResourceManager rm = ResourceManager.getInstance();
+//
+//		sb.append("<html>"); //$NON-NLS-1$
+//		sb.append("<h3>").append(rm.get("plugins.coref.labelPattern.title")).append("</h3>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//		sb.append("<table>"); //$NON-NLS-1$
+//		sb.append("<tr><th>") //$NON-NLS-1$
+//			.append(rm.get("plugins.coref.labelPattern.character")).append("</th><th>") //$NON-NLS-1$ //$NON-NLS-2$
+//			.append(rm.get("plugins.coref.labelPattern.description")).append("</th></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+//
+//		Map<Object, Object> mc = PatternLabelBuilder.magicCharacters;
+//		for(Entry<Object, Object> entry : mc.entrySet()) {
+//			String c = entry.getKey().toString();
+//			String key = entry.getValue().toString();
+//
+//			sb.append("<tr><td>").append(HtmlUtils.escapeHTML(c)) //$NON-NLS-1$
+//			.append("</td><td>").append(rm.get(key)).append("</td></tr>"); //$NON-NLS-1$ //$NON-NLS-2$
+//		}
+//
+//		sb.append("</table>"); //$NON-NLS-1$
+//
+//		return sb.toString();
 	}
 
 	/**
@@ -506,7 +513,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	}
 
 	protected Object createVertex(Span span, CorefErrorType nodeType, boolean gold) {
-		CoreferenceData sentence = span.isROOT() ?
+		CoreferenceData sentence = (span.isROOT() || span.isVirtual()) ?
 				CoreferenceUtils.emptySentence
 				: document.get(span.getSentenceIndex());
 
@@ -591,8 +598,8 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 			CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, isFilterSingletons());
 
-			cache.clear();
-			cache.cacheEdges(comparison.getEdgeSet().getEdges());
+//			cache.clear();
+//			cache.cacheEdges(comparison.getEdgeSet().getEdges());
 
 			//System.out.println(Arrays.toString(edges.toArray()));
 
@@ -698,7 +705,7 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 	}
 
 	public int getIndex(Span span) {
-		return cache.getIndex(span);
+		return span.getIndex();
 	}
 
 	public boolean isIncludeGoldEdges() {
@@ -796,23 +803,28 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 		firePropertyChange("filterSingletons", oldValue, filterSingletons); //$NON-NLS-1$
 	}
 
-	/**
-	 * @return the labelBuilder
-	 */
-	public CellLabelBuilder getLabelBuilder() {
-		return labelBuilder;
+	public TextSource getNodeTextPattern() {
+		return nodeTextPattern;
 	}
 
-	/**
-	 * @param labelBuilder the labelBuilder to set
-	 */
-	public void setLabelBuilder(PatternLabelBuilder labelBuilder) {
-		if (labelBuilder == null)
-			throw new NullPointerException("Invalid labelBuilder"); //$NON-NLS-1$
+	public TextSource getEdgeTextPattern() {
+		return edgeTextPattern;
+	}
 
-		this.labelBuilder = labelBuilder;
+	public TextSource getVirtualNodeTextPattern() {
+		return virtualNodeTextPattern;
+	}
 
-		refreshLayout();
+	protected void setVirtualNodeTextPattern(String virtualNodeTextPattern) throws ParseException {
+		this.virtualNodeTextPattern = CorefPatternContext.createTextSource(CorefLevel.SPAN, virtualNodeTextPattern);
+	}
+
+	protected void setNodeTextPattern(String nodeTextPattern) throws ParseException {
+		this.nodeTextPattern = CorefPatternContext.createTextSource(CorefLevel.SPAN, nodeTextPattern);
+	}
+
+	protected void setEdgeTextPattern(String edgeTextPattern) throws ParseException {
+		this.edgeTextPattern = CorefPatternContext.createTextSource(CorefLevel.EDGE, edgeTextPattern);
 	}
 
 	protected void outlineProperties(Object value) {
@@ -823,7 +835,10 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 			Collection<CorefMember> members = new LinkedList<>();
 
 			if(value instanceof CorefNodeData) {
-				members.add(((CorefNodeData)value).getSpan());
+				Span span = ((CorefNodeData)value).getSpan();
+				if(!span.isROOT() && !span.isVirtual()) {
+					members.add(span);
+				}
 			} else if(value instanceof CorefEdgeData) {
 				Edge edge = ((CorefEdgeData)value).getEdge();
 
@@ -1017,23 +1032,23 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 
 			Object value = model.getValue(cell);
 
-//			System.out.println(value);
-
 			String label = null;
 
-			if(value instanceof CorefEdgeData) {
-				label = labelBuilder.getLabel(((CorefEdgeData)value).getEdge());
-			} else if(value instanceof CorefNodeData) {
+			if(value instanceof CorefNodeData) {
 				CorefNodeData nodeData = (CorefNodeData) value;
 
 				if(nodeData.getSpan().isROOT()) {
-					label = "\n   Document Root   \n \n"; //$NON-NLS-1$
-				} else {
-					label = labelBuilder.getLabel(nodeData.getSpan(), nodeData.getSentence());
+					label = CoreferenceGraphRenderer2.ROOT_LABEL;
 				}
 			}
 
-			((CorefCellData<?>)value).setLabel(label);
+			CorefCellData<?> data = (CorefCellData<?>) value;
+
+			if(label==null) {
+				label = data.data.toString();
+			}
+
+			data.setLabel(label);
 
 			return label;
 		}
@@ -1145,10 +1160,16 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 						"plugins.jgraph.appearance.coref.defaultEdgeLabelPattern"); //$NON-NLS-1$
 				edgePatternSelect = createPatternSelect(pattern);
 			}
+			if(virtualNodePatternSelect==null) {
+				String pattern = ConfigRegistry.getGlobalRegistry().getString(
+						"plugins.jgraph.appearance.coref.defaultVirtualNodeLabelPattern"); //$NON-NLS-1$
+				virtualNodePatternSelect = createPatternSelect(pattern);
+			}
 
 			if(patternSelectInfo==null) {
 				final JLabel label = new JLabel();
-				label.addMouseListener(new TooltipFreezer());label.setIcon(UIUtil.getInfoIcon());
+				label.addMouseListener(new TooltipFreezer());
+				label.setIcon(UIUtil.getInfoIcon());
 
 				Localizable localizable = new Localizable() {
 
@@ -1164,14 +1185,17 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				patternSelectInfo = label;
 			}
 
-			nodePatternSelect.setSelectedItem(labelBuilder.getNodePattern());
-			edgePatternSelect.setSelectedItem(labelBuilder.getEdgePattern());
+			nodePatternSelect.setSelectedItem(PatternFactory.escape(nodeTextPattern.getExternalForm()));
+			virtualNodePatternSelect.setSelectedItem(PatternFactory.escape(virtualNodeTextPattern.getExternalForm()));
+			edgePatternSelect.setSelectedItem(PatternFactory.escape(edgeTextPattern.getExternalForm()));
 
 			FormBuilder formBuilder = FormBuilder.newLocalizingBuilder();
 			formBuilder.addEntry("info", new DummyFormEntry( //$NON-NLS-1$
 					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.info", patternSelectInfo)); //$NON-NLS-1$
 			formBuilder.addEntry("nodePattern", new ChoiceFormEntry( //$NON-NLS-1$
 					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.nodePattern", nodePatternSelect)); //$NON-NLS-1$
+			formBuilder.addEntry("virtualNodePattern", new ChoiceFormEntry( //$NON-NLS-1$
+					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.virtualNodePattern", virtualNodePatternSelect)); //$NON-NLS-1$
 			formBuilder.addEntry("edgePattern", new ChoiceFormEntry( //$NON-NLS-1$
 					"plugins.coref.coreferenceGraphPresenter.dialogs.editPattern.edgePattern", edgePatternSelect)); //$NON-NLS-1$
 
@@ -1189,11 +1213,12 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 				String nodePattern = getPattern(nodePatternSelect);
 				if(nodePattern==null || nodePattern.isEmpty()) {
 					// Ensure minimum label!
-					nodePattern = "$form$"; //$NON-NLS-1$
+					nodePattern = CoreferenceGraphRenderer2.FORM_LABEL_PATTERN;
 				}
+				nodePattern = PatternFactory.unescape(nodePattern);
 
 				try {
-					labelBuilder.setNodePattern(nodePattern);
+					setNodeTextPattern(nodePattern);
 					addPattern(nodePattern, nodePatternSelect);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,
@@ -1208,14 +1233,40 @@ public class CoreferenceGraphPresenter extends GraphPresenter implements Install
 					return;
 				}
 
+				// Virtual node pattern
+				String virtualNodePattern = getPattern(virtualNodePatternSelect);
+				if(virtualNodePattern==null) {
+					virtualNodePattern = ""; //$NON-NLS-1$
+				}
+				virtualNodePattern = PatternFactory.unescape(virtualNodePattern);
+
+				//FIXME check why we always get an empty pattern
+
+				try {
+					setVirtualNodeTextPattern(virtualNodePattern);
+					addPattern(virtualNodePattern, virtualNodePatternSelect);
+				} catch(Exception ex) {
+					LoggerFactory.log(this, Level.SEVERE,
+							"Invalid virtual node pattern: "+virtualNodePattern, ex); //$NON-NLS-1$
+
+					UIUtil.beep();
+					DialogFactory.getGlobalFactory().showError(null,
+							"plugins.coref.coreferenceGraphPresenter.dialogs.invalidNodePattern.title",  //$NON-NLS-1$
+							"plugins.coref.coreferenceGraphPresenter.dialogs.invalidNodePattern.message",  //$NON-NLS-1$
+							virtualNodePattern);
+
+					return;
+				}
+
 				// Edge pattern
 				String edgePattern = getPattern(edgePatternSelect);
 				if(edgePattern==null) {
 					edgePattern = ""; //$NON-NLS-1$
 				}
+				edgePattern = PatternFactory.unescape(edgePattern);
 
 				try {
-					labelBuilder.setEdgePattern(edgePattern);
+					setEdgeTextPattern(edgePattern);
 					addPattern(edgePattern, edgePatternSelect);
 				} catch(Exception ex) {
 					LoggerFactory.log(this, Level.SEVERE,

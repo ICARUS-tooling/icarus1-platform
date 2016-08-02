@@ -45,11 +45,10 @@ import javax.swing.text.StyleConstants;
 import de.ims.icarus.language.coref.CorefComparison;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.language.coref.SpanCache;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentAnnotationManager;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.language.coref.helper.SpanBuffer;
@@ -100,7 +99,7 @@ public class CoreferenceDocument extends BatchDocument {
 
 	private AnnotationManager annotationManager;
 
-	private SpanCache cache;
+//	private SpanCache cache;
 
 	private PropertyChangeSupport propertyChangeSupport;
 
@@ -337,9 +336,9 @@ public class CoreferenceDocument extends BatchDocument {
 						continue;
 					}
 
-					int clusterIndex = getCache().getIndex(span);
+					int spanIndex = span.getIndex();
 					Color highlightColor = null;
-					long highlight = annotationManager==null ? 0L : annotationManager.getHighlight(clusterIndex);
+					long highlight = annotationManager==null ? 0L : annotationManager.getHighlight(spanIndex);
 					if(CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
 						highlightColor =  CoreferenceDocumentHighlighting.getInstance().getGroupColor(highlight);
 						if(highlightColor==null) {
@@ -425,9 +424,9 @@ public class CoreferenceDocument extends BatchDocument {
 						continue;
 					}
 
-					int clusterIndex = getCache().getIndex(span);
+					int spanIndex = span.getIndex();
 					Color highlightColor = null;
-					long highlight = annotationManager==null ? 0L : annotationManager.getHighlight(clusterIndex);
+					long highlight = annotationManager==null ? 0L : annotationManager.getHighlight(spanIndex);
 					if(CoreferenceDocumentHighlighting.getInstance().isHighlighted(highlight)) {
 						highlightColor =  highlightStack.pop();
 					}
@@ -515,7 +514,7 @@ public class CoreferenceDocument extends BatchDocument {
 
 		CorefComparison comparison = CoreferenceUtils.compare(edgeSet, goldSet, filterSingletons);
 
-		cacheSpans(edgeSet, goldSet);
+//		cacheSpans(edgeSet, goldSet);
 
 		CoreferenceDocumentAnnotationManager annotationManager =
 				(CoreferenceDocumentAnnotationManager) getAnnotationManager();
@@ -585,22 +584,22 @@ public class CoreferenceDocument extends BatchDocument {
 		appendBatchLineFeed(null);
 	}
 
-	protected SpanCache getCache() {
-		if(cache==null) {
-			cache = new SpanCache();
-		}
-		return cache;
-	}
+//	protected SpanCache getCache() {
+//		if(cache==null) {
+//			cache = new SpanCache();
+//		}
+//		return cache;
+//	}
 
-	public void cacheSpans(EdgeSet edgeSet, EdgeSet goldSets) {
-		getCache().clear();
-		if(displayMode==CoreferenceDocument.DisplayMode.GOLD
-				|| displayMode==CoreferenceDocument.DisplayMode.FALSE_NEGATIVES) {
-			getCache().cacheEdges(goldSets);
-		} else {
-			getCache().cacheEdges(edgeSet);
-		}
-	}
+//	public void cacheSpans(EdgeSet edgeSet, EdgeSet goldSets) {
+//		getCache().clear();
+//		if(displayMode==CoreferenceDocument.DisplayMode.GOLD
+//				|| displayMode==CoreferenceDocument.DisplayMode.FALSE_NEGATIVES) {
+//			getCache().cacheEdges(goldSets);
+//		} else {
+//			getCache().cacheEdges(edgeSet);
+//		}
+//	}
 
 	public AnnotationManager getAnnotationManager() {
 		return annotationManager;

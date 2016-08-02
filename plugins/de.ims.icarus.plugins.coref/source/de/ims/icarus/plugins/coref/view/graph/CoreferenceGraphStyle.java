@@ -63,7 +63,7 @@ public class CoreferenceGraphStyle extends DefaultGraphStyle {
 	public String getStyle(GraphOwner owner, Object cell, Options options) {
 		mxIGraphModel model = owner.getGraph().getModel();
 		Object value = model.getValue(cell);
-		long highlight = 0L;
+//		long highlight = 0L;
 
 //		if(value instanceof CorefCellData) {
 //			highlight = ((CorefCellData<?>)value).getHighlight();

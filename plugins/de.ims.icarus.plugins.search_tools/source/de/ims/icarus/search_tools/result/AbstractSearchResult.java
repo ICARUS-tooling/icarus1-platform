@@ -53,6 +53,11 @@ public abstract class AbstractSearchResult implements SearchResult {
 	protected String[] groupTokens;
 	protected SubstitutionSupport[] groupInstances;
 	protected SearchConstraint[] groupConstraints;
+
+	/**
+	 * Maps from static groupId to current potentially reordered index
+	 * in other grouping related fields
+	 */
 	protected int[] groupIndexMap;
 
 	protected CompactProperties properties;

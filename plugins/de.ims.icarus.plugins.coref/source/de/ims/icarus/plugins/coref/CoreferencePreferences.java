@@ -36,11 +36,13 @@ import de.ims.icarus.config.ConfigUtils;
 import de.ims.icarus.language.coref.CorefErrorType;
 import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.plugins.ExtensionListCellRenderer;
+import de.ims.icarus.plugins.coref.view.graph.CoreferenceGraphRenderer2;
 import de.ims.icarus.plugins.coref.view.grid.ClusterLabelType;
 import de.ims.icarus.plugins.jgraph.JGraphPreferences;
 import de.ims.icarus.ui.list.TooltipListCellRenderer;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.annotation.HighlightType;
+import de.ims.icarus.util.strings.pattern.PatternFactory;
 
 
 /**
@@ -66,8 +68,9 @@ public class CoreferencePreferences {
 		builder.addBooleanEntry("markFalseEdges", true); //$NON-NLS-1$
 		builder.addBooleanEntry("includeGoldEdges", false); //$NON-NLS-1$
 		builder.addBooleanEntry("filterSingletons", true); //$NON-NLS-1$
-		builder.addStringEntry("defaultNodeLabelPattern", "$form$\\\\ns-b-e"); //$NON-NLS-1$ //$NON-NLS-2$
-		builder.addStringEntry("defaultEdgeLabelPattern", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		builder.addStringEntry("defaultNodeLabelPattern", PatternFactory.escape(CoreferenceGraphRenderer2.DEFAULT_NODE_LABEL_PATTERN)); //$NON-NLS-1$
+		builder.addStringEntry("defaultVirtualNodeLabelPattern", PatternFactory.escape(CoreferenceGraphRenderer2.DEFAULT_VIRTUAL_NODE_LABEL_PATTERN)); //$NON-NLS-1$
+		builder.addStringEntry("defaultEdgeLabelPattern", PatternFactory.escape(CoreferenceGraphRenderer2.DEFAULT_EDGE_LABEL_PATTERN)); //$NON-NLS-1$
 		Options options = new Options();
 		options.put("gridEnabled", false); //$NON-NLS-1$
 //		options.put("selectedVertexShape", 1); //$NON-NLS-1$

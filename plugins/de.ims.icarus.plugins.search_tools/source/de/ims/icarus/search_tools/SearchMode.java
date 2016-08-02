@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.search_tools;
@@ -28,6 +28,7 @@ package de.ims.icarus.search_tools;
 import javax.swing.Icon;
 
 import de.ims.icarus.resources.ResourceManager;
+import de.ims.icarus.search_tools.standard.DefaultSearchOperator;
 import de.ims.icarus.util.id.Identity;
 
 
@@ -37,30 +38,35 @@ import de.ims.icarus.util.id.Identity;
  *
  */
 public enum SearchMode implements Identity {
-	
+
 	/**
 	 * Every single hit encountered in a target graph
 	 * should be cached and the graph reported as a whole.
 	 * This effectively implies exhaustive searching!
+	 *
+	 * @deprecated The interaction of this search mode and the {@link DefaultSearchOperator#GROUPING grouping operator}
+	 * causes undesired side effects in result set creation that are not easily fixed. Therefore searching will be restricted
+	 * to only use the other 2 "basic" modes!
 	 */
+	@Deprecated
 	HITS("hits", true), //$NON-NLS-1$
-	
+
 	/**
 	 * Every single hit encountered in a target graph
 	 * should be reported independently. This effectively
 	 * implies exhaustive searching!
 	 */
 	INDEPENDENT_HITS("independentHits", true), //$NON-NLS-1$
-	
+
 	/**
 	 * Only the first hit in a target graph should be reported.
 	 * Further processing of that graph is not necessary.
 	 */
 	MATCHES("matches", false); //$NON-NLS-1$
-	
+
 	private final String key;
 	private final boolean exhaustive;
-	
+
 	private SearchMode(String key, boolean exhaustive) {
 		this.key = key;
 		this.exhaustive = exhaustive;
@@ -110,5 +116,9 @@ public enum SearchMode implements Identity {
 
 	public boolean isExhaustive() {
 		return exhaustive;
+	}
+
+	public static SearchMode[] supportedModes() {
+		return new SearchMode[]{INDEPENDENT_HITS, MATCHES};
 	}
 }

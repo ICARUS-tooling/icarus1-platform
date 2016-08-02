@@ -60,7 +60,7 @@ public class DefaultParameterEditor implements Editor<Options>, SearchParameters
 
 		FormEntry entry = new ChoiceFormEntry(
 				"plugins.searchTools.labels.searchMode",  //$NON-NLS-1$
-				SearchMode.values()).setRenderer(new TooltipListCellRenderer());
+				SearchMode.supportedModes()).setRenderer(new TooltipListCellRenderer());
 		formBuilder.addEntry(SEARCH_MODE, entry);
 
 		entry = new ChoiceFormEntry(

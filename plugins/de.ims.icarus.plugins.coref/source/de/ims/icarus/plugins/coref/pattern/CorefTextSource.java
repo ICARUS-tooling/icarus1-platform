@@ -63,6 +63,8 @@ public abstract class CorefTextSource extends AggregatedTextSource {
 				return false;
 			}
 
+			boolean validIndexEncounetred = false;
+
 			for(int i=0; i<indexIterator.size(); i++) {
 				if(i>0) {
 					buffer.append(accessor.getSeparator());
@@ -77,7 +79,10 @@ public abstract class CorefTextSource extends AggregatedTextSource {
 
 				// Once again outside valid space -> stop processing
 				if(!indexValid(index, rawData)) {
-					break;
+					if(validIndexEncounetred)
+						break;
+					else
+						continue;
 				}
 
 				setIndex(proxy, index, rawData);
@@ -88,6 +93,8 @@ public abstract class CorefTextSource extends AggregatedTextSource {
 				}
 
 				buffer.append(text);
+
+				validIndexEncounetred = true;
 			}
 
 		} else {
@@ -310,7 +317,11 @@ public abstract class CorefTextSource extends AggregatedTextSource {
 		@Override
 		protected void setIndex(CorefDataProxy proxy, int index,
 				CorefDataProxy rawData) {
-			proxy.setWordIndex(index);
+			if(rawData.isSpanSet()) {
+				proxy.setWordIndex(rawData.getSpan().getBeginIndex()+index);
+			} else {
+				proxy.setWordIndex(index);
+			}
 		}
 
 		/**
@@ -320,8 +331,14 @@ public abstract class CorefTextSource extends AggregatedTextSource {
 		protected void prepareIndexIterator(IndexIterator indexIterator,
 				CorefDataProxy rawData) {
 
-			indexIterator.setCenter(rawData.getWordIndex());
-			indexIterator.refresh(rawData.getSentence().length());
+			if(rawData.isSpanSet()) {
+				Span span = rawData.getSpan();
+				indexIterator.setCenter(span.getBeginIndex());
+				indexIterator.refresh(span.getRange());
+			} else {
+				indexIterator.setCenter(rawData.getWordIndex());
+				indexIterator.refresh(rawData.getSentence().length());
+			}
 		}
 
 		/**
@@ -329,7 +346,13 @@ public abstract class CorefTextSource extends AggregatedTextSource {
 		 */
 		@Override
 		protected boolean indexValid(int index, CorefDataProxy rawData) {
-			return index<rawData.getSentence().length();
+
+			if(rawData.isSpanSet()) {
+				Span span = rawData.getSpan();
+				return index>=0 && index<span.getRange();
+			} else {
+				return index<rawData.getSentence().length();
+			}
 		}
 
 	}

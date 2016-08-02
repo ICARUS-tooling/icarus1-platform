@@ -80,6 +80,14 @@ public final class CorefDataProxy {
 		return wordIndex!=-1;
 	}
 
+	public boolean isSpanSet() {
+		return span!=null;
+	}
+
+	public boolean isEdgeSet() {
+		return edge!=null;
+	}
+
 	public void set(DocumentData document) {
 		clear();
 		this.documentIndex = document.getDocumentIndex();
@@ -93,7 +101,9 @@ public final class CorefDataProxy {
 		this.document = document;
 		this.documentSet = document.getDocumentSet();
 		this.span = span;
-		this.sentence = document.get(span.getSentenceIndex());
+		if(!span.isROOT() && !span.isVirtual()) {
+			this.sentence = document.get(span.getSentenceIndex());
+		}
 	}
 
 	public void set(DocumentData document, Edge edge) {

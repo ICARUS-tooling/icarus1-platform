@@ -26,11 +26,11 @@
 package de.ims.icarus.search_tools.result;
 
 import static de.ims.icarus.search_tools.util.SearchUtils.checkResultEntry;
+import gnu.trove.set.hash.THashSet;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -252,6 +252,8 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 	protected synchronized void commit(ResultEntry entry, ResultNDCache cache) {
 		checkResultEntry(entry);
 
+//		System.out.printf("entry={%s} multi=%b cache=%s\n", entry, cache.multiValueSets, cache);
+
 		if(cache.multiValueSets) {
 			commitRecursive(entry, cache, 0);
 		} else {
@@ -424,10 +426,12 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 			System.arraycopy(values, 0, indices, 0, indices.length);
 		}
 
+		@SuppressWarnings("unused")
 		public void set(Key key) {
 			System.arraycopy(key.indices, 0, indices, 0, indices.length);
 		}
 
+		@SuppressWarnings("unused")
 		public int[] indices() {
 			return indices.clone();
 		}
@@ -480,7 +484,7 @@ public class DefaultSearchResultND extends AbstractSearchResult {
 
 		public ResultNDCache() {
 			for(int i=0; i<instanceBuffer.length; i++) {
-				instanceBuffer[i] = new HashSet<>();
+				instanceBuffer[i] = new THashSet<>();
 			}
 		}
 

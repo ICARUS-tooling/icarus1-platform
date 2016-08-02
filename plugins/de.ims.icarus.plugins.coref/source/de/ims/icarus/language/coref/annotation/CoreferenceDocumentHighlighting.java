@@ -69,6 +69,7 @@ public class CoreferenceDocumentHighlighting extends BitmaskHighlighting {
 		registerToken("sentenceProperty", true, new Color(2677593)); //$NON-NLS-1$
 		registerToken("edgeProperty", false, new Color(3677593)); //$NON-NLS-1$
 		registerToken("headProperty", true, new Color(3677593)); //$NON-NLS-1$
+		registerToken("virtualNode", true, Color.pink.darker()); //$NON-NLS-1$
 	}
 
 	protected ConfigListener configListener;

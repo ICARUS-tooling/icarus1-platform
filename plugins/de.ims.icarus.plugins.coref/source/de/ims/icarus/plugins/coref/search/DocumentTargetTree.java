@@ -38,6 +38,7 @@ import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.search_tools.tree.AbstractTargetTree;
 import de.ims.icarus.search_tools.tree.CompactTree;
 import de.ims.icarus.util.CorruptedStateException;
@@ -48,7 +49,7 @@ import de.ims.icarus.util.Options;
  * @version $Id$
  *
  */
-public class DocumentTargetTree extends AbstractTargetTree<DocumentData> {
+public class DocumentTargetTree extends AbstractTargetTree<DocumentData> implements CorefConstants {
 
 	protected SpanSet spanSet;
 	protected EdgeSet edgeSet;
@@ -171,6 +172,10 @@ public class DocumentTargetTree extends AbstractTargetTree<DocumentData> {
 		return spanSet.get(nodePointer);
 	}
 
+	public boolean isVirtual() {
+		return getSpan().isVirtual();
+	}
+
 	public int getSentenceIndex() {
 		return getSpan().getSentenceIndex();
 	}
@@ -192,7 +197,13 @@ public class DocumentTargetTree extends AbstractTargetTree<DocumentData> {
 	}
 
 	public Object getSpanProperty(String key) {
-		return getSpan().getProperty(key);
+		switch (key) {
+		case INDEX_KEY:
+			return indexMap.get(getSpan());
+
+		default:
+			return getSpan().getProperty(key);
+		}
 	}
 
 	// EDGE METHODS
