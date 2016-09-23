@@ -26,6 +26,7 @@
 package de.ims.icarus.language.coref;
 
 import de.ims.icarus.language.SentenceData;
+import de.ims.icarus.util.CompactProperties;
 
 /**
  * @author Markus Gärtner
@@ -43,12 +44,14 @@ public interface CoreferenceData extends SentenceData {
 	/**
 	 * Fetches a general property of this sentence
 	 */
+	@Override
 	Object getProperty(String key);
 
 	/**
 	 * Fetches a property that was assigned for a certain word in
 	 * this sentence
 	 */
+	@Override
 	Object getProperty(int index, String key);
 
 	// NOTE: spans should always be sorted descending in order of size!
@@ -56,5 +59,5 @@ public interface CoreferenceData extends SentenceData {
 
 	DocumentData getDocument();
 
-	CorefProperties getProperties();
+	CompactProperties getProperties();
 }

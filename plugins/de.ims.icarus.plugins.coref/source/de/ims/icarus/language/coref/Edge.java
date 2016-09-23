@@ -27,6 +27,7 @@ package de.ims.icarus.language.coref;
 
 import java.io.Serializable;
 
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Reference;
 import de.ims.icarus.util.mem.ReferenceType;
@@ -50,7 +51,10 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 	@Reference(ReferenceType.DOWNLINK)
 	private Span target;
 
-	protected Edge() {
+	/**
+	 * Use only in reader implementations or for serialization!
+	 */
+	public Edge() {
 		// no-op
 	}
 
@@ -111,7 +115,7 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 		Edge edge = new Edge(source, target);
 
 		if(tabIndex<s.length()-1) {
-			edge.setProperties(CorefProperties.parse(s, tabIndex+1));
+			edge.setProperties(CompactProperties.parse(s, tabIndex+1));
 		}
 
 		return edge;
@@ -140,7 +144,7 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 		Edge edge = new Edge(source, target);
 
 		if(tabIndex<s.length()-1) {
-			edge.setProperties(CorefProperties.parse(s, tabIndex+1));
+			edge.setProperties(CompactProperties.parse(s, tabIndex+1));
 		}
 
 		return edge;
@@ -178,7 +182,7 @@ public class Edge extends CorefMember implements Cloneable, Serializable, Compar
 		Edge edge = new Edge(source, target);
 
 		if(tabIndex<s.length()-1) {
-			edge.setProperties(CorefProperties.parse(s, tabIndex+1));
+			edge.setProperties(CompactProperties.parse(s, tabIndex+1));
 		}
 
 		return edge;

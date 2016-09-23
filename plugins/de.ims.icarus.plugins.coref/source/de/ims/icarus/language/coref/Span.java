@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.coref.CorefConstants;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.classes.ClassUtils;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
@@ -157,6 +158,9 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 	}
 
 	public void setSentenceIndex(int sentenceIndex) {
+		if(sentenceIndex<0)
+			throw new IllegalArgumentException();
+
 		this.sentenceIndex = sentenceIndex;
 	}
 
@@ -289,7 +293,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 				throw new IllegalArgumentException("Unrecognized format for span: "+s); //$NON-NLS-1$
 
 			if(tabIndex<s.length()-1) {
-				span.setProperties(CorefProperties.parse(s, tabIndex+1));
+				span.setProperties(CompactProperties.parse(s, tabIndex+1));
 			}
 
 			return span;
@@ -330,7 +334,7 @@ public class Span extends CorefMember implements Serializable, Comparable<Span>,
 			span.setEndIndex(StringPrimitives.parseInt(s, m.start(3), m.end(3)-1)-1);
 
 			if(tabIndex<s.length()-1) {
-				span.setProperties(CorefProperties.parse(s, tabIndex+1));
+				span.setProperties(CompactProperties.parse(s, tabIndex+1));
 			}
 
 			return span;

@@ -19,13 +19,12 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.coref.view.properties;
 
-import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.DocumentData;
@@ -34,6 +33,7 @@ import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Counter;
 
 /**
@@ -53,8 +53,8 @@ public final class PropertyUtils {
 		if(data==null) {
 			return;
 		}
-		
-		CorefProperties.countKeys(data.getProperties(), counter);
+
+		CompactProperties.countKeys(data.getProperties(), counter);
 	}
 
 	public static void countProperties(Counter counter, DocumentData document) {
@@ -63,10 +63,10 @@ public final class PropertyUtils {
 		if(document==null || document.size()==0) {
 			return;
 		}
-		
+
 		for(int i=0; i<document.size(); i++) {
 			CoreferenceData sentence = document.get(i);
-			CorefProperties.countKeys(sentence.getProperties(), counter);
+			CompactProperties.countKeys(sentence.getProperties(), counter);
 		}
 	}
 
@@ -76,7 +76,7 @@ public final class PropertyUtils {
 		if(documentSet==null || documentSet.size()==0) {
 			return;
 		}
-		
+
 		for(int i=0; i<documentSet.size(); i++) {
 			countProperties(counter, documentSet.get(i));
 		}
@@ -88,10 +88,10 @@ public final class PropertyUtils {
 		if(spanSet==null || spanSet.size()==0) {
 			return;
 		}
-		
+
 		for(int i=0; i<spanSet.size(); i++) {
 			Span span = spanSet.get(i);
-			CorefProperties.countKeys(span.getProperties(), counter);
+			CompactProperties.countKeys(span.getProperties(), counter);
 		}
 	}
 
@@ -101,10 +101,10 @@ public final class PropertyUtils {
 		if(edgeSet==null || edgeSet.size()==0) {
 			return;
 		}
-		
+
 		for(int i=0; i<edgeSet.size(); i++) {
 			Edge edge = edgeSet.get(i);
-			CorefProperties.countKeys(edge.getProperties(), counter);
+			CompactProperties.countKeys(edge.getProperties(), counter);
 		}
 	}
 
@@ -114,7 +114,7 @@ public final class PropertyUtils {
 		if(allocation==null || allocation.size()==0) {
 			return;
 		}
-		
+
 		String[] documentIds = allocation.getDocumentIds();
 		for(String documentId : documentIds) {
 			countProperties(counter, allocation.getSpanSet(documentId));
@@ -128,7 +128,7 @@ public final class PropertyUtils {
 		if(allocation==null || allocation.size()==0) {
 			return;
 		}
-		
+
 		String[] documentIds = allocation.getDocumentIds();
 		for(String documentId : documentIds) {
 			countProperties(counter, allocation.getEdgeSet(documentId));
@@ -141,7 +141,7 @@ public final class PropertyUtils {
 		if(allocation==null || allocation.size()==0) {
 			return;
 		}
-		
+
 		String[] documentIds = allocation.getDocumentIds();
 		for(String documentId : documentIds) {
 			countProperties(counter, allocation.getEdgeSet(documentId));

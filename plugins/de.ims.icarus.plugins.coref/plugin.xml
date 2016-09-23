@@ -249,6 +249,13 @@
 		<parameter id="class" value="de.ims.icarus.language.coref.io.CONLL12AllocationReader" />
 	</extension>
 	
+	<extension id="SlateAllocationReader" plugin-id="de.ims.icarus.coref" point-id="AllocationReader">
+		<parameter id="name" value="plugins.coref.slateAllocationReader.identity.name" />
+		<parameter id="description" value="plugins.coref.slateAllocationReader.identity.description" />
+		<parameter id="resources" value="de.ims.icarus.plugins.coref.resources.coref" />
+		<parameter id="class" value="de.ims.icarus.language.coref.io.SlateAllocationReader2" />
+	</extension>
+	
 	<extension id="CONLL12DocumentReader" plugin-id="de.ims.icarus.coref" point-id="DocumentReader">
 		<parameter id="name" value="plugins.coref.CONLL12DocumentReader.identity.name" />
 		<parameter id="description" value="plugins.coref.CONLL12DocumentReader.identity.description" />

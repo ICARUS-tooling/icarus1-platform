@@ -54,7 +54,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import de.ims.icarus.language.coref.CorefMember;
-import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.DocumentData;
@@ -68,6 +67,7 @@ import de.ims.icarus.ui.actions.ActionComponentBuilder;
 import de.ims.icarus.ui.actions.ActionManager;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
@@ -110,7 +110,7 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 	 */
 	@Override
 	public boolean supports(ContentType type) {
-		return CorefProperties.class.isAssignableFrom(type.getContentClass());
+		return CompactProperties.class.isAssignableFrom(type.getContentClass());
 	}
 
 	/**
@@ -148,14 +148,14 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 
 		CorefMember member = getSelectedMember();
 
-		CorefProperties sentenceProperties = null;
-		CorefProperties memberProperties = member.getProperties();
+		CompactProperties sentenceProperties = null;
+		CompactProperties memberProperties = member.getProperties();
 
 		if(document!=null && member instanceof Span) {
 			Span span = (Span)member;
 			if(!span.isVirtual()) {
 				CoreferenceData sentence = document.get(span.getSentenceIndex());
-				sentenceProperties = CorefProperties.subset(
+				sentenceProperties = CompactProperties.subset(
 						sentence.getProperties(),
 						span.getHead());
 			}
@@ -191,7 +191,7 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 			appendSpan(sb, edge.getTarget());
 		}
 
-		CorefProperties properties = data.getProperties();
+		CompactProperties properties = data.getProperties();
 		if(properties!=null) {
 			sb.append('\n');
 			sb.append(rm.get("plugins.coref.labels.properties")).append(":"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -508,8 +508,8 @@ public class DetailOutline implements AWTPresenter, ActionListener {
 			setProperties(null, null);
 		}
 
-		public void setProperties(CorefProperties memberProperties,
-				CorefProperties sentenceProperties) {
+		public void setProperties(CompactProperties memberProperties,
+				CompactProperties sentenceProperties) {
 
 			properties.clear();
 			keys.clear();

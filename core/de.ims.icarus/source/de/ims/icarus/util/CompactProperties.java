@@ -26,12 +26,17 @@
 package de.ims.icarus.util;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
+import de.ims.icarus.util.strings.Splitable;
+import de.ims.icarus.util.strings.StringPrimitives;
+import de.ims.icarus.util.strings.StringUtil;
 
 
 /**
@@ -44,6 +49,9 @@ import de.ims.icarus.util.mem.Link;
 public class CompactProperties implements Cloneable, Serializable {
 
 	private static final long serialVersionUID = -492641053997637443L;
+
+	private static final char ASSIGNMENT_CHAR = ':';
+	private static final char SEPARATOR_CHAR = ';';
 
 	@Link
 	protected Object table;
@@ -212,5 +220,292 @@ public class CompactProperties implements Cloneable, Serializable {
 		}
 
 		return clone;
+	}
+
+	@Override
+	public String toString() {
+		if(table==null) {
+			return ""; //$NON-NLS-1$
+		}
+
+		StringBuilder sb = new StringBuilder();
+		appendTo(sb);
+
+		return sb.toString();
+	}
+
+	public void appendTo(StringBuilder sb) {
+
+		if(table instanceof Object[]) {
+			Object[] items = (Object[]) table;
+			int maxI = items.length-1;
+			for(int i=0; i<maxI; i+=2) {
+				if(items[i]==null || items[i+1]==null) {
+					continue;
+				}
+				sb.append(items[i]).append(ASSIGNMENT_CHAR)
+					.append(items[i+1]).append(SEPARATOR_CHAR);
+			}
+		} else if(table!=null) {
+			Map<?, ?> map = (Map<?, ?>) table;
+			for(Entry<?, ?> entry : map.entrySet()) {
+				if(entry.getValue()==null) {
+					continue;
+				}
+				sb.append(entry.getKey()).append(ASSIGNMENT_CHAR)
+					.append(entry.getValue()).append(SEPARATOR_CHAR);
+			}
+		}
+	}
+
+	public static CompactProperties parse(Splitable s) {
+		return parse(s, 0);
+	}
+
+	public static CompactProperties parse(Splitable s, int from) {
+		if(s==null || s.isEmpty()) {
+			return null;
+		}
+
+		CompactProperties properties = new CompactProperties();
+		int maxIndex = s.length()-1;
+		int startIndex = from;
+		while(startIndex<maxIndex) {
+			int offset0 = s.indexOf(ASSIGNMENT_CHAR, startIndex);
+			if(offset0==-1)
+				throw new NullPointerException("Invalid properties source string: "+s); //$NON-NLS-1$
+			int endIndex = s.indexOf(SEPARATOR_CHAR, offset0);
+			if(endIndex==-1) {
+				endIndex = s.length();
+			}
+
+			Splitable sKey = s.subSequence(startIndex, offset0);
+			Splitable sValue = s.subSequence(offset0+1, endIndex);
+
+			properties.put(sKey.toString(), toValue(sValue));
+
+			sKey.recycle();
+			sValue.recycle();
+
+			startIndex = endIndex+1;
+		}
+
+		return properties;
+	}
+
+	public static CompactProperties parse(String s) {
+		return parse(s, 0);
+	}
+
+	public static CompactProperties parse(String s, int from) {
+		if(s==null || s.isEmpty()) {
+			return null;
+		}
+
+		CompactProperties properties = new CompactProperties();
+		int maxIndex = s.length()-1;
+		int startIndex = from;
+		while(startIndex<maxIndex) {
+			int offset0 = s.indexOf(ASSIGNMENT_CHAR, startIndex);
+			if(offset0==-1)
+				throw new NullPointerException("Invalid properties source string: "+s); //$NON-NLS-1$
+			int endIndex = s.indexOf(SEPARATOR_CHAR, offset0);
+			if(endIndex==-1) {
+				endIndex = s.length();
+			}
+
+			String sKey = s.substring(startIndex, offset0);
+			String sValue = s.substring(offset0+1, endIndex);
+
+			properties.put(sKey.toString(), toValue(sValue));
+
+			startIndex = endIndex+1;
+		}
+
+		return properties;
+	}
+
+	private static Object toValue(Splitable s) {
+		try {
+			return StringPrimitives.parseInt(s);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+		try {
+			return StringPrimitives.parseDouble(s);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+
+		return s.toString();
+	}
+
+	private static Object toValue(String s) {
+		try {
+			return StringPrimitives.parseInt(s);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+		try {
+			return StringPrimitives.parseDouble(s);
+		} catch(NumberFormatException e) {
+			// ignore
+		}
+
+		return s;
+	}
+
+	public static CompactProperties subset(CompactProperties source, int index) {
+		if(source==null) {
+			return null;
+		}
+		CompactProperties properties = new CompactProperties();
+
+		String suffix = '_'+String.valueOf(index);
+
+		Object table = source.table;
+
+		if(table instanceof Object[]) {
+			Object[] items = (Object[]) table;
+			int maxI = items.length-1;
+			for(int i=0; i<maxI; i+=2) {
+				if(items[i]==null || items[i+1]==null) {
+					continue;
+				}
+				String key = (String) items[i];
+				if(key.endsWith(suffix)) {
+					key = key.substring(0, key.length()-suffix.length());
+					properties.put(key, items[i+1]);
+				}
+			}
+		} else if(table!=null) {
+			Map<?, ?> map = (Map<?, ?>) table;
+			for(Entry<?, ?> entry : map.entrySet()) {
+				if(entry.getValue()==null) {
+					continue;
+				}
+
+				String key = (String) entry.getKey();
+				if(key.endsWith(suffix)) {
+					key = key.substring(0, key.length()-suffix.length());
+					properties.put(key, entry.getValue());
+				}
+			}
+		}
+
+		return properties;
+	}
+
+	public static CompactProperties subset(CompactProperties source,
+			int index0, int index1) {
+		if(source==null) {
+			return null;
+		}
+		CompactProperties properties = new CompactProperties();
+
+		Map<String, Object> map = source.asMap();
+
+		for(int i=index0; i<=index1; i++) {
+			String suffix = '_'+String.valueOf(i);
+			Iterator<Entry<String, Object>> it = map.entrySet().iterator();
+			while(it.hasNext()) {
+				Entry<String, Object> entry = it.next();
+				String key = (String) entry.getKey();
+
+				if(entry.getValue()==null) {
+					it.remove();
+					continue;
+				}
+
+				if(key.endsWith(suffix)) {
+					key = StringUtil.intern(key.substring(0, key.length()-suffix.length()));
+					properties.put(key, entry.getValue());
+					it.remove();
+				}
+			}
+		}
+
+		return properties;
+	}
+
+	public static void countKeys(CompactProperties properties,
+			Counter counter) {
+
+		if(counter==null)
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
+
+		if(properties==null || properties.size()==0) {
+			return;
+		}
+
+		Object table = properties.table;
+
+		if(table instanceof Object[]) {
+			Object[] items = (Object[]) table;
+			int maxI = items.length-1;
+			for(int i=0; i<maxI; i+=2) {
+				if(items[i]==null || items[i+1]==null) {
+					continue;
+				}
+				counter.increment(getRawKey((String) items[i]));
+			}
+		} else if(table!=null) {
+			Map<?, ?> map = (Map<?, ?>) table;
+			for(Entry<?, ?> entry : map.entrySet()) {
+				if(entry.getValue()==null) {
+					continue;
+				}
+
+				counter.increment(getRawKey((String) entry.getKey()));
+			}
+		}
+	}
+
+	public static void collectKeys(CompactProperties properties,
+			Collection<String> target) {
+		if(target==null)
+			throw new NullPointerException("Invalid counter"); //$NON-NLS-1$
+
+		if(properties==null || properties.size()==0) {
+			return;
+		}
+
+		Object table = properties.table;
+
+		if(table instanceof Object[]) {
+			Object[] items = (Object[]) table;
+			int maxI = items.length-1;
+			for(int i=0; i<maxI; i+=2) {
+				if(items[i]==null || items[i+1]==null) {
+					continue;
+				}
+				target.add(getRawKey((String) items[i]));
+			}
+		} else if(table!=null) {
+			Map<?, ?> map = (Map<?, ?>) table;
+			for(Entry<?, ?> entry : map.entrySet()) {
+				if(entry.getValue()==null) {
+					continue;
+				}
+
+				target.add(getRawKey((String) entry.getKey()));
+			}
+		}
+	}
+
+	private static String getRawKey(String key) {
+		int idx = key.lastIndexOf('_');
+		if(idx==-1) {
+			return key;
+		}
+
+		int len = key.length();
+		for(int i=idx+1; i<len; i++) {
+			if(!Character.isDigit(key.charAt(i))) {
+				return key;
+			}
+		}
+
+		return key.substring(0, idx);
 	}
 }

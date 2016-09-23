@@ -27,10 +27,10 @@ package de.ims.icarus.plugins.prosody.annotation;
 
 import de.ims.icarus.language.Grammar;
 import de.ims.icarus.language.annotation.AnnotatedSentenceData;
-import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodicSentenceData;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Wrapper;
 import de.ims.icarus.util.annotation.Annotation;
 
@@ -263,7 +263,7 @@ public class AnnotatedProsodicSentenceData implements ProsodicSentenceData, Anno
 	}
 
 	@Override
-	public CorefProperties getProperties() {
+	public CompactProperties getProperties() {
 		return source.getProperties();
 	}
 

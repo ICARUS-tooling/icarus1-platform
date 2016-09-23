@@ -34,17 +34,17 @@ import java.util.Stack;
 import java.util.regex.Pattern;
 
 import de.ims.icarus.language.coref.Cluster;
-import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.DocumentData;
-import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.plugins.coref.CorefConstants;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -178,7 +178,7 @@ public final class CONLL12Utils implements CorefConstants {
 		String documentId = null;
 		String partId = null;
 
-		CorefProperties properties = new CorefProperties();
+		CompactProperties properties = new CompactProperties();
 		Row row;
 
 		DefaultCoreferenceData result = new DefaultCoreferenceData(document, forms);

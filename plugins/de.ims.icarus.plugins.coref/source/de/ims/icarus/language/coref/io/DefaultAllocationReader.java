@@ -303,7 +303,7 @@ public class DefaultAllocationReader implements AllocationReader {
 		Queue<Edge> pending = new LinkedList<>(edgeSet.getEdges());
 		Map<Integer, Cluster> clusterMap = new HashMap<>();
 		Map<Span, Cluster> heads = new HashMap<>();
-		Set<Edge> postproned = new HashSet<>();
+		Set<Edge> postponed = new HashSet<>();
 		while(!pending.isEmpty()) {
 			Edge edge = pending.poll();
 			if(edge.getSource().isROOT()) {
@@ -317,9 +317,9 @@ public class DefaultAllocationReader implements AllocationReader {
 				cluster.addSpan(edge.getTarget(), edge);
 				edge.getTarget().setCluster(cluster);
 				heads.put(edge.getTarget(), cluster);
-			} else if(!postproned.contains(edge)) {
+			} else if(!postponed.contains(edge)) {
 				pending.offer(edge);
-				postproned.add(edge);
+				postponed.add(edge);
 			} else {
 				throw new IllegalArgumentException(errMsg("Unable to to assign node to cluster " //$NON-NLS-1$
 						+ "- source of edge has no connection to ROOT: "+edge+" ")); //$NON-NLS-1$ //$NON-NLS-2$

@@ -116,6 +116,7 @@ public class UniSylIOUtils {
 	public static final String KEY_COREF_PROPERTY_KEY = "corefPropertyKey"; //$NON-NLS-1$
 	public static final String KEY_DECODE_FESTIVAL_UMLAUTS = "decodeFestivalUmlauts"; //$NON-NLS-1$
 	public static final String KEY_IGNORE_COLUMN_COUNT_MISMATCH = "ignoreColumnCountMismatch"; //$NON-NLS-1$
+	public static final String KEY_DOCUMENT_ID_FORMAT = "documentIdFormat"; //$NON-NLS-1$
 
 	public static final String ROLE_DELIMITER = "DEL"; //$NON-NLS-1$
 	public static final String ROLE_AGGREGATE = "AGG"; //$NON-NLS-1$
@@ -224,6 +225,7 @@ public class UniSylIOUtils {
 		config.corefPropertyKey = options.getString(KEY_COREF_PROPERTY_KEY);
 		config.decodeFestivalUmlauts = options.getBoolean(KEY_DECODE_FESTIVAL_UMLAUTS);
 		config.ignoreColumnCountMismatch = options.getBoolean(KEY_IGNORE_COLUMN_COUNT_MISMATCH);
+		config.documentIdFormat = options.getString(KEY_DOCUMENT_ID_FORMAT);
 
 		if(config.createCorefStructure && config.corefPropertyKey==null) {
 			config.corefPropertyKey = "coref"; //$NON-NLS-1$
@@ -461,6 +463,8 @@ public class UniSylIOUtils {
 		String localSampaRulesFile;
 
 		String emptyContent;
+
+		String documentIdFormat;
 	}
 
 	public static class Column {

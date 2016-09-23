@@ -25,6 +25,7 @@
  */
 package de.ims.icarus.language.coref;
 
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
 
@@ -37,7 +38,7 @@ import de.ims.icarus.util.mem.Link;
 public abstract class CorefMember {
 
 	@Link
-	protected CorefProperties properties;
+	protected CompactProperties properties;
 
 	protected CorefMember() {
 		// no-op
@@ -49,21 +50,21 @@ public abstract class CorefMember {
 
 	public void setProperty(String key, Object value) {
 		if(properties==null) {
-			properties = new CorefProperties();
+			properties = new CompactProperties();
 		}
 
 		properties.put(key, value);
 	}
 
-	public void setProperties(CorefProperties properties) {
+	public void setProperties(CompactProperties properties) {
 		this.properties = properties;
 	}
 
-	public CorefProperties getProperties() {
+	public CompactProperties getProperties() {
 		return properties;
 	}
 
-	protected CorefProperties cloneProperties() {
+	protected CompactProperties cloneProperties() {
 		return properties==null ? null : properties.clone();
 	}
 }

@@ -37,10 +37,9 @@ import java.util.Stack;
 import de.ims.icarus.Core;
 import de.ims.icarus.config.ConfigRegistry;
 import de.ims.icarus.language.coref.Cluster;
-import de.ims.icarus.language.coref.CorefProperties;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
@@ -50,6 +49,7 @@ import de.ims.icarus.plugins.prosody.DefaultProsodicSentenceData;
 import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 import de.ims.icarus.plugins.prosody.ProsodyConstants;
 import de.ims.icarus.plugins.prosody.sampa.SampaMapper2;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.strings.CharTableBuffer;
 import de.ims.icarus.util.strings.CharTableBuffer.Cursor;
 import de.ims.icarus.util.strings.CharTableBuffer.Row;
@@ -291,7 +291,7 @@ public final class DirndlIOUtils implements ProsodyConstants {
 //		LinkedList<Span> spanBuffer = new LinkedList<>();
 //		Stack<Span> spanStack = new Stack<>();
 //
-//		CorefProperties properties = new CorefProperties();
+//		CompactProperties properties = new CompactProperties();
 //		int headerOffset = 0;
 //		for(int i=0; i<size; i++) {
 //			Row row = buffer.getRow(i);
@@ -750,7 +750,7 @@ public final class DirndlIOUtils implements ProsodyConstants {
 			spanStack.clear();
 		}
 
-		protected int readProperties(CorefProperties properties) {
+		protected int readProperties(CompactProperties properties) {
 			int headerOffset = 0;
 			for(int i=0; i<buffer.getRowCount(); i++) {
 				Row row = buffer.getRow(i);
@@ -859,7 +859,7 @@ public final class DirndlIOUtils implements ProsodyConstants {
 			clearInternals();
 
 			// Read in properties
-			CorefProperties properties = new CorefProperties();
+			CompactProperties properties = new CompactProperties();
 			int headerOffset = readProperties(properties);
 			forms = new String[size-headerOffset];
 			result = new DefaultProsodicSentenceData(document, forms);

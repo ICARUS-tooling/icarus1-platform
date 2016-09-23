@@ -444,7 +444,12 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		if(document.getId()==null) {
 			Object id = document.getProperty(DOCUMENT_ID);
 			if(id==null) {
-				id = "doc_"+document.getDocumentIndex(); //$NON-NLS-1$
+
+				if(config.documentIdFormat!=null) {
+					id = String.format(config.documentIdFormat, document.getDocumentIndex());
+				} else {
+					id = "doc_"+document.getDocumentIndex(); //$NON-NLS-1$
+				}
 			}
 			document.setId(String.valueOf(id));
 		}

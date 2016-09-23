@@ -53,6 +53,14 @@ public class EdgeSet extends CorefListMember<Edge> implements Cloneable {
 		items.add(edge);
 	}
 
+	public void addEdges(List<? extends Edge> edges) {
+		if(items==null) {
+			items = new ArrayList<>();
+		}
+
+		items.addAll(edges);
+	}
+
 	/**
 	 * Returns a read-only view of all the edges in this {@code EdgeSet}
 	 */

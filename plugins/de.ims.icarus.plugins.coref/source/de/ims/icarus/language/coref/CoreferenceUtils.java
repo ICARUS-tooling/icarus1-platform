@@ -60,6 +60,7 @@ import de.ims.icarus.search_tools.util.SharedPropertyRegistry;
 import de.ims.icarus.search_tools.util.ValueHandler;
 import de.ims.icarus.ui.TooltipFreezer;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.Filter;
 import de.ims.icarus.util.HtmlUtils;
 import de.ims.icarus.util.Options;
@@ -672,7 +673,7 @@ public final class CoreferenceUtils implements CorefConstants {
 		return sb.toString();
 	}
 
-	private static void appendProperties(StringBuilder sb, CorefProperties properties) {
+	private static void appendProperties(StringBuilder sb, CompactProperties properties) {
 		if(properties==null || properties.size()==0)
 			return;
 

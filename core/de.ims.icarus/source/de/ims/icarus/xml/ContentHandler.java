@@ -21,11 +21,22 @@ import org.xml.sax.helpers.DefaultHandler;
 public abstract class ContentHandler extends DefaultHandler {
 
 	private StringBuilder textBuffer = new StringBuilder(30);
+	private boolean ignoreCharacters = false;
+
+	protected boolean isIgnoreCharacters() {
+		return ignoreCharacters;
+	}
+
+	protected void setIgnoreCharacters(boolean ignoreCharacters) {
+		this.ignoreCharacters = ignoreCharacters;
+	}
 
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
-		textBuffer.append(ch, start, length);
+		if(!ignoreCharacters) {
+			textBuffer.append(ch, start, length);
+		}
 	}
 
 	protected void clearText() {
