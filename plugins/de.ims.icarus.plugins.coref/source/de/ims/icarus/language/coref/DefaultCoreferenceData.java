@@ -30,7 +30,6 @@ import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.plugins.coref.CorefConstants;
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.mem.HeapMember;
-import de.ims.icarus.util.mem.Primitive;
 import de.ims.icarus.util.mem.Reference;
 import de.ims.icarus.util.mem.ReferenceType;
 
@@ -47,9 +46,6 @@ public class DefaultCoreferenceData extends BasicSentenceData<CompactProperties>
 
 	@Reference(ReferenceType.UPLINK)
 	protected DocumentData document;
-
-	@Primitive
-	protected int sentenceIndex = -1;
 
 	public DefaultCoreferenceData() {
 		super();
@@ -69,8 +65,8 @@ public class DefaultCoreferenceData extends BasicSentenceData<CompactProperties>
 	 */
 	@Override
 	public Span[] getSpans() {
-		return sentenceIndex==-1 ? null
-				: getDocument().getSpanSet().getSpans(sentenceIndex);
+		return index==-1 ? null
+				: getDocument().getSpanSet().getSpans(index);
 	}
 
 	@Override
@@ -94,31 +90,15 @@ public class DefaultCoreferenceData extends BasicSentenceData<CompactProperties>
 		this.document = document;
 	}
 
-	public int getSentenceIndex() {
-		return sentenceIndex;
-	}
-
 	@Override
 	public Object getProperty(String key) {
 		switch (key) {
 
 		case SENTENCE_INDEX_KEX:
-			return getSentenceIndex();
+			return getIndex();
 
 		default:
 			return super.getProperty(key);
 		}
-	}
-
-	public void setSentenceIndex(int sentenceIndex) {
-		this.sentenceIndex = sentenceIndex;
-	}
-
-	/**
-	 * @see de.ims.icarus.language.SentenceData#getIndex()
-	 */
-	@Override
-	public int getIndex() {
-		return sentenceIndex;
 	}
 }

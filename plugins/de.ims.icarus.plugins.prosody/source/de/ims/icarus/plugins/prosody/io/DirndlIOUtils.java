@@ -888,13 +888,13 @@ public final class DirndlIOUtils implements ProsodyConstants {
 				result.setProperty(SPEAKER_KEY, speaker);
 			}
 
-			result.setSentenceIndex(document.size());
+			result.setIndex(document.size());
 			document.add(result);
 
 			Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
 			if(spans!=null) {
 				CoreferenceAllocation allocation = document.getDocumentSet().getDefaultAllocation();
-				allocation.setSpans(document.getId(), result.getSentenceIndex(), spans);
+				allocation.setSpans(document.getId(), result.getIndex(), spans);
 			}
 
 			clearInternals();

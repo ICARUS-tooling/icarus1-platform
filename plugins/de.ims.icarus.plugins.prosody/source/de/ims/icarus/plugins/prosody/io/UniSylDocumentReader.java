@@ -490,6 +490,7 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 			}
 		}
 		sentence.setForms(forms);
+		sentence.setIndex(document.size());
 	}
 
 	private void assignProperty(AnnotationLevel level, String key, Object value) {

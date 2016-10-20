@@ -28,6 +28,9 @@ package de.ims.icarus.language;
 import gnu.trove.map.TMap;
 import gnu.trove.map.hash.THashMap;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -41,12 +44,16 @@ import de.ims.icarus.util.mem.Link;
  *
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class BasicSentenceData<P extends CompactProperties> implements SentenceData, LanguageConstants, Cloneable {
 
 	private static final long serialVersionUID = 6042849879442946254L;
 
 	@XmlTransient
 	protected P properties;
+
+	@XmlAttribute(name="index", required=false)
+	protected int index = -1;
 
 	@XmlTransient
 	protected TMap<Key, Object> indexedProperties;
@@ -130,7 +137,11 @@ public class BasicSentenceData<P extends CompactProperties> implements SentenceD
 	 */
 	@Override
 	public int getIndex() {
-		return -1;
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 	/**

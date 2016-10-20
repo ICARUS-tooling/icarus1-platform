@@ -77,7 +77,7 @@ public class DefaultCoreferenceDocumentData extends CorefListMember<SentenceData
 
 	public DefaultCoreferenceData newData(String[] forms) {
 		DefaultCoreferenceData data = new DefaultCoreferenceData(this, forms);
-		data.setSentenceIndex(size());
+		data.setIndex(size());
 		add(data);
 
 		return data;

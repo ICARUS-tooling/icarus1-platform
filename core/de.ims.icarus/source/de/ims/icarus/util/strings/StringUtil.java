@@ -117,6 +117,7 @@ public final class StringUtil {
 	 * @return
 	 */
 	public static String intern(CharSequence s) {
+		// We cast to String here because all the 3 possible interners create Strings as output
 		return s==null ? null : (String)interner.intern(s);
 	}
 

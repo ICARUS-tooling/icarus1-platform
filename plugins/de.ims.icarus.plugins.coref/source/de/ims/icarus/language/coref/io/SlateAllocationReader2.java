@@ -192,7 +192,7 @@ public class SlateAllocationReader2 implements AllocationReader {
 		 * <br>
 		 * content: -
 		 */
-		public static final String TAG_DOCUMENT = "document"; //$NON-NLS-1$
+		public static final String TAG_DOCUMENT = "currentDocument"; //$NON-NLS-1$
 
 		/**
 		 * attributes: -
@@ -274,7 +274,8 @@ public class SlateAllocationReader2 implements AllocationReader {
 		private List<Span> spans = new ArrayList<>(100);
 		private List<Edge> edges = new ArrayList<>(100);
 
-		private DocumentData document;
+		private int documentIndex = -1;
+		private DocumentData currentDocument;
 
 		private Set<Span> unresolvableSpans = new TCustomHashSet<>(IdentityHashingStrategy.INSTANCE);
 
@@ -438,25 +439,25 @@ public class SlateAllocationReader2 implements AllocationReader {
 
 		private void createAnchors(String text) {
 
-			document = null;
+			currentDocument = null;
 
 			if(documentSet.size()==1) {
-				document = documentSet.get(0);
+				currentDocument = documentSet.get(0);
 			} else if(documentId!=null) {
-				document = documentSet.getDocument(documentId);
+				currentDocument = documentSet.getDocument(documentId);
 			}
 
-			if(document==null)
-				throw new IllegalStateException("Unable to map slate allocation data to a valid document in corpus"); //$NON-NLS-1$
+			if(currentDocument==null)
+				throw new IllegalStateException("Unable to map slate allocation data to a valid currentDocument in corpus"); //$NON-NLS-1$
 
 			if(options.getBoolean(KEY_OVERRIDE_DOCUMENT_ID, false)) {
-				documentId = document.getId();
+				documentId = currentDocument.getId();
 			}
 
 			int cursor = 0;
 
-			for(int sentenceIndex = 0; sentenceIndex<document.size(); sentenceIndex++) {
-				SentenceData sentence = document.get(sentenceIndex);
+			for(int sentenceIndex = 0; sentenceIndex<currentDocument.size(); sentenceIndex++) {
+				SentenceData sentence = currentDocument.get(sentenceIndex);
 
 				// Skip the speaker attribution on begin of sentences (kinda optional thing)
 //				int sentenceBegin = StringUtil.indexOf(text, ':', cursor, Math.min(len, cursor+20));
@@ -507,13 +508,13 @@ public class SlateAllocationReader2 implements AllocationReader {
 				Anchor beginAnchor = beginAnchors.get(anchor0);
 				if(beginAnchor==null)
 					throw new IllegalStateException(String.format(
-							"Failed to resolve span \"%s\" (%d-%d) to existing tokens in document - misplaced begin anchor", //$NON-NLS-1$
+							"Failed to resolve span \"%s\" (%d-%d) to existing tokens in currentDocument - misplaced begin anchor", //$NON-NLS-1$
 							content, anchor0, anchor1));
 
 				Anchor endAnchor = endAnchors.get(anchor1);
 				if(endAnchor==null)
 					throw new IllegalStateException(String.format(
-							"Failed to resolve span \"%s\" (%d-%d) to existing tokens in document - misplaced end anchor", //$NON-NLS-1$
+							"Failed to resolve span \"%s\" (%d-%d) to existing tokens in currentDocument - misplaced end anchor", //$NON-NLS-1$
 							content, anchor0, anchor1));
 
 				//TODO alternative way of handling this kind of spans? (maybe silently ignore them?
@@ -522,6 +523,7 @@ public class SlateAllocationReader2 implements AllocationReader {
 //							"Span is crossing sentence border [%d-%d]: %s", //$NON-NLS-1$
 //							beginAnchor.sentenceIndex+1, endAnchor.sentenceIndex+1, content));
 
+					// For now we send a warning and ignore those kind of spans and all edges associated with them
 					LoggerFactory.warning(this, String.format("Span is crossing sentence border [%d-%d]: %s", //$NON-NLS-1$
 							beginAnchor.sentenceIndex+1, endAnchor.sentenceIndex+1, content));
 
@@ -562,8 +564,8 @@ public class SlateAllocationReader2 implements AllocationReader {
 				}
 			}
 
-			System.out.printf("Reader: %d spans, %d edges, %d undesired edges, %d unresolvable spans, %d root candidates\n",
-					spans.size(), edges.size(), undesiredEdges.size(), unresolvableSpans.size(), roots.size());
+//			System.out.printf("Reader: %d spans, %d edges, %d undesired edges, %d unresolvable spans, %d root candidates\n",
+//					spans.size(), edges.size(), undesiredEdges.size(), unresolvableSpans.size(), roots.size());
 
 			// Link all unconnected nodes to root node
 			roots.removeAll(unresolvableSpans);
@@ -681,7 +683,7 @@ public class SlateAllocationReader2 implements AllocationReader {
 		}
 
 		private String errMsg(String s) {
-			return "Error in document '"+documentId+"': "+s; //$NON-NLS-1$ //$NON-NLS-2$
+			return "Error in currentDocument '"+documentId+"': "+s; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

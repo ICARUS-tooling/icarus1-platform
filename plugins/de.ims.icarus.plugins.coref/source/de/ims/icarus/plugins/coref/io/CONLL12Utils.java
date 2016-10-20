@@ -273,7 +273,7 @@ public final class CONLL12Utils implements CorefConstants {
 		if(!spanStack.isEmpty())
 			throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 
-		result.setSentenceIndex(document.size());
+		result.setIndex(document.size());
 		document.add(result);
 		result.setProperty(CoreferenceData.DOCUMENT_ID_PROPERTY, documentId);
 		result.setProperty(CoreferenceData.PART_ID_PROPERTY, partId);
@@ -281,7 +281,7 @@ public final class CONLL12Utils implements CorefConstants {
 		Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);
 		if(spans!=null) {
 			CoreferenceAllocation allocation = document.getDocumentSet().getDefaultAllocation();
-			allocation.setSpans(document.getId(), result.getSentenceIndex(), spans);
+			allocation.setSpans(document.getId(), result.getIndex(), spans);
 		}
 
 		return result;
