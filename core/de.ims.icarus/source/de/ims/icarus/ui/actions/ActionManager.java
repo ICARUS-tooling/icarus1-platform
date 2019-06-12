@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.ui.actions;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -89,6 +86,8 @@ import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.id.DuplicateIdentifierException;
 import de.ims.icarus.util.id.UnknownIdentifierException;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * @author Markus Gärtner
@@ -1006,7 +1005,10 @@ public class ActionManager {
 	}
 
 	protected void configureButton(AbstractButton button, Action action) {
-		button.setHideActionText(true);
+		boolean actionHasIcon = action.getValue(Action.SMALL_ICON)!=null
+				|| action.getValue(Action.LARGE_ICON_KEY)!=null;
+
+		button.setHideActionText(actionHasIcon);
 		button.setFocusable(false);
 
 		// TODO check for requirements of a default preferred size for buttons!

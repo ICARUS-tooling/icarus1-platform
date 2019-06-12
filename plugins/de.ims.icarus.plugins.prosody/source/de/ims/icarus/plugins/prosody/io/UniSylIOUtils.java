@@ -108,15 +108,19 @@ public class UniSylIOUtils {
 	public static final String KEY_SYLLABLE_OFFSETS_FROM_SAMPA = "syllableOffsetsFromSampa"; //$NON-NLS-1$
 	public static final String KEY_LOCAL_SAMPA_RULES_FILE = "localSampaRulesFile"; //$NON-NLS-1$
 	public static final String KEY_MARK_ACCENT_ON_WORDS = "markAccentOnWords"; //$NON-NLS-1$
-	public static final String KEY_ONLY_CONSIDER_STRESSED_SYLLABLES = "onlyConsiderStressedSylables"; //$NON-NLS-1$
+	public static final String KEY_ONLY_CONSIDER_STRESSED_SYLLABLES = "onlyConsiderStressedSyllables"; //$NON-NLS-1$
 	public static final String KEY_ACCENT_EXCURSION = "accentExcursion"; //$NON-NLS-1$
 	public static final String KEY_EMPTY_CONTENT = "emptyContent"; //$NON-NLS-1$
 	public static final String KEY_ADJUST_DEPENDENCY_HEADS = "adjustDependencyHeads"; //$NON-NLS-1$
 	public static final String KEY_CREATE_COREF_STRUCTURE = "createCorefStructure"; //$NON-NLS-1$
 	public static final String KEY_COREF_PROPERTY_KEY = "corefPropertyKey"; //$NON-NLS-1$
+	public static final String KEY_COREF_CLUSTER_ID_PATTERN_KEY = "corefClusterIdPattern"; //$NON-NLS-1$
+	public static final String KEY_COREF_FILTER_PATTERN = "corefFilterPattern"; //$NON-NLS-1$
+	public static final String KEY_COREF_IGNORE_UNCLOSED_SPANS = "corefIngoreUnclosedSpans"; //$NON-NLS-1$
 	public static final String KEY_DECODE_FESTIVAL_UMLAUTS = "decodeFestivalUmlauts"; //$NON-NLS-1$
 	public static final String KEY_IGNORE_COLUMN_COUNT_MISMATCH = "ignoreColumnCountMismatch"; //$NON-NLS-1$
 	public static final String KEY_DOCUMENT_ID_FORMAT = "documentIdFormat"; //$NON-NLS-1$
+	public static final String KEY_EXPAND_SYLLABLE_STRESS_ARRAY = "expandSyllabeStressArray";
 
 	public static final String ROLE_DELIMITER = "DEL"; //$NON-NLS-1$
 	public static final String ROLE_AGGREGATE = "AGG"; //$NON-NLS-1$
@@ -216,16 +220,20 @@ public class UniSylIOUtils {
 		config.skipEmptyLines = options.getBoolean(KEY_SKIP_EMPTY_LINES);
 		config.syllableOffsetsFromSampa = options.getBoolean(KEY_SYLLABLE_OFFSETS_FROM_SAMPA);
 		config.markAccentOnWords = options.getBoolean(KEY_MARK_ACCENT_ON_WORDS);
-		config.onlyConsiderStressedSylables = options.getBoolean(KEY_ONLY_CONSIDER_STRESSED_SYLLABLES);
+		config.onlyConsiderStressedSyllables = options.getBoolean(KEY_ONLY_CONSIDER_STRESSED_SYLLABLES);
 		config.accentExcursion = options.getInteger(KEY_ACCENT_EXCURSION);
 		config.localSampaRulesFile = options.getString(KEY_LOCAL_SAMPA_RULES_FILE);
 		config.emptyContent = options.getString(KEY_EMPTY_CONTENT);
 		config.adjustDependencyHeads = options.getBoolean(KEY_ADJUST_DEPENDENCY_HEADS);
 		config.createCorefStructure = options.getBoolean(KEY_CREATE_COREF_STRUCTURE);
 		config.corefPropertyKey = options.getString(KEY_COREF_PROPERTY_KEY);
+		config.corefClusterIdPattern = options.getString(KEY_COREF_CLUSTER_ID_PATTERN_KEY);
+		config.corefFilterPattern = options.getString(KEY_COREF_FILTER_PATTERN);
+		config.corefIngoreUnclosedSpans = options.getBoolean(KEY_COREF_IGNORE_UNCLOSED_SPANS);
 		config.decodeFestivalUmlauts = options.getBoolean(KEY_DECODE_FESTIVAL_UMLAUTS);
 		config.ignoreColumnCountMismatch = options.getBoolean(KEY_IGNORE_COLUMN_COUNT_MISMATCH);
 		config.documentIdFormat = options.getString(KEY_DOCUMENT_ID_FORMAT);
+		config.expandSyllabeStressArray = options.getBoolean(KEY_EXPAND_SYLLABLE_STRESS_ARRAY);
 
 		if(config.createCorefStructure && config.corefPropertyKey==null) {
 			config.corefPropertyKey = "coref"; //$NON-NLS-1$
@@ -452,13 +460,17 @@ public class UniSylIOUtils {
 		boolean skipEmptyLines;
 		boolean syllableOffsetsFromSampa;
 		boolean markAccentOnWords = false;
-		boolean onlyConsiderStressedSylables = false;
+		boolean onlyConsiderStressedSyllables = false;
 		int accentExcursion = -1;
 		boolean adjustDependencyHeads = false;
 		boolean createCorefStructure = false;
 		String corefPropertyKey;
+		String corefClusterIdPattern = null;
+		String corefFilterPattern = null;
+		boolean corefIngoreUnclosedSpans = false;
 		boolean decodeFestivalUmlauts = false;
 		boolean ignoreColumnCountMismatch = false;
+		boolean expandSyllabeStressArray = false;
 
 		String localSampaRulesFile;
 

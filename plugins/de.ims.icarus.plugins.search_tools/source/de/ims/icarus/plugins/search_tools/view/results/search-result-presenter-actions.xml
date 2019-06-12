@@ -14,6 +14,10 @@
 	<action id="plugins.searchTools.searchResultPresenter.reorderResultAction"
 		name="${id}.name" desc="${id}.description" icon="actmark_act.gif" />
 		
+	<!-- Show Text Outline -->
+	<action id="plugins.searchTools.searchResultPresenter.showTextOutlineAction"
+		name="${id}.name" desc="${id}.description" icon="task_set.gif" />
+		
 	<!-- Sort Columns Actions -->
 	<action id="plugins.searchTools.searchResultPresenter.sortColsAscAlphaAction"
 		name="${id}.name" desc="${id}.description" icon="sort_cols_asc_alph.gif" command="sort_cols_asc_alph" />
@@ -66,6 +70,8 @@
 		<item type="custom" value="sortButtons" />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.flipTableAction" />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.resetTableAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchResultPresenter.showTextOutlineAction" />
 	</action-list>
 		
 	<!-- ToolBar List for header area ( 3D result )-->
@@ -78,6 +84,8 @@
 		<item type="custom" value="sortButtons" />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.flipTableAction" />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.resetTableAction" />
+		<separator />
+		<item type="action" value="plugins.searchTools.searchResultPresenter.showTextOutlineAction" />
 		<separator />
 		<item type="action" value="plugins.searchTools.searchResultPresenter.reorderResultAction" />
 	</action-list>

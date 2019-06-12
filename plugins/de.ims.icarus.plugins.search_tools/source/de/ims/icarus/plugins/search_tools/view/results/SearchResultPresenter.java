@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.results;
@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.logging.Level;
 
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingWorker;
@@ -43,6 +44,7 @@ import de.ims.icarus.search_tools.result.SearchResult;
 import de.ims.icarus.ui.NumberDisplayMode;
 import de.ims.icarus.ui.UIUtil;
 import de.ims.icarus.ui.actions.ActionManager;
+import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.PresenterUtils;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
@@ -60,26 +62,26 @@ import de.ims.icarus.util.strings.StringUtil;
  *
  */
 public abstract class SearchResultPresenter implements AWTPresenter {
-	
+
 	public static final int DEFAULT_CELL_HEIGHT = 25;
 	public static final int DEFAULT_CELL_WIDTH = 75;
-	
+
 	protected JPanel contentPanel;
 	protected SearchResult searchResult;
-	
+
 	protected Handler handler;
 	protected CallbackHandler callbackHandler;
-	
+
 	protected SwingWorker<?, ?> currentTask;
-	
+
 	protected Options options;
-	
+
 	public static final int DEFAULT_REFRESH_DELAY = 1000;
-	
+
 	protected ActionManager actionManager;
-	
+
 	private static ActionManager sharedActionManager;
-	
+
 	protected synchronized static ActionManager getSharedActionManager() {
 		if(sharedActionManager==null) {
 			sharedActionManager = ActionManager.globalManager().derive();
@@ -87,11 +89,11 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 			URL actionLocation = SearchResultPresenter.class.getResource("search-result-presenter-actions.xml"); //$NON-NLS-1$
 			if(actionLocation==null)
 				throw new CorruptedStateException("Missing resources: search-result-presenter-actions.xml"); //$NON-NLS-1$
-			
+
 			try {
 				sharedActionManager.loadActions(actionLocation);
 			} catch (IOException e) {
-				LoggerFactory.log(SearchResultPresenter.class, Level.SEVERE, 
+				LoggerFactory.log(SearchResultPresenter.class, Level.SEVERE,
 						"Failed to load actions from file", e); //$NON-NLS-1$
 			}
 		}
@@ -101,48 +103,60 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	protected SearchResultPresenter() {
 		// no-op
 	}
-	
+
 	protected ActionManager getActionManager() {
 		if(actionManager==null) {
 			actionManager = getSharedActionManager().derive();
-			
+
 			registerActionCallbacks();
 		}
-		
+
 		return actionManager;
 	}
-	
+
 	protected void registerActionCallbacks() {
 		if(callbackHandler==null) {
 			callbackHandler = createCallbackHandler();
 		}
-		
+
 		ActionManager actionManager = getActionManager();
-		
+
 		actionManager.addHandler("plugins.searchTools.searchResultPresenter.toggleNumberDisplayModeAction",  //$NON-NLS-1$
 				callbackHandler, "toggleNumberDisplayMode"); //$NON-NLS-1$
+
+		actionManager.addHandler("plugins.searchTools.searchResultPresenter.showTextOutlineAction", //$NON-NLS-1$
+				callbackHandler, "showTextOutline"); //$NON-NLS-1$
 	}
-	
+
+	protected JComponent getTextOutlineComponent() {
+		return null;
+	}
+
 	protected void refreshActions() {
-		// no-op
+
+		ActionManager actionManager = getActionManager();
+
+		JComponent textOutlineComponent = getTextOutlineComponent();
+		actionManager.setEnabled(textOutlineComponent!=null,
+				"plugins.searchTools.searchResultPresenter.showTextOutlineAction"); //$NON-NLS-1$
 	}
-	
+
 	protected void setCurrentTask(SwingWorker<? extends Object, ? extends Object> task) {
 		currentTask = task;
 	}
-	
+
 	protected boolean hasCurrentTask() {
 		return currentTask!=null;
 	}
-	
+
 	protected SwingWorker<?, ?> getCurrentTask() {
 		return currentTask;
 	}
-	
+
 	public void exportToolBarItems(JToolBar toolBar) {
 		// no-op
 	}
-	
+
 	public abstract int getSupportedDimensions();
 
 	/**
@@ -152,7 +166,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	public boolean supports(ContentType type) {
 		return ContentTypeRegistry.isCompatible("SearchResultContentType", type); //$NON-NLS-1$
 	}
-	
+
 	public boolean supportsEntryType(ContentType type) {
 		return true;
 	}
@@ -165,47 +179,49 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 			throws UnsupportedPresentationDataException {
 		if(data==null)
 			throw new NullPointerException("Invalid data"); //$NON-NLS-1$
-		
+
 		if(!PresenterUtils.presenterSupports(this, data))
 			throw new UnsupportedPresentationDataException("Unsupported data: "+data.getClass()); //$NON-NLS-1$
-		
+
 		SearchResult searchResult = (SearchResult)data;
 		int supportedDimension = getSupportedDimensions();
 		if(supportedDimension!=-1 && searchResult.getDimension()!=supportedDimension)
 			throw new UnsupportedPresentationDataException("Result dimension not supported: "+searchResult.getDimension()); //$NON-NLS-1$
-		
+
 		setSearchResult(searchResult, options);
 	}
-	
+
 	protected Handler getHandler() {
 		if(handler==null) {
 			handler = createHandler();
 		}
-		
+
 		return handler;
 	}
-	
+
 	protected Handler createHandler() {
 		return new Handler();
 	}
-	
+
 	protected CallbackHandler createCallbackHandler() {
 		return new CallbackHandler();
 	}
-	
+
 	protected void setSearchResult(SearchResult searchResult, Options options) {
 		if(this.searchResult==searchResult) {
 			return;
 		}
-		
+
 		this.searchResult = searchResult;
-		
+
 		setOptions(options);
 		displayResult();
-		
+
 		updateGroupPainters();
+
+		refreshActions();
 	}
-	
+
 	protected Options getOptions() {
 		return options==null ? Options.emptyOptions : options;
 	}
@@ -218,9 +234,9 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	}
 
 	protected abstract void displayResult();
-	
+
 	public abstract void refresh();
-	
+
 	public SearchResult getSearchResult() {
 		return searchResult;
 	}
@@ -261,9 +277,9 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	public Object getPresentedData() {
 		return getSearchResult();
 	}
-	
+
 	protected abstract void buildContentPanel();
-	
+
 	protected void updateGroupPainters() {
 		// for subclasses
 	}
@@ -273,22 +289,22 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 	 */
 	@Override
 	public Component getPresentingComponent() {
-		if(contentPanel==null) {			
+		if(contentPanel==null) {
 			buildContentPanel();
-			
+
 			refresh();
 		}
 		return contentPanel;
 	}
-	
+
 	protected void setNumberDisplayMode(NumberDisplayMode mode) {
 		// no-op
 	}
-	
+
 	public void openPreferences() {
 		UIUtil.openConfigDialog("plugins.searchTools"); //$NON-NLS-1$
 	}
-	
+
 	public static String getHitCountString(SearchResult result) {
 		if(result==null) {
 			return "-"; //$NON-NLS-1$
@@ -296,54 +312,70 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		ResourceManager rm = ResourceManager.getInstance();
 		int total = result.getTotalMatchCount();
 		int groups = result.getDimension();
-		
+
 		String format = "%d %s - %s %s"; //$NON-NLS-1$
-		
+
 		String matchString = total==1 ?
 				rm.get("plugins.searchTools.labels.matchSg") //$NON-NLS-1$
 				: rm.get("plugins.searchTools.labels.matchPl"); //$NON-NLS-1$
-				
+
 		String groupString = groups==1 ?
 				rm.get("plugins.searchTools.labels.groupSg") //$NON-NLS-1$
 				: rm.get("plugins.searchTools.labels.groupPl"); //$NON-NLS-1$
-				
+
 		return String.format(format, groups, groupString, StringUtil.formatDecimal(total), matchString);
 	}
 
 	protected class Handler extends MouseAdapter  {
 		// no-op
 	}
-	
+
 	public class CallbackHandler {
-		
+
 		protected CallbackHandler() {
 			// no-op
 		}
-		
+
 		public void toggleNumberDisplayMode(boolean b) {
 			try {
 				NumberDisplayMode mode = b ? NumberDisplayMode.PERCENTAGE : NumberDisplayMode.RAW;
 				setNumberDisplayMode(mode);
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to toggle number display mode", ex); //$NON-NLS-1$
 				UIUtil.beep();
 			}
 		}
-		
+
 		public void toggleNumberDisplayMode(ActionEvent e) {
 			// ignore
 		}
+
+		public void showTextOutline(ActionEvent e) {
+			try {
+				JComponent comp = getTextOutlineComponent();
+				if(comp==null) {
+					return;
+				}
+
+				DialogFactory.getGlobalFactory().showGenericDialog(contentPanel,
+						DialogFactory.OK_OPTION, "Text Outline", null, comp, true);
+			} catch (Exception ex) {
+				LoggerFactory.log(this, Level.SEVERE,
+						"Failed to show text outline", ex); //$NON-NLS-1$
+				UIUtil.beep();
+			}
+		}
 	}
-	
+
 	protected abstract class AbstractResultJob extends SwingWorker<Object, Object> implements Identity {
-		
+
 		private final String key;
-		
+
 		protected AbstractResultJob(String key) {
 			if(key==null)
 				throw new NullPointerException("Invalid key"); //$NON-NLS-1$
-			
+
 			this.key = key;
 		}
 
@@ -357,7 +389,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 			return ResourceManager.getInstance().get(
 					"plugins.searchTools.searchResultPresenter."+key+".name"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 		protected Object[] getDescriptionParams() {
 			return null;
 		}
@@ -377,7 +409,7 @@ public abstract class SearchResultPresenter implements AWTPresenter {
 		public Object getOwner() {
 			return this;
 		}
-		
+
 		protected final Object owner() {
 			return SearchResultPresenter.this;
 		}

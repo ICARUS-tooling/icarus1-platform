@@ -27,8 +27,8 @@ package de.ims.icarus.plugins.prosody;
 
 import java.lang.reflect.Array;
 
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
+import de.ims.icarus.language.coref.DocumentData;
 
 /**
  * @author Markus Gärtner
@@ -160,7 +160,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 
 		default:
 			Object array = getIndexedProperty(index, key);
-			return (array==null || !array.getClass().isArray() || Array.getLength(array)==0) ?
+			return (array==null || !array.getClass().isArray() || Array.getLength(array)<=sylIndex) ?
 					null : Array.get(array, sylIndex);
 		}
 	}
@@ -217,7 +217,7 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 
 	private boolean getSyllableBooleanProperty(int index, String key, int syllable) {
 		boolean[] value = (boolean[])getIndexedProperty(index, key);
-		return value==null ? false : value[syllable];
+		return value==null /*|| value.length<=syllable*/ ? false : value[syllable];
 	}
 
 	/**
@@ -269,6 +269,16 @@ public class DefaultProsodicSentenceData extends DefaultCoreferenceData implemen
 //		if(value==null) {
 //			return false;
 //		}
+//
+//		/*
+//		 * WORKAROUND: DB dump contains sorted array of stressed syllable indices
+//		 *
+//		 * So we need to either compute the bit array at loading time or run a
+//		 * small search for every invocation.
+//		 */
+//		return Arrays.binarySearch((int[])value, syllable)>=0;
+//
+//		return (int)value == syllable;
 //
 //		int mask = 1<<syllable;
 //

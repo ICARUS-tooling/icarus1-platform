@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody.io;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
@@ -74,6 +71,8 @@ import de.ims.icarus.util.strings.CharLineBuffer;
 import de.ims.icarus.util.strings.Splitable;
 import de.ims.icarus.util.strings.StringPrimitives;
 import de.ims.icarus.util.strings.StringUtil;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * @author Markus Gärtner
@@ -96,6 +95,8 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 	private DefaultProsodicSentenceData sentence;
 	private String separator;
 	private int wordIndex;
+	private Matcher clusterIdMatcher;
+	private Matcher corefFilter;
 
 	private SampaMapper2 sampaMapper;
 	private Matcher emptyContentMatcher;
@@ -172,6 +173,12 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 			clusterMap  = new TIntObjectHashMap<>();
 			spanBuffer  = new LinkedList<>();
 			spanStack  = new Stack<>();
+			if(config.corefClusterIdPattern!=null) {
+				clusterIdMatcher = Pattern.compile(config.corefClusterIdPattern).matcher(""); //$NON-NLS-1$
+			}
+			if(config.corefFilterPattern!=null) {
+				corefFilter = Pattern.compile(config.corefFilterPattern).matcher(""); //$NON-NLS-1$
+			}
 		}
 	}
 
@@ -244,7 +251,7 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 				if(isDataLine) {
 					int colCount = buffer.split(separator);
 					if(!config.ignoreColumnCountMismatch && colCount!=config.columns.length)
-						throw new IllegalStateException("Insufficient number of data columns encountered at line "+(buffer.getLineNumber()+1) //$NON-NLS-1$
+						throw new IllegalStateException("Unexpected number of data columns encountered at line "+(buffer.getLineNumber()+1) //$NON-NLS-1$
 								+" (expected "+config.columns.length+" - got "+colCount+"): "+buffer); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 					tryColDelimiters();
@@ -479,6 +486,12 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 				sentence.setProperty(i, SYLLABLE_OFFSET_KEY, offsets);
 			}
 
+			// If necessary adjust the arrays holding stressed syllables
+			// needs to happen BEFORE tonal prominence calculation!!!
+			if(config.expandSyllabeStressArray) {
+				expandSyllableStressArray(i);
+			}
+
 			// Check for word accent markers
 			if(config.markAccentOnWords) {
 				markTonalProminence(i);
@@ -491,6 +504,22 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		}
 		sentence.setForms(forms);
 		sentence.setIndex(document.size());
+	}
+
+	private void expandSyllableStressArray(int index) {
+		Object value = sentence.getProperty(index, SYLLABLE_STRESS_KEY);
+		if(value==null || value instanceof boolean[]) {
+			return;
+		}
+
+		int sylCount = sentence.getSyllableCount(index);
+		boolean[] stress = new boolean[sylCount];
+
+		for(int stressIndex : (int[]) value) {
+			stress[stressIndex] = true;
+		}
+
+		sentence.setProperty(index, SYLLABLE_STRESS_KEY, stress);
 	}
 
 	private void assignProperty(AnnotationLevel level, String key, Object value) {
@@ -523,6 +552,10 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 				continue;
 			}
 
+			if(config.ignoreColumnCountMismatch && column.index>=buffer.getSplitCount()) {
+				continue;
+			}
+
 			ColumnType type = column.type;
 			Splitable cursor = buffer.getSplitCursor(column.index);
 
@@ -537,7 +570,10 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 					array = type.createSylBuffer(sylCount);
 					for(int i=0; i<sylCount; i++) {
 						Splitable part = cursor.getSplitCursor(i);
-						type.parseAndSet(array, i, part);
+						if(!isEmptyContent(part)) {
+							//FIXME pretty dirty workaround, we leave some fields uninitialized in case of "empty-content" markers in an aggregation expression
+							type.parseAndSet(array, i, part);
+						}
 						part.recycle();
 					}
 					sentence.setProperty(wordIndex, SYLLABLE_COUNT, sylCount);
@@ -648,7 +684,11 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 		boolean hasTonalProminence = false;
 		if(sylCount>0 && config.accentExcursion!=-1) {
 			for(int i=0; i<sylCount; i++) {
-				if(config.onlyConsiderStressedSylables && !sentence.isSyllableStressed(index, i)) {
+				if(sentence.getPainteB(index, i) <0) {
+					continue;
+				}
+
+				if(config.onlyConsiderStressedSyllables && !sentence.isSyllableStressed(index, i)) {
 					continue;
 				}
 
@@ -664,9 +704,40 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 	}
 
 	private static final String OBR = "("; //$NON-NLS-1$
+	private static final String OBR_CONT = "*("; //$NON-NLS-1$
 	private static final String CBR = ")"; //$NON-NLS-1$
+	private static final String CBR_CONT = ")*"; //$NON-NLS-1$
+
+	private int readClusterId(CharSequence s, int from, int to) {
+		if(clusterIdMatcher!=null) {
+			clusterIdMatcher.reset(s);
+			clusterIdMatcher.region(from, to+1); // end of region value is exclusive!
+			if(clusterIdMatcher.find()) {
+				from = clusterIdMatcher.start(1);
+				to = clusterIdMatcher.end(1)-1;
+			} else
+				throw new IllegalArgumentException("Unable to extract cluster id: "+s); //$NON-NLS-1$
+		}
+
+		return StringPrimitives.parseInt(s, from, to);
+	}
+
+	private boolean isIgnoreSpan(CharSequence s, int from, int to) {
+		if(corefFilter!=null) {
+			corefFilter.reset(s);
+			corefFilter.region(from, to+1);
+			return corefFilter.find();
+		}
+
+		return false;
+	}
 
 	private void createCorefStructure() {
+
+		spanStack.clear();
+		spanBuffer.clear();
+
+		List<String> unclosedSpans = null;
 
 		for(int sentIndex=0; sentIndex<document.size(); sentIndex++) {
 			DefaultProsodicSentenceData sentence = (DefaultProsodicSentenceData) document.get(sentIndex);
@@ -675,13 +746,25 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 				if(!coref.isEmpty()) {
 					// Build spans
 					String[] splits = coref.split("\\|"); //$NON-NLS-1$
+//					System.out.println("splits: "+Arrays.toString(splits));
 					for(String chunk : splits) {
-						if(chunk.startsWith(OBR)) {
+						if(chunk.startsWith(OBR) || chunk.startsWith(OBR_CONT)) {
+//							System.out.println("start "+chunk);
 							int i1 = chunk.length()-1;
 							if(chunk.endsWith(CBR)) {
 								i1--;
 							}
-							int clusterId = StringPrimitives.parseInt(chunk, 1, i1);
+							int begin = 1;
+							if(chunk.startsWith(OBR_CONT)) {
+								begin++;
+							}
+
+							if(isIgnoreSpan(chunk, begin, i1)) {
+//								System.out.println("ignoring "+chunk);
+								continue;
+							}
+
+							int clusterId = readClusterId(chunk, begin, i1); //StringPrimitives.parseInt(chunk, 1, i1);
 
 							// Start of span definition
 							Span span = new Span(i, i, sentIndex);
@@ -698,9 +781,20 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 
 							spanStack.push(span);
 						}
-						if(chunk.endsWith(CBR)) {
+						if(chunk.endsWith(CBR) || chunk.endsWith(CBR_CONT)) {
+//							System.out.println("end "+chunk);
 							int i0 = chunk.startsWith(OBR) ? 1 : 0;
-							int clusterId = StringPrimitives.parseInt(chunk, i0, chunk.length()-2);
+							int end = chunk.length()-2;
+							if(chunk.endsWith(CBR_CONT)) {
+								end--;
+							}
+
+							if(isIgnoreSpan(chunk, i0, end)) {
+//								System.out.println("ignoring "+chunk);
+								continue;
+							}
+
+							int clusterId = readClusterId(chunk, i0, end);//StringPrimitives.parseInt(chunk, i0, chunk.length()-2);
 
 							// End of span definition
 							Span span = null;
@@ -710,22 +804,35 @@ public class UniSylDocumentReader implements Reader<ProsodicDocumentData>, DataC
 									break;
 								}
 							}
-							if(span==null)
-								throw new IllegalArgumentException("No span introduced for cluster-id: "+clusterId); //$NON-NLS-1$
-							span.setEndIndex(i);
+							if(span==null) {
+								if(config.corefIngoreUnclosedSpans) {
+									if(unclosedSpans==null) {
+										unclosedSpans = new ArrayList<>();
+									}
+									unclosedSpans.add(chunk);
+								} else
+									throw new IllegalArgumentException("No span introduced for cluster-id: "+clusterId+", chunk="+chunk); //$NON-NLS-1$ //$NON-NLS-2$
+							} else {
+								span.setEndIndex(i);
 
-							// Ensure there can be only one span covering the exact
-							// same range of indices (we keep the first such one and
-							// discard all subsequent spans for this range
-							if(span.compareTo(spanBuffer.peekLast())!=0) {
-								spanBuffer.offerLast(span);
+								// Ensure there can be only one span covering the exact
+								// same range of indices (we keep the first such one and
+								// discard all subsequent spans for this range
+								if(span.compareTo(spanBuffer.peekLast())!=0) {
+									spanBuffer.offerLast(span);
+								}
 							}
 						}
 					}
 				}
 			}
 
-			if(!spanStack.isEmpty())
+			if(unclosedSpans!=null) {
+				LoggerFactory.debug(this, String.format("Unclosed spans in document %s: %s", //$NON-NLS-1$
+						document.getId(), unclosedSpans.toString()));
+			}
+
+			if(!spanStack.isEmpty() && !config.corefIngoreUnclosedSpans)
 				throw new IllegalArgumentException("Coreference data contains unclosed spans"); //$NON-NLS-1$
 
 			Span[] spans = spanBuffer.isEmpty() ? null : spanBuffer.toArray(new Span[spanBuffer.size()]);

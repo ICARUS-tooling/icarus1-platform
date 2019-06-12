@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.events;
@@ -35,17 +35,34 @@ import javax.swing.event.EventListenerList;
  *
  */
 public class ChangeSource {
-	
+
 	protected EventListenerList listenerList = new EventListenerList();
-	
+
+	protected final Object source;
+
+	public ChangeSource() {
+		source = null;
+	}
+
+	public ChangeSource(Object source) {
+		if (source == null)
+			throw new NullPointerException("Invalid source");
+
+		this.source = source;
+	}
+
 	public void addChangeListener(ChangeListener listener) {
 		listenerList.add(ChangeListener.class, listener);
 	}
-	
+
 	public void removeChangeListener(ChangeListener listener) {
 		listenerList.remove(ChangeListener.class, listener);
 	}
-	
+
+	private Object getSource() {
+		return source==null ? this : source;
+	}
+
 	public void fireStateChanged() {
 		Object[] pairs = listenerList.getListenerList();
 
@@ -54,7 +71,7 @@ public class ChangeSource {
 		for (int i = pairs.length - 2; i >= 0; i -= 2) {
 			if (pairs[i] == ChangeListener.class) {
 				if (event == null) {
-					event = new ChangeEvent(this);
+					event = new ChangeEvent(getSource());
 				}
 
 				((ChangeListener) pairs[i + 1]).stateChanged(event);

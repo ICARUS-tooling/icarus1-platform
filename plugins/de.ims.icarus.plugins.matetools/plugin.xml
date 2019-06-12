@@ -26,10 +26,10 @@
 		<library id="source" path="." type="code">
 			<export prefix="*" />
 		</library>
-		<library id="mate-tools" path="lib/anna-3.3-d8.jar" type="code">
+		<library id="mate-tools" path="lib/anna-3.61.jar" type="code">
 			<doc>
 				<doc-text>
-					matetools library version 3.3-d8 (SFB732-D8 Project Version)
+					matetools library version 3.61
 				</doc-text>
 			</doc>
 			<export prefix="*" />

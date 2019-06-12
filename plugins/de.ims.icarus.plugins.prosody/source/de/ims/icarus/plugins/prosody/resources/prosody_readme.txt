@@ -61,9 +61,14 @@ Supported header properties for the prosody reader:
 	syllableOffsetsFromSampa		flag to indicate whether to create syllable offsets from sampa annotations
 	localSampaRulesFile				name or path of a sampa rules file, relative to the /data folder
 	markAccentOnWords				flag to indicate whether words should receive a marker when they are found to host an accented syllable
-	onlyConsiderStressedSylables	flag to indicate that only syllables should be considered for the above accent marking when they are also stressed
+	onlyConsiderStressedSyllables	flag to indicate that only syllables should be considered for the above accent marking when they are also stressed
 	accentExcursion					excursion (min value of either c1 or c2) to be used as threshold when performing above mentioned accent marking
 	ignoreColumnCountMismatch		flag to ignore additional columns in the data file that are not covered by valid column definitions in the scheme header
+	expandSyllabeStressArray		flag to indicate that the compact integer array denoting stressed syllables should be expanded to a bit vector
+	createCorefStructure			flag to indicate that coreference structure should be created for each document in the corpus
+	corefPropertyKey				if coreference structure is to be created this defines the word level property to extract info from
+	corefClusterIdPattern			optional pattern to be used to extract the actual cluster id from the annotation strings denoting coreference information
+	corefIngoreUnclosedSpans		flag to suppress errors when encountering spans that aren't closed within the same sentence 
 	
 Column format for the prosody reader's header section:
 	[property_key,type,level,role,separator]

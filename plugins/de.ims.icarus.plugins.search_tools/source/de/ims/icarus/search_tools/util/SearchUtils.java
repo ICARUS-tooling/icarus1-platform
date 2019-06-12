@@ -427,8 +427,9 @@ public final class SearchUtils implements LanguageConstants, SearchParameters {
 	public static void checkResultEntry(ResultEntry entry) {
 		if (entry == null)
 			throw new NullPointerException("Invalid entry");  //$NON-NLS-1$
-		if(entry.getHitCount()==0)
-			throw new IllegalArgumentException("Entry is empty: "+entry); //$NON-NLS-1$
+		//TODO find a more elegant way of telling the UI that the search yielded no result
+//		if(entry.getHitCount()==0)
+//			throw new IllegalArgumentException("Entry is empty: "+entry); //$NON-NLS-1$
 	}
 
 	public interface Visitor {

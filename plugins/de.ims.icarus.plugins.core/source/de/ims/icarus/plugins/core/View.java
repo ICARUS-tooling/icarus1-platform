@@ -43,7 +43,6 @@ import de.ims.icarus.ui.events.EventObject;
 import de.ims.icarus.ui.events.EventSource;
 import de.ims.icarus.util.Capability;
 import de.ims.icarus.util.CorruptedStateException;
-import de.ims.icarus.util.Options;
 import de.ims.icarus.util.id.Identifiable;
 import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.util.mpi.Message;
@@ -271,7 +270,7 @@ public abstract class View implements Identifiable {
 	 * object describing a super-type for targets, a {@link Capability} describing
 	 * required capabilities or {@code null} if the {@code data} should be dispatched as a broadcast.
 	 * <p>
-	 * <b>Note:</b> As long as data is being dispatched by {@link Perspective#dispatchData(View, String, Object, Object, Options)}
+	 * <b>Note:</b> As long as data is being dispatched by {@link Perspective#sendRequest(Object, Object, Object, Message)}
 	 * this method will always be called on the {@code EventDispatchThread}
 	 * @param receiver target filter, may be a {@code ViewFilter} a {@code String}, a {@code Class} or {@code null}
 	 * @param message the request to be dispatched

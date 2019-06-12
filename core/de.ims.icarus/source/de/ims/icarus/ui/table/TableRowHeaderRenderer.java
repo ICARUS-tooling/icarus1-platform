@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui.table;
@@ -42,12 +42,11 @@ import javax.swing.event.MouseInputListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 
-import com.sun.java.swing.plaf.windows.WindowsTableHeaderUI;
-
+import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.ui.UIUtil;
 
 /**
- * 
+ *
  * @author Markus Gärtner
  * @version $Id$
  *
@@ -64,13 +63,25 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	protected int verticalOffset;
 
 	protected int rolloverRow = -1;
-	
+
 	protected int currentRow = -1;
 
 	protected boolean alwaysContains = false;
 	protected boolean isRenderCall = false;
-	
+
 	protected MouseEvent pendingEvent = null;
+
+	private static final Class WINDOWS_UI;
+	static {
+
+		Class clazz = null;
+		try {
+			clazz = Class.forName("com.sun.java.swing.plaf.windows.WindowsTableHeaderUI");
+		} catch (ClassNotFoundException e) {
+			LoggerFactory.warning(TableColumnHeaderRenderer.class, "Failed to load windows UI class", e);
+		}
+		WINDOWS_UI = clazz;
+	}
 
 	public TableRowHeaderRenderer(JList<String> list, JTable table) {
 		if(list==null)
@@ -84,7 +95,7 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 		this.list = list;
 		list.addMouseMotionListener(this);
 		list.addMouseListener(this);
-		
+
 		UIUtil.disableHtml(this);
 
 		setTable(table);
@@ -111,7 +122,7 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	}
 
 	protected int getOffsetForUI() {
-		if (getUI() instanceof WindowsTableHeaderUI) {
+		if (WINDOWS_UI!=null && WINDOWS_UI.isInstance(getUI())) {
 			return UIUtil.isWindowsClassicLAF() ? 1 : 2;
 		}
 
@@ -189,7 +200,7 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 		} else {
 			pendingEvent = e;
 		}
-		
+
 		isRenderCall = false;
 	}
 
@@ -201,14 +212,14 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	@Override
 	public Component getListCellRendererComponent(JList<? extends String> list,
 			String value, int index, boolean selected, boolean hasFocus) {
-		
+
 		currentRow = index;
 
 		// setSize(list.getWidth(), list.getFixedCellHeight());
-		
+
 		if(selected) {
 			isRenderCall = true;
-			
+
 			Rectangle bounds = list.getCellBounds(index, index);
 			int x = bounds.x+1;
 			int y = bounds.y+1;
@@ -224,7 +235,7 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 		super.updateUI();
 
 		verticalOffset = getOffsetForUI();
-		
+
 		Object renderer = getDefaultRenderer();
 		if(renderer instanceof JLabel) {
 			((JLabel)renderer).setHorizontalAlignment(SwingConstants.LEFT);
@@ -243,15 +254,15 @@ public class TableRowHeaderRenderer extends JTableHeader implements
 	public void paint(Graphics g) {
 
 		int row = currentRow;
-		
+
 		proxyColumn.setHeaderValue(list.getModel().getElementAt(row));
 		proxyColumn.setWidth(list.getWidth());
-		
+
 		super.paint(g);
-		
+
 		MouseEvent event = pendingEvent;
 		pendingEvent = null;
-		
+
 		if(event!=null) {
 
 			MouseListener[] listeners = getMouseListeners();

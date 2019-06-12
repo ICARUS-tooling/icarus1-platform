@@ -31,7 +31,6 @@ import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.Span;
-import de.ims.icarus.plugins.prosody.ProsodicDocumentData;
 
 public final class CorefDataProxy {
 
@@ -152,7 +151,7 @@ public final class CorefDataProxy {
 
 	public void setDocumentIndex(int documentIndex) {
 		this.documentIndex = documentIndex;
-		document = (ProsodicDocumentData) documentSet.get(documentIndex);
+		document = (DocumentData) documentSet.get(documentIndex);
 		sentenceIndex = wordIndex = -1;
 	}
 

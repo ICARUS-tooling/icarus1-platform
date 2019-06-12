@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.matetools.conll;
 
-import is2.data.SentenceData09;
-import is2.io.CONLLReader09;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,6 +45,8 @@ import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.location.DefaultFileLocation;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
+import is2.data.SentenceData09;
+import is2.io.CONLLReader09;
 
 
 /**
@@ -89,7 +88,8 @@ public class CONLL09SentenceDataGoldReader implements SentenceDataReader {
 
 		try {
 			reader = new CONLLReader09(normalize);
-			reader.startReading(location.openInputStream());
+			reader.startReading(location.getLocalPath().toString());
+//			reader.startReading(location.openInputStream());
 		} catch (IllegalArgumentException e) {
 			LoggerFactory.log(this, Level.SEVERE,
 					"CoNLL State Exception", e.getCause()); //$NON-NLS-1$

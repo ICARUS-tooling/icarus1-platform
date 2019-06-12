@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.search_tools.view.results;
@@ -31,10 +31,12 @@ import java.awt.event.MouseEvent;
 import java.util.concurrent.CancellationException;
 import java.util.logging.Level;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
@@ -48,6 +50,7 @@ import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.ui.CompoundMenuButton;
 import de.ims.icarus.ui.NumberDisplayMode;
 import de.ims.icarus.ui.UIUtil;
+import de.ims.icarus.ui.Updatable;
 import de.ims.icarus.ui.actions.ActionList.EntryType;
 import de.ims.icarus.ui.list.RowHeaderList;
 import de.ims.icarus.ui.table.TableRowHeaderRenderer;
@@ -63,16 +66,18 @@ import de.ims.icarus.util.Options;
  *
  */
 public class Default1DResultPresenter extends SearchResultTablePresenter {
-	
+
 	public static final int SUPPORTED_DIMENSIONS = 1;
-	
+
 	protected Default0DResultPresenter subResultPresenter;
-	
+
 	protected SearchResult1DTableModel tableModel;
 	protected ResultCountTableCellRenderer cellRenderer;
 	protected TableRowHeaderRenderer rowHeaderRenderer;
 	protected RowHeaderList rowHeader;
 	protected JTable table;
+
+	protected TextOutline1D textOutline;
 
 	public Default1DResultPresenter() {
 		buildContentPanel();
@@ -84,6 +89,20 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	@Override
 	public int getSupportedDimensions() {
 		return SUPPORTED_DIMENSIONS;
+	}
+
+	/**
+	 * @see de.ims.icarus.plugins.search_tools.view.results.SearchResultPresenter#getTextOutlineComponent()
+	 */
+	@Override
+	protected JComponent getTextOutlineComponent() {
+		if(textOutline==null) {
+			textOutline = new TextOutline1D();
+		}
+
+		textOutline.update();
+
+		return textOutline;
 	}
 
 	@Override
@@ -101,7 +120,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		if(searchResult==null) {
 			searchResult = ResultDummies.dummyResult1D;
 		}
-		
+
 		tableModel.setResultData(searchResult);
 		cellRenderer.setSearchResult(searchResult);
 		displaySelectedSubResult(tableModel.getRowCount()==0 ? -1 : 0);
@@ -127,30 +146,30 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	@Override
 	protected void buildContentPanel() {
 		contentPanel = new JPanel(new BorderLayout());
-		
+
 		subResultPresenter = new Default0DResultPresenter();
 
 		cellRenderer = new ResultCountTableCellRenderer();
-		
+
 		tableModel = new SearchResult1DTableModel(ResultDummies.dummyResult1D);
 		table = createTable(tableModel, cellRenderer, true);
 		table.addMouseListener(getHandler());
 
 		rowHeader = createRowHeader(tableModel.getRowHeaderModel(), table, contentPanel);
-		
+
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setRowHeaderView(rowHeader);
-		scrollPane.setBorder(UIUtil.topLineBorder);		
+		scrollPane.setBorder(UIUtil.topLineBorder);
 		Grouping.decorate(scrollPane, false);
-		
+
 		JPanel leftPanel = new JPanel(new BorderLayout());
-		
+
 		CompoundMenuButton menuButton = createCompoundButton(SORT_ROWS_BUTTON);
-		
+
 		Options options = new Options();
 		options.put("sortButtons", new Object[]{ //$NON-NLS-1$
 				EntryType.SEPARATOR,
-				menuButton, 
+				menuButton,
 				menuButton.getOpenButton(),
 		});
 		options.put("multiline", true); //$NON-NLS-1$
@@ -158,11 +177,11 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 				"plugins.searchTools.searchResultPresenter.toolBarList1D", options); //$NON-NLS-1$
 		leftPanel.add(toolBar, BorderLayout.NORTH);
 		leftPanel.add(scrollPane, BorderLayout.CENTER);
-		
+
 		Dimension minSize = new Dimension(100, 100);
 		leftPanel.setMinimumSize(minSize);
 		subResultPresenter.getPresentingComponent().setMinimumSize(minSize);
-		
+
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setContinuousLayout(true);
 		splitPane.setLeftComponent(leftPanel);
@@ -171,18 +190,18 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		splitPane.setDividerSize(5);
 		splitPane.setDividerLocation(200);
 		splitPane.setBorder(null);
-		
+
 		contentPanel.add(splitPane, BorderLayout.CENTER);
 	}
-	
+
 	protected void displaySelectedSubResult(int index) {
 		if(searchResult==null) {
 			return;
 		}
-		
+
 		if(index==-1) {
 			subResultPresenter.clear();
-		} else {		
+		} else {
 			TaskManager.getInstance().schedule(
 					new SubResultDisplayJob(index), TaskPriority.DEFAULT, true);
 		}
@@ -192,10 +211,10 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 	protected void setNumberDisplayMode(NumberDisplayMode mode) {
 		if(mode==null)
 			throw new NullPointerException("Invalid display mode"); //$NON-NLS-1$
-		
+
 		cellRenderer.setDisplayMode(mode);
 		tableModel.setDisplayMode(mode);
-		
+
 		// TODO ensure that the row header is still readable (adjust width?)
 	}
 
@@ -204,7 +223,7 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		if(hasCurrentTask()) {
 			return;
 		}
-		
+
 		SortTableJob job = new SortTableJob(sortMode){
 			@Override
 			protected Object doInBackground() throws Exception {
@@ -235,11 +254,11 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 				super.mouseClicked(e);
 				return;
 			}
-			
+
 			if(e.getClickCount()!=2 || !SwingUtilities.isLeftMouseButton(e)) {
 				return;
 			}
-			
+
 			try {
 				int index = table.rowAtPoint(e.getPoint());
 				if(index>=-1) {
@@ -247,16 +266,16 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 					displaySelectedSubResult(index);
 				}
 			} catch(Exception ex) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to handle mouse-click on table: "+e, ex); //$NON-NLS-1$
 			}
-		}		
+		}
 	}
-	
+
 	protected class SubResultDisplayJob extends AbstractResultJob {
-		
+
 		protected final int index;
-		
+
 		public SubResultDisplayJob(int index) {
 			super("subResultJob"); //$NON-NLS-1$
 			this.index = index;
@@ -276,24 +295,24 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 			try {
 				SearchResult subResult = (SearchResult) get();
 				if(subResult!=null) {
-					
+
 					Object label = searchResult.getInstanceLabel(0, index);
 					String title = ResourceManager.getInstance().get(
 							"plugins.searchTools.default1DResultPresenter.instanceTitle", //$NON-NLS-1$
 							label);
-					
+
 					Options options = new Options();
 					options.put(Options.TITLE, title);
 					options.putAll(getOptions());
-					
+
 					subResultPresenter.present(subResult, options);
 				}
 			} catch(InterruptedException | CancellationException e) {
 				// ignore
 			} catch(Exception e) {
-				LoggerFactory.log(this, Level.SEVERE, 
+				LoggerFactory.log(this, Level.SEVERE,
 						"Failed to display sub-result for index: "+index, e); //$NON-NLS-1$
-				
+
 				Core.getCore().handleThrowable(e);
 			} finally {
 				firePropertyChange("indeterminate", true, false); //$NON-NLS-1$
@@ -304,5 +323,30 @@ public class Default1DResultPresenter extends SearchResultTablePresenter {
 		protected Object[] getDescriptionParams() {
 			return new Object[]{index};
 		}
+	}
+
+	protected class TextOutline1D extends JPanel implements Updatable {
+
+		private final JTextArea textArea;
+
+		public TextOutline1D() {
+			super(new BorderLayout());
+
+			textArea = new JTextArea();
+			JScrollPane scrollPane = new JScrollPane(textArea);
+
+			add(scrollPane, BorderLayout.CENTER);
+		}
+
+		/**
+		 * @see de.ims.icarus.ui.Updatable#update()
+		 */
+		@Override
+		public boolean update() {
+
+
+			return true;
+		}
+
 	}
 }

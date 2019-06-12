@@ -201,15 +201,31 @@ public class SoundPlayer {
 		return getSoundFile(sentence.getDocument());
 	}
 
-	private Path createPath(String fileName) {
+	private Path createPath(String fileName) throws SoundException {
 		if(fileName.trim().isEmpty())
 			throw new IllegalArgumentException("File name is empty"); //$NON-NLS-1$
 
-		for(Path folder : folders) {
-			Path file = folder.resolve(fileName);
+		boolean isGlob = fileName.indexOf('*')!=-1;
 
-			if(Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
-				return file;
+		for(Path folder : folders) {
+			if(!Files.isDirectory(folder)) {
+				continue;
+			}
+
+			if(isGlob) {
+				try(DirectoryStream<Path> files = Files.newDirectoryStream(folder, fileName)) {
+					for(Path file : files)
+						return file;
+				} catch (IOException e) {
+					throw new SoundException("Failed to search for sound file via glob: "+fileName, e); //$NON-NLS-1$
+				}
+			} else {
+				// Plain file resolution
+				Path file = folder.resolve(fileName);
+
+				if(Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
+					return file;
+				}
 			}
 		}
 

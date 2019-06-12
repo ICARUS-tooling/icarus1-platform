@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.ui;
@@ -33,6 +33,6 @@ package de.ims.icarus.ui;
 public enum NumberDisplayMode {
 	RAW,
 	PERCENTAGE,
-	
+	;
 	// TODO add localization stuff
 }

@@ -25,12 +25,6 @@
  */
 package de.ims.icarus.plugins.matetools.parser;
 
-import is2.data.SentenceData09;
-import is2.lemmatizer.Lemmatizer;
-import is2.parser.ParametersFloat;
-import is2.parser.Parser;
-import is2.parser.Pipe;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,6 +39,11 @@ import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.dialog.DialogDispatcher;
 import de.ims.icarus.ui.dialog.DialogFactory;
 import de.ims.icarus.util.Options;
+import is2.data.SentenceData09;
+import is2.lemmatizer.Lemmatizer;
+import is2.parser.ParametersFloat;
+import is2.parser.Parser;
+import is2.parser.Pipe;
 
 
 /**
@@ -226,7 +225,8 @@ public class MatetoolsPipeline {
 
 			// LEMMATIZER
 			if(useLemmatizer && lemmatizer==null && storage.getLemmatizerModelPath()!=null) {
-				lemmatizer=new Lemmatizer(storage.getLemmatizerModelPath(),doUppercaseLemmas);
+				lemmatizer = new Lemmatizer(storage.getLemmatizerModelPath());
+//				lemmatizer=new Lemmatizer(storage.getLemmatizerModelPath(),doUppercaseLemmas);
 			}
 			if(useLemmatizer && lemmatizer!=null) {
 				data = lemmatizer.apply(data);
@@ -270,9 +270,13 @@ public class MatetoolsPipeline {
 
 				// Workaround
 				if(storage.getParserModelPath()!=null && data.pfeats!=null){
+					if(data.feats==null) {
+						data.feats = new String[data.pfeats.length][];
+					}
 					for(int i=1;i<data.pfeats.length;++i){
 						if(data.pfeats[i]!=null && !data.pfeats[i].equals("_")) //$NON-NLS-1$
 							data.feats[i]=data.pfeats[i].split("\\|"); //$NON-NLS-1$
+//							data.feats[i]=data.pfeats[i].split("\\|"); //$NON-NLS-1$
 					}
 				}
 
@@ -300,7 +304,8 @@ public class MatetoolsPipeline {
 				parser=p;
 			}
 			if(useParser && parser!=null) {
-				data = parser.applyQuick(data);
+				data = parser.apply(data);
+//				data = parser.applyQuick(data);
 				output = MatetoolsCONLLUtils.readPredicted(data, -1, false, true);
 				if(verbose) {
 					String msg = String.format("Matetools pipeline (run %d) - Parser result:\n%s",  //$NON-NLS-1$

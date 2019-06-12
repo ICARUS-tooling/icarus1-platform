@@ -216,7 +216,7 @@ public class ProsodyPreferences {
 		builder.addBooleanEntry("syllableOffsetsFromSampa", true); //$NON-NLS-1$
 		builder.addBooleanEntry("markAccentOnWords", true); //$NON-NLS-1$
 		builder.addIntegerEntry("accentExcursion", 50, 10, 150); //$NON-NLS-1$
-		builder.addBooleanEntry("onlyConsiderStressedSylables", false); //$NON-NLS-1$
+		builder.addBooleanEntry("onlyConsiderStressedSyllables", false); //$NON-NLS-1$
 
 		// END PROSODY READER GROUP
 		builder.back();
@@ -227,7 +227,7 @@ public class ProsodyPreferences {
 		builder.addBooleanEntry("syllableOffsetsFromSampa", true); //$NON-NLS-1$
 		builder.addBooleanEntry("markAccentOnWords", true); //$NON-NLS-1$
 		builder.addIntegerEntry("accentExcursion", 50, 10, 150); //$NON-NLS-1$
-		builder.addBooleanEntry("onlyConsiderStressedSylables", false); //$NON-NLS-1$
+		builder.addBooleanEntry("onlyConsiderStressedSyllables", false); //$NON-NLS-1$
 
 		// END FESTIVAL READER GROUP
 		builder.back();

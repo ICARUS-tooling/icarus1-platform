@@ -775,9 +775,17 @@ public final class PluginUtil {
 
 		// Convert declarations into actual capability objects
 		for(Extension.Parameter param : params) {
+			Capability capability;
+
 			String command = param.getId();
-			ContentType contentType = ContentTypeRegistry.getInstance().getType(param.valueAsString());
-			capabilities.add(Capability.getCapability(command, contentType));
+			String contentTypeId = param.rawValue();
+			if(contentTypeId!=null && !contentTypeId.isEmpty()) {
+				ContentType contentType = ContentTypeRegistry.getInstance().getType(contentTypeId);
+				capability = Capability.getCapability(command, contentType);
+			} else {
+				capability = Capability.getCapability(command);
+			}
+			capabilities.add(capability);
 		}
 
 		return capabilities;
