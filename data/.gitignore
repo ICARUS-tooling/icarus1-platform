@@ -1,0 +1,5 @@
+# ignore internal files
+/ngramquery.xml
+/ngramquery_one.xml
+/webchain.xml
+/weblicht.xml
