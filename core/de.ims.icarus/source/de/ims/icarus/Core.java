@@ -901,11 +901,6 @@ public class Core {
 		return name==null ? "???" : name; //$NON-NLS-1$
 	}
 
-	public String getAppRevision() {
-		String revision = getVersionProperty("app.revision"); //$NON-NLS-1$
-		return revision==null ? "???" : revision; //$NON-NLS-1$
-	}
-
 	public String getAppBuildDate() {
 		String date = getVersionProperty("build.date"); //$NON-NLS-1$
 		return date==null ? "???" : date; //$NON-NLS-1$

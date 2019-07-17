@@ -19,8 +19,8 @@
  * $Date$
  * $URL$
  *
- * $LastChangedDate$ 
- * $LastChangedRevision$ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
  * $LastChangedBy$
  */
 package de.ims.icarus.plugins.core;
@@ -78,7 +78,7 @@ public class AboutDialog extends JDialog {
 	private static final long serialVersionUID = 7752834817128092360L;
 
 	protected final JPanel aboutPanel;
-	
+
 	private static final String A_HREF = "<a href=\""; //$NON-NLS-1$
 	private static final String HREF_CLOSED = "\">"; //$NON-NLS-1$
 	private static final String HREF_END = "</a>"; //$NON-NLS-1$
@@ -87,9 +87,9 @@ public class AboutDialog extends JDialog {
 
 	public AboutDialog() {
 		aboutPanel = new JPanel(new GridBagLayout());
-		
-		buildAbout();	
-		
+
+		buildAbout();
+
 		setIconImages(Core.getIconImages());
 
 		this.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
@@ -97,23 +97,24 @@ public class AboutDialog extends JDialog {
 		this.setMinimumSize(new Dimension(600, 450));
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setIconImage(Core.getSmallIcon().getImage());
-		
+
 		//center jdialog
 		this.setLocationRelativeTo(null);
 		this.addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				dialogExitAction();
 			}
 		});
 	}
 
-	public static void showDialog(Component parent) {	
+	public static void showDialog(Component parent) {
 		AboutDialog ad = new AboutDialog();
 		ad.setTitle(ResourceManager.getInstance()
 				.get("plugins.core.aboutDialog.aboutIcarus")); //$NON-NLS-1$
 		ad.setVisible(true);
 	}
-	
+
 	protected void addSeperator(JPanel panel, GridBagConstraints gbc){
 		//seperator
 		gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -121,40 +122,38 @@ public class AboutDialog extends JDialog {
 		gbc.gridx = 0;
 		panel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
 	}
-	
+
 	private String versionString() {
 		StringBuilder sb = new StringBuilder();
-		
+
 		sb.append(Core.getCore().getAppVersion())
-		.append(' ')
-		.append(Core.getCore().getAppRevision())
 		.append("  (") //$NON-NLS-1$
 		.append(Core.getCore().getAppBuildDate())
-		.append(')');		
-		
+		.append(')');
+
 		return sb.toString();
 	}
-	
-	protected void buildAbout() {	
+
+	protected void buildAbout() {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc = GridBagUtil.makeGbc(0, 0, 0, 1, 1);
 		gbc.insets = new Insets(5, 5, 5, 5);
-		
+
 		JLabel logo = new JLabel(IconRegistry.getGlobalRegistry()
 							.getIcon("icarus_logo_small.png")); //$NON-NLS-1$
 		logo.setBorder(BorderFactory.createLineBorder(new Color(41, 79, 157)));
 		logo.setBackground(Color.white);
 		logo.setOpaque(true);
 		aboutPanel.add(logo, gbc);
-	
+
 		gbc.gridy = 1;
-		
-		
+
+
 		//Version / NR
-		//gbc = GridBagUtil.makeGbc(0, gbc.gridy, 0, 1, 1);	
+		//gbc = GridBagUtil.makeGbc(0, gbc.gridy, 0, 1, 1);
 		gbc.insets = new Insets(3, 3, 3, 3);
-		
+
 		addSeperator(aboutPanel, gbc);
 		gbc.gridy++;
 
@@ -164,8 +163,8 @@ public class AboutDialog extends JDialog {
 		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 0, 1, 1);
 		aboutPanel.add(new JLabel(versionString()), gbc);
 		gbc.gridy++;
-		
-		
+
+
 		//Authors + Name
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
@@ -174,8 +173,8 @@ public class AboutDialog extends JDialog {
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
 									.get("plugins.core.aboutDialog.authors.name")), gbc);//$NON-NLS-1$
 		gbc.gridy++;
-		
-		
+
+
 		//Contact + 2x Email
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
@@ -193,7 +192,7 @@ public class AboutDialog extends JDialog {
 		.get("plugins.core.aboutDialog.eMail.icarus")); //$NON-NLS-1$
 		aboutPanel.add(eMailIcarus, gbc);
 		gbc.gridy++;
-		
+
 		//URL + Visit
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
@@ -203,11 +202,11 @@ public class AboutDialog extends JDialog {
 									.get("plugins.core.aboutDialog.uri.url")); //$NON-NLS-1$
 		aboutPanel.add(url, gbc);
 		gbc.gridy++;
-		
+
 
 		addSeperator(aboutPanel, gbc);
 		gbc.gridy++;
-		
+
 		//PluginsListed
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
 		aboutPanel.add(new JLabel(ResourceManager.getInstance()
@@ -223,48 +222,50 @@ public class AboutDialog extends JDialog {
 		UIUtil.defaultSetUnitIncrement(pluginsJSP);
 		aboutPanel.add(pluginsJSP, gbc);
 		gbc.gridy++;
-		
-		
+
+
 		//license Button
 		JButton license = new JButton(ResourceManager.getInstance().get(
 				"plugins.core.aboutDialog.ShowlicenseText")); //$NON-NLS-1$
 		license.setFocusable(false);
-		
-		license.addActionListener(new ActionListener() {  
-            public void actionPerformed(ActionEvent e) {
-            	DisclaimerDialog.showDialogLicenseOnly(); 
-            } 
+
+		license.addActionListener(new ActionListener() {
+            @Override
+			public void actionPerformed(ActionEvent e) {
+            	DisclaimerDialog.showDialogLicenseOnly();
+            }
         });
-		
+
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
 		aboutPanel.add(new JLabel(ResourceManager.getInstance().get(
 				"plugins.core.aboutDialog.licenseText")),gbc); //$NON-NLS-1$
 		gbc = GridBagUtil.makeGbc(1, gbc.gridy, 1, 1, 0);
 		aboutPanel.add(license,gbc);
 		gbc.gridy++;
-		
-		
+
+
 		if (isBrowsingSupported()) {
 			makeLinkable(url, new LinkMouseListener());
 			//makeLinkable(eMailMarkus, new LinkMouseListener());
 			//makeLinkable(eMailGregor, new LinkMouseListener());
 			makeLinkable(eMailIcarus, new LinkMouseListener());
 		}
-		
-		
+
+
 		JButton bclose = new JButton(ResourceManager.getInstance().get("close")); //$NON-NLS-1$
-		
-		bclose.addActionListener(new ActionListener() {  
-            public void actionPerformed(ActionEvent e) {  
-                dialogExitAction(); 
-            }  
+
+		bclose.addActionListener(new ActionListener() {
+            @Override
+			public void actionPerformed(ActionEvent e) {
+                dialogExitAction();
+            }
         });
-        
+
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 1);
 		gbc.gridwidth = 3;
 		addSeperator(aboutPanel, gbc);
 		gbc.gridy++;
-		
+
 		//close Button
 		gbc = GridBagUtil.makeGbc(0, gbc.gridy, 1, 1, 0);
 		gbc.gridwidth = 3;
@@ -280,9 +281,9 @@ public class AboutDialog extends JDialog {
 		this.setVisible(false);
 		this.dispose();
 	}
-	
-	
-	
+
+
+
 	private static void makeLinkable(JLabel c, MouseListener ml) {
 		assert ml != null;
 //		System.out.println("Text: " + c.getText());
@@ -292,8 +293,8 @@ public class AboutDialog extends JDialog {
 		c.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
 		c.addMouseListener(ml);
 	}
-	
-	
+
+
 	private static boolean isBrowsingSupported() {
 		if (!Desktop.isDesktopSupported()) {
 			return false;
@@ -306,7 +307,7 @@ public class AboutDialog extends JDialog {
 		return result;
 
 	}
-	
+
 	private static class LinkMouseListener extends MouseAdapter {
 
 		@Override
@@ -320,16 +321,16 @@ public class AboutDialog extends JDialog {
 				throw new AssertionError(use);
 			} catch (IOException ioe) {
 				DialogFactory.getGlobalFactory().showDetailedError(
-						null, 
+						null,
 						"plugins.core.aboutDialog.urlErrorTitle",  //$NON-NLS-1$
 						"plugins.core.aboutDialog.urlError",  //$NON-NLS-1$
 						ioe);
 			}
 		}
 	}
-	
 
-	
+
+
 	private static String getPlainLink(String s) {
 		return s.substring(s.indexOf(A_HREF) + A_HREF.length(),
 				s.indexOf(HREF_CLOSED));
@@ -348,8 +349,8 @@ public class AboutDialog extends JDialog {
 	private static String htmlIfy(String s) {
 		return HTML.concat(s).concat(HTML_END);
 	}
-	
-	
+
+
 	public class PluginsListCellRenderer extends JLabel implements ListCellRenderer<Object>{
 
 		private static final long serialVersionUID = -6517753002122477794L;
@@ -358,8 +359,8 @@ public class AboutDialog extends JDialog {
 		public PluginsListCellRenderer(){
 	         setOpaque(true);
 	     }
-		
-		
+
+
 		/**
 		 * @see javax.swing.ListCellRenderer#getListCellRendererComponent(javax.swing.JList, java.lang.Object, int, boolean, boolean)
 		 */
@@ -367,17 +368,17 @@ public class AboutDialog extends JDialog {
 		public Component getListCellRendererComponent(
 				JList<? extends Object> list, Object value, int index,
 				boolean isSelected, boolean cellHasFocus) {
-			
+
 			setBackground(list.getBackground());
-			
+
 			PluginDescriptor pd = (PluginDescriptor) value;
 			String text = pd.getId()
 					 + "   (" //$NON-NLS-1$
 					 + pd.getVersion()
 					 + " )"; //$NON-NLS-1$
-			
+
 			setText(text);
-			
+
 			return this;
 		}
 	}
