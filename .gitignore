@@ -69,3 +69,6 @@ hs_err_pid*
 
 # Utility script against the annoying archive bit issue
 /clrArchBit.bat
+
+# Resources of the (outdated) quickstart guide
+/quickstart-guide
