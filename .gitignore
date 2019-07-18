@@ -73,3 +73,5 @@ hs_err_pid*
 # Resources of the (outdated) quickstart guide
 /quickstart-guide
 /classes
+/source
+/legacy
