@@ -2,6 +2,8 @@
 
 **ICARUS** stands for "Interactive platform for Corpus Analysis and Research tools, University of Stuttgart" and is a visualization and search tool geared towards dependency treebanks and/or corpora annotated for coreference. The original project page with additional information and associated publications can be found [here](https://www.ims.uni-stuttgart.de/forschung/ressourcen/werkzeuge/icarus.en.html).
 
+**! Further feature development for the ICARUS project in its first generation is discontinued. Expect the 2nd generation to be available soon™ !**
+
 ## Features
 
 * Easy setup: only Java 7 or higher required to run ICARUS locally
