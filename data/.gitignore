@@ -1,5 +1,10 @@
-# ignore internal files
+# ignore internal and auto-generated files
 /ngramquery.xml
 /ngramquery_one.xml
 /webchain.xml
 /weblicht.xml
+/config.xml
+/perspectiveUsages.xml
+/prosody_readme.txt
+/treebanks.xml
+/treebanks
