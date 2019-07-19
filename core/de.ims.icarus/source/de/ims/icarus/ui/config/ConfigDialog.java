@@ -722,7 +722,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			return eh;
 		EntryType et = (EntryType) config.getProperty(handle, ITEM_TYPE);
 		if ( et == null)
-			config.getType(handle);
+			et = config.getType(handle);
 		switch (et) {
 		case STRING:
 			return ConfigUtils.sharedStringEntryHandler;
@@ -746,7 +746,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 			return mh;
 		EntryType et = (EntryType) config.getProperty(handle, ITEM_TYPE);
 		if ( et == null)
-			config.getType(handle);
+			et = config.getType(handle);
 		switch (et) {
 		case STRING:
 			return ConfigUtils.sharedStringMapHandler;
@@ -1262,9 +1262,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		gbc.fill = GridBagConstraints.NONE;
 
 		//seperator needed?
-		if (config.getProperty(handle, SEPARATED) != null
-				&& config.getProperty(handle,
-						SEPARATED).toString() == "separated"){ //$NON-NLS-1$
+		if ("separated".equals(config.getProperty(handle, SEPARATED))){ //$NON-NLS-1$
 			paintSeperatorLine(gbc);
 		}
 		state.getStatePanel().add(jn,gbc);
@@ -1290,9 +1288,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		gbc.fill = GridBagConstraints.NONE;
 
 		//seperator needed?
-		if (config.getProperty(handle, SEPARATED) != null
-				&& config.getProperty(handle,
-						SEPARATED).toString() == "separated"){ //$NON-NLS-1$
+		if ("separated".equals(config.getProperty(handle, SEPARATED))){ //$NON-NLS-1$
 			paintSeperatorLine(gbc);
 		}
 		state.getStatePanel().add(jn,gbc);
@@ -1880,8 +1876,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 
 
 
-			if (config.getProperty(handle, ITEM_TYPE) != null
-					&& config.getProperty(handle, ITEM_TYPE).toString() == "COLOR"){	 //$NON-NLS-1$
+			if ("COLOR".equals(config.getProperty(handle, ITEM_TYPE))){	 //$NON-NLS-1$
 				ListCellRenderer<Object> renderer = new ColorCellRenderer();
 				cb.setRenderer(renderer);
 			}
@@ -1912,9 +1907,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 		gbc.fill = GridBagConstraints.NONE;
 
 		//seperator needed?
-		if (config.getProperty(handle, SEPARATED) != null
-				&& config.getProperty(handle,
-						SEPARATED).toString() == "separated"){ //$NON-NLS-1$
+		if ("separated".equals(config.getProperty(handle, SEPARATED))){ //$NON-NLS-1$
 			paintSeperatorLine(gbc);
 		}
 
