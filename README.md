@@ -1,4 +1,4 @@
-#ICARUS
+# ICARUS
 
 **ICARUS** stands for "Interactive platform for Corpus Analysis and Research tools, University of Stuttgart" and is a visualization and search tool geared towards dependency treebanks and/or corpora annotated for coreference. The original project page with additional information and associated publications can be found [here](https://www.ims.uni-stuttgart.de/forschung/ressourcen/werkzeuge/icarus.en.html).
 
@@ -32,23 +32,23 @@
   * Further customize visualizations
   * Introduce new search constraints
 
-##Getting Started
+## Getting Started
 
 To run ICARUS either double-click the 'icarus.jar' archive file (only recommended when working with small corpora) or run the ``java`` command with a customized heap size to give ICARUS more working memory (in this case 1 GB):
 ``java -Xms1g -Xmx1g -jar icarus.jar``
 
 Note that ICARUS requires sufficient working memory to load all the desired corpora and/or parser models in case the integrated matetools parser is being used. While it is optimized for search performance (without using indexing), it is **not** geared towards huge corpora, such as web corpora!
 
-##Contact
+## Contact
 
 Please send questions and suggestions to [icarus@ims.uni-stuttgart.de](mailto:icarus@ims.uni-stuttgart.de).
 
-##Documentation
+## Documentation
 
 A (slightly outdated) tutorial how to get started using ICARUS can be downloaded [here](https://www.ims.uni-stuttgart.de/forschung/ressourcen/werkzeuge/icarus/Quickstart_Guide_ICARUS_1.05.pdf) (also included in the binary distribution).
 
 The documentation which include some tutorials and [videos](http://wiki.ims.uni-stuttgart.de/extern/ICARUS-Search-Perspective#tutorials) can be found in our [wiki](http://wiki.ims.uni-stuttgart.de/extern/ICARUS). Note that this documentation is intended  for end users.
 
-##Releases
+## Releases
 
 The [releases](https://github.com/ICARUS-tooling/icarus1-platform/releases) section lists available ready-to-use binaries for download. Amongst them are also a couple legacy releases from older versions.
