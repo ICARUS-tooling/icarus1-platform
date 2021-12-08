@@ -256,14 +256,14 @@ public class CompoundUndoManager extends UndoManager implements
 
 			if (undo) {
 				putValue(Action.SMALL_ICON, IconRegistry.getGlobalRegistry().getIcon("undo_edit.gif")); //$NON-NLS-1$
-				putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_U));
+				putValue(Action.MNEMONIC_KEY, Integer.valueOf(KeyEvent.VK_U));
 				putValue(Action.ACCELERATOR_KEY, KeyStroke
 						.getKeyStroke("control Z")); //$NON-NLS-1$
 			} else {
 				putValue(Action.SMALL_ICON, IconRegistry.getGlobalRegistry().getIcon("redo_edit.gif")); //$NON-NLS-1$
-				putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_R));
+				putValue(Action.MNEMONIC_KEY, Integer.valueOf(KeyEvent.VK_R));
 				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
-						KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+						KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
 			}
 			
 			String actionID = undo ? "undo" : "redo"; //$NON-NLS-1$ //$NON-NLS-2$

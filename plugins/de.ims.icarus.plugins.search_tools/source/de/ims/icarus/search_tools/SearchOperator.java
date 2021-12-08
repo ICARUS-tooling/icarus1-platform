@@ -67,6 +67,8 @@ public abstract class SearchOperator implements Serializable {
 	public abstract String getName();
 
 	public abstract String getDescription();
+	
+	public abstract boolean supportsNumbers();
 
 	public boolean isGrouping() {
 		return false;

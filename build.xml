@@ -47,6 +47,10 @@
 		<pathelement location="${lib.home}/log4j.jar" />
 		<pathelement location="${lib.home}/jpf.jar" />
 		<pathelement location="${lib.home}/trove-3.0.3.jar" />
+		<pathelement location="${lib.home}/javax.activation-1.2.0.jar" />
+		<pathelement location="${lib.home}/jaxb-api-2.3.1.jar" />
+		<pathelement location="${lib.home}/jaxb-core-2.3.0.1.jar" />
+		<pathelement location="${lib.home}/jaxb-runtime-2.3.1.jar" />
 	</path>
 
 	<!--================= CLASSPATHES =================-->

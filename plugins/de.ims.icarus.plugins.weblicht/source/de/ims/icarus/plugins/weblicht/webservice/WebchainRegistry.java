@@ -180,7 +180,7 @@ public class WebchainRegistry {
 				}
 				if (webchain.getElementAt(j) instanceof WebchainOutputType){
 					WebchainOutputType wo = (WebchainOutputType) webchain.getElementAt(j);
-					String used = new Boolean(wo.isOutputUsed()).toString();
+					String used = Boolean.valueOf(wo.isOutputUsed()).toString();
 					chain.appendChild(
 							generateChainOutputElement(document, "chainelement", //$NON-NLS-1$
 													wo.getOutputType(),

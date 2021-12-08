@@ -356,10 +356,10 @@ public class ConfigUtils implements ConfigConstants {
 	}
 
 	public static final NumberEntryHandler<Integer> sharedIntegerEntryHandler =
-		new NumberEntryHandler<Integer>(new Integer(0));
+		new NumberEntryHandler<Integer>(Integer.valueOf(0));
 
 	public static final NumberEntryHandler<Double> sharedDoubleEntryHandler =
-		new NumberEntryHandler<Double>(new Double(0d));
+		new NumberEntryHandler<Double>(Double.valueOf(0d));
 
 	/**
 	 *
@@ -643,10 +643,10 @@ public class ConfigUtils implements ConfigConstants {
 	}
 
 	public static final NumberMapHandler<Integer> sharedIntegerMapHandler =
-		new NumberMapHandler<Integer>(new Integer(0));
+		new NumberMapHandler<Integer>(Integer.valueOf(0));
 
 	public static final NumberMapHandler<Double> sharedDoubleMapHandler =
-		new NumberMapHandler<Double>(new Double(0d));
+		new NumberMapHandler<Double>(Double.valueOf(0d));
 
 	/**
 	 *

@@ -41,12 +41,17 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 
 	private static final long serialVersionUID = -710533898266463677L;
 
-	private String key;
+	private final String key;
+	private final boolean supportsNumbers;
 
-	private DefaultSearchOperator(String symbol, String key) {
+	private DefaultSearchOperator(String symbol, String key, boolean supportsNumbers) {
 		super(symbol);
 		this.key = key;
+		this.supportsNumbers = supportsNumbers;
 	}
+	
+	@Override
+	public boolean supportsNumbers() { return supportsNumbers; }
 
 	@Override
 	public String getName() {
@@ -89,7 +94,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		return ((Comparable)value).compareTo((Comparable)constraint);
 	}
 
-	public static final SearchOperator GROUPING = new DefaultSearchOperator("<*>", "grouping") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator GROUPING = new DefaultSearchOperator("<*>", "grouping", false) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = -1321881172167842710L;
 
@@ -110,7 +115,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator RANGE = new DefaultSearchOperator("<>", "range") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator RANGE = new DefaultSearchOperator("<>", "range", false) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = 2640098895375772516L;
 
@@ -123,7 +128,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator EQUALS = new DefaultSearchOperator("=", "equals") {  //$NON-NLS-1$//$NON-NLS-2$
+	public static final SearchOperator EQUALS = new DefaultSearchOperator("=", "equals", true) {  //$NON-NLS-1$//$NON-NLS-2$
 
 		private static final long serialVersionUID = -3692306391485959449L;
 
@@ -136,7 +141,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator EQUALS_NOT = new DefaultSearchOperator("!=", "equalsNot") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator EQUALS_NOT = new DefaultSearchOperator("!=", "equalsNot", true) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = -4730832928170697565L;
 
@@ -149,7 +154,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator MATCHES = new DefaultSearchOperator("~", "matches") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator MATCHES = new DefaultSearchOperator("~", "matches", false) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = -548739311862178925L;
 
@@ -162,7 +167,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator MATCHES_NOT = new DefaultSearchOperator("!~", "matchesNot") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator MATCHES_NOT = new DefaultSearchOperator("!~", "matchesNot", false) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = -370237882408639045L;
 
@@ -175,7 +180,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator CONTAINS = new DefaultSearchOperator("#", "contains") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator CONTAINS = new DefaultSearchOperator("#", "contains", false) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = -8935758538857689576L;
 
@@ -188,7 +193,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator CONTAINS_NOT = new DefaultSearchOperator("!#", "containsNot") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator CONTAINS_NOT = new DefaultSearchOperator("!#", "containsNot", false) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = 2110261744483750112L;
 
@@ -201,7 +206,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator LESS_THAN = new DefaultSearchOperator("<", "lessThan") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator LESS_THAN = new DefaultSearchOperator("<", "lessThan", true) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = -8353909321259706543L;
 
@@ -214,7 +219,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator LESS_OR_EQUAL = new DefaultSearchOperator("<=", "lessOrEqual") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator LESS_OR_EQUAL = new DefaultSearchOperator("<=", "lessOrEqual", true) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = 6982415206383632031L;
 
@@ -227,7 +232,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator GREATER_THAN = new DefaultSearchOperator(">", "greaterThan") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator GREATER_THAN = new DefaultSearchOperator(">", "greaterThan", true) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = -3748593349088379755L;
 
@@ -240,7 +245,7 @@ public abstract class DefaultSearchOperator extends SearchOperator {
 		}
 	};
 
-	public static final SearchOperator GREATER_OR_EQUAL = new DefaultSearchOperator(">=", "greaterOrEqual") { //$NON-NLS-1$ //$NON-NLS-2$
+	public static final SearchOperator GREATER_OR_EQUAL = new DefaultSearchOperator(">=", "greaterOrEqual", true) { //$NON-NLS-1$ //$NON-NLS-2$
 
 		private static final long serialVersionUID = 5164052048370243973L;
 

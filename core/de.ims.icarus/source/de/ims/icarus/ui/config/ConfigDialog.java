@@ -139,6 +139,7 @@ import de.ims.icarus.util.collections.CollectionUtils;
  * @author Gregor Thiele
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ConfigDialog extends JDialog implements ConfigConstants {
 
 	private static final long serialVersionUID = 6372741052385278814L;
@@ -2826,7 +2827,7 @@ public class ConfigDialog extends JDialog implements ConfigConstants {
 	                 * we're going to change the JOptionPane's
 	                 * value property.
 	                 */
-	                    optionPane.setValue(new Integer(
+	                    optionPane.setValue(Integer.valueOf(
 	                                        JOptionPane.CLOSED_OPTION));
 	            }
 	        });

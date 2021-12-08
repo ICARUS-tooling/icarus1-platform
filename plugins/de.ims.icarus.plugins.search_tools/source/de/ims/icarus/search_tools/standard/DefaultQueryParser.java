@@ -681,8 +681,9 @@ public class DefaultQueryParser {
 		}
 		skipWS();
 
-		// Parse value
+		// Parse value (for now we can't support floating point data here)
 		Object value = parseText();
+//		Object value = parseValue(operator.supportsNumbers());
 
 		if(SearchManager.isGroupingOperator(operator)) {
 			value = Integer.parseInt((String)value)-1;
@@ -692,6 +693,45 @@ public class DefaultQueryParser {
 		}
 
 		nodeStack.pushConstraint(new DefaultConstraint(token, value, operator, specifier));
+	}
+	
+	private static boolean isNumberBegin(char c) {
+		return c=='+' || c=='-' || Character.isDigit(c);
+	}
+	
+	private static boolean isNumberFragment(char c) {
+		return c=='.' || Character.isDigit(c);
+	}
+	
+	protected Object parseValue(boolean isNumberAllowed) throws ParseException {
+		if(isNumberAllowed && isNumberBegin(current())) {
+			buffer.setLength(0);
+
+			while(!isEOS()) {
+				char c = current();
+
+				if(isLegalId(c)) {
+					buffer.append(c);
+				} else {
+					break;
+				}
+
+				if(!hasNext()) {
+					break;
+				}
+
+				next();
+			}
+
+			if(buffer.length()==0)
+				throw new ParseException(errorMessage(
+						"Unexpected character at index "+index+" - expected alpha-numeric character [a-zA-Z0-9] or part of a floating point number"), index); //$NON-NLS-1$ //$NON-NLS-2$
+
+			String value = buffer.toString();
+			//TODO we need to find a way to decide the best number type here
+		}
+		
+		return parseText();
 	}
 
 	protected void parseProperties() throws ParseException {

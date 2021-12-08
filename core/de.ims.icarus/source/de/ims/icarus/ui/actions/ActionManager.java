@@ -391,7 +391,7 @@ public class ActionManager {
 		String mnemonic = attr.getValue(MNEMONIC_INDEX);
 		if (mnemonic != null && !mnemonic.equals("")) { //$NON-NLS-1$
 			action.putValue(Action.MNEMONIC_KEY,
-					new Integer(mnemonic.charAt(0)));
+					Integer.valueOf(mnemonic.charAt(0)));
 		}
 		String accel = attr.getValue(ACCEL_INDEX);
 		if (accel != null && !accel.equals("")) { //$NON-NLS-1$

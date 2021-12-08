@@ -230,21 +230,7 @@ public final class ClassUtils {
 		final Trace trace = new Trace(clazz, true);
 		trace.visit(obj1);
 		try {
-			return AccessController.doPrivileged(new PrivilegedExceptionAction<Boolean>() {
-
-				@Override
-				public Boolean run() throws Exception {
-					return getChecker(clazz).equals(trace, obj1, obj2);
-				}
-			});
-		} catch (PrivilegedActionException e) {
-			Exception cause = e.getException();
-			if(cause instanceof IllegalAccessException) {
-				throw (IllegalAccessException) cause;
-			} else if(cause instanceof RuntimeException) {
-				throw (RuntimeException) cause;
-			} else
-				throw new CorruptedStateException("Unexpected exception from privileged invocation", cause); //$NON-NLS-1$
+			return getChecker(clazz).equals(trace, obj1, obj2);
 		} finally {
 			trace.leave(obj1);
 		}
@@ -260,20 +246,7 @@ public final class ClassUtils {
 		final Trace trace = new Trace(clazz, true);
 		trace.visit(obj1);
 		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Boolean>() {
-
-				@Override
-				public Boolean run() throws Exception {
-					return getChecker(clazz).equals(trace, obj1, obj2);
-				}
-			});
-		} catch (PrivilegedActionException e) {
-			Exception cause = e.getException();
-			if(cause instanceof IllegalAccessException) {
-				throw (IllegalAccessException) cause;
-			} else if(cause instanceof RuntimeException) {
-				throw (RuntimeException) cause;
-			}
+			getChecker(clazz).equals(trace, obj1, obj2);
 		} finally {
 			trace.leave(obj1);
 		}
@@ -398,9 +371,7 @@ public final class ClassUtils {
 
 				Class<?> type = field.getType();
 
-				if(!field.isAccessible()) {
-					field.setAccessible(true);
-				}
+				field.setAccessible(true);
 
 				if(type.isPrimitive()) {
 					fieldHandlers.add(new PrimitiveFieldHandler(field));
