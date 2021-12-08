@@ -625,7 +625,7 @@ public final class DirndlIOUtils implements ProsodyConstants {
 				accentExcursion = ConfigRegistry.getGlobalRegistry().getInteger(
 						"plugins.prosody.prosodyReader.accentExcursion"); //$NON-NLS-1$
 				onlyConsiderStressedSylables = ConfigRegistry.getGlobalRegistry().getBoolean(
-						"plugins.prosody.prosodyReader.onlyConsiderStressedSylables"); //$NON-NLS-1$
+						"plugins.prosody.prosodyReader.onlyConsiderStressedSyllables"); //$NON-NLS-1$
 			}
 		}
 
