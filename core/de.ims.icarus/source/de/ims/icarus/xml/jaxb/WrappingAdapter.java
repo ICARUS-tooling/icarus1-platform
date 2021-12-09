@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.xml.jaxb;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * @author Markus Gärtner
@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class WrappingAdapter extends XmlAdapter<Object, Object> {
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
 	public Object unmarshal(Object v) throws Exception {
@@ -44,7 +44,7 @@ public class WrappingAdapter extends XmlAdapter<Object, Object> {
 	}
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
 	public Object marshal(Object v) throws Exception {

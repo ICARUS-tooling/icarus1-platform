@@ -23,7 +23,7 @@ Use top-level project build file to build application.
 			<fileset dir="${basedir}/classes" includes="**/*" />
 		</delete>
 		<manifest file="${basedir}/manifest.mf">
-			<attribute name="Class-Path" value="jpf.jar jgoodies-common-1.6.0.jar jgoodies-forms-1.7.1.jar trove-3.0.3.jar commons-collections4-4.0.jar javax.activation-1.2.0 jaxb-api-2.3.1.jar jaxb-core-2.3.0.1.jar jaxb-runtime-2.3.1.jar" />
+			<attribute name="Class-Path" value="jpf.jar jgoodies-common-1.6.0.jar jgoodies-forms-1.7.1.jar trove-3.0.3.jar commons-collections4-4.0.jar javax.activation-1.2.0 jakarta.xml.bind-api-3.0.1.jar jakarta.activation-api-2.0.1.jar jaxb-core-3.0.1.jar jaxb-impl-3.0.1.jar" />
 			<attribute name="Main-Class" value="${core.main-class}" />
 			<attribute name="SplashScreen-Image" value="${core.splash-image}" />
 			<attribute name="Implementation-Version" value="${implementation.version}" />
@@ -35,6 +35,8 @@ Use top-level project build file to build application.
 			destdir="${basedir}/classes" 
 			debug="${compile.debug}"
 			deprecation="${compile.deprecation}"
+			target="${compile.target-vm}"
+			source="${compile.source-vm}"
 			optimize="${compile.optimize}"
 			encoding="UTF-8"
 			includeantruntime="false"
@@ -59,9 +61,10 @@ Use top-level project build file to build application.
 		<copy todir="${build.home}/lib" file="${lib.home}/trove-3.0.3.jar" overwrite="true"/>
 		<copy todir="${build.home}/lib" file="${lib.home}/commons-collections4-4.0.jar" overwrite="true"/>
 		<copy todir="${build.home}/lib" file="${lib.home}/javax.activation-1.2.0.jar" overwrite="true"/>
-		<copy todir="${build.home}/lib" file="${lib.home}/jaxb-api-2.3.1.jar" overwrite="true"/>
-		<copy todir="${build.home}/lib" file="${lib.home}/jaxb-core-2.3.0.1.jar" overwrite="true"/>
-		<copy todir="${build.home}/lib" file="${lib.home}/jaxb-runtime-2.3.1.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jakarta.xml.bind-api-3.0.1.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jakarta.activation-api-2.0.1.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jaxb-core-3.0.1.jar" overwrite="true"/>
+		<copy todir="${build.home}/lib" file="${lib.home}/jaxb-impl-3.0.1.jar" overwrite="true"/>
 		<jar jarfile="${build.home}/lib/${core.jar.name}" basedir="${basedir}/classes" 
 			index="true" manifest="${basedir}/manifest.mf" />
 	</target>

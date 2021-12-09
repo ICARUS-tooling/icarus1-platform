@@ -28,7 +28,7 @@ package de.ims.icarus.xml.jaxb;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import de.ims.icarus.xml.jaxb.JAXBUtils.EntryImp;
 import de.ims.icarus.xml.jaxb.JAXBUtils.MapImp;
@@ -52,7 +52,7 @@ import de.ims.icarus.xml.jaxb.JAXBUtils.MapImp;
 public class MapAdapter<K, V> extends XmlAdapter<MapImp<K, V>, Map<K, V>> {
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
 	public Map<K, V> unmarshal(MapImp<K, V> v) throws Exception {
@@ -69,7 +69,7 @@ public class MapAdapter<K, V> extends XmlAdapter<MapImp<K, V>, Map<K, V>> {
 	}
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
 	public MapImp<K, V> marshal(Map<K, V> v) throws Exception {

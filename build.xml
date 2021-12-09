@@ -38,6 +38,8 @@
 	<property name="nodoc" value="true" />
 	
 	<!--================= COMPILER OPTIONS =================-->
+	<property name="compile.source-vm" value="1.8"/>
+	<property name="compile.target-vm" value="1.8"/>
 	<property name="compile.debug"       value="true"/>
 	<property name="compile.deprecation" value="false"/>
 	<property name="compile.optimize"    value="true"/>
@@ -50,9 +52,10 @@
 		<pathelement location="${lib.home}/jpf.jar" />
 		<pathelement location="${lib.home}/trove-3.0.3.jar" />
 		<pathelement location="${lib.home}/javax.activation-1.2.0.jar" />
-		<pathelement location="${lib.home}/jaxb-api-2.3.1.jar" />
-		<pathelement location="${lib.home}/jaxb-core-2.3.0.1.jar" />
-		<pathelement location="${lib.home}/jaxb-runtime-2.3.1.jar" />
+		<pathelement location="${lib.home}/jakarta.activation-api-2.0.1.jar" />
+		<pathelement location="${lib.home}/jakarta.xml.bind-api-3.0.1.jar" />
+		<pathelement location="${lib.home}/jaxb-core-3.0.1.jar" />
+		<pathelement location="${lib.home}/jaxb-impl-3.0.1.jar" />
 	</path>
 
 	<!--================= CLASSPATHES =================-->
@@ -128,6 +131,8 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 		<javac destdir="${dir}/classes"
 			srcdir="${dir}/source"
 		    classpathref="classpath"
+			target="${compile.target-vm}"
+			source="${compile.source-vm}"
 			debug="${compile.debug}"
 			deprecation="${compile.deprecation}"
 			optimize="${compile.optimize}"

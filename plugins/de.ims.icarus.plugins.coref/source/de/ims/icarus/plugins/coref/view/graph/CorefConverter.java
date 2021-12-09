@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.plugins.coref.view.graph;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import de.ims.icarus.language.coref.CorefMember;
 import de.ims.icarus.language.coref.Edge;
@@ -39,7 +39,7 @@ import de.ims.icarus.language.coref.Span;
 public class CorefConverter extends XmlAdapter<String, CorefMember> {
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
 	public CorefMember unmarshal(String v) throws Exception {
@@ -51,7 +51,7 @@ public class CorefConverter extends XmlAdapter<String, CorefMember> {
 	}
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
 	public String marshal(CorefMember v) throws Exception {

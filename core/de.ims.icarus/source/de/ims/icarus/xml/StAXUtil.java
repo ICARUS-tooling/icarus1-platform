@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.xml;
 
-import javax.xml.bind.ValidationException;
+import jakarta.xml.bind.ValidationException;
 import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;

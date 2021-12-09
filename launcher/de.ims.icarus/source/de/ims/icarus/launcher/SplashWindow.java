@@ -86,7 +86,7 @@ public class SplashWindow {
 				Path dir = file.getParent();
 
 				int urlCount = 1;
-				URL[] urls = new URL[10];
+				URL[] urls = new URL[20];
 				urls[0] = file.toUri().toURL();
 
 				try {

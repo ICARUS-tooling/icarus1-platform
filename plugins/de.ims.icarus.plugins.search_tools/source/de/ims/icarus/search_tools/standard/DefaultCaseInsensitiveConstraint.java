@@ -25,9 +25,9 @@
  */
 package de.ims.icarus.search_tools.standard;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 import de.ims.icarus.search_tools.SearchOperator;
 

@@ -34,6 +34,8 @@ Use top-level project build file to build application.
 		<javac srcdir="${basedir}/source" 
 			destdir="${basedir}/classes"
 			debug="${compile.debug}"
+			target="${compile.target-vm}"
+			source="${compile.source-vm}"
 			deprecation="${compile.deprecation}"
 			optimize="${compile.optimize}"
 			encoding="UTF-8"

@@ -26,7 +26,7 @@
 package de.ims.icarus.plugins.coref.view.grid;
 
 import javax.swing.Icon;
-import javax.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnum;
 
 import de.ims.icarus.language.coref.Cluster;
 import de.ims.icarus.language.coref.CoreferenceUtils;

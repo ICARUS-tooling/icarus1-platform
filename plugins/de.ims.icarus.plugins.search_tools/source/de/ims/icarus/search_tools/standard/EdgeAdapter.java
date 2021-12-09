@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.search_tools.standard;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import de.ims.icarus.search_tools.SearchEdge;
 
@@ -38,7 +38,7 @@ import de.ims.icarus.search_tools.SearchEdge;
 public class EdgeAdapter extends XmlAdapter<DefaultGraphEdge, SearchEdge> {
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
 	public SearchEdge unmarshal(DefaultGraphEdge v) throws Exception {
@@ -46,7 +46,7 @@ public class EdgeAdapter extends XmlAdapter<DefaultGraphEdge, SearchEdge> {
 	}
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
 	public DefaultGraphEdge marshal(SearchEdge v) throws Exception {

@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.search_tools.standard;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import de.ims.icarus.search_tools.SearchNode;
 
@@ -38,7 +38,7 @@ import de.ims.icarus.search_tools.SearchNode;
 public class NodeAdapter extends XmlAdapter<DefaultGraphNode, SearchNode> {
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
 	public SearchNode unmarshal(DefaultGraphNode v) throws Exception {
@@ -46,7 +46,7 @@ public class NodeAdapter extends XmlAdapter<DefaultGraphNode, SearchNode> {
 	}
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
 	public DefaultGraphNode marshal(SearchNode v) throws Exception {

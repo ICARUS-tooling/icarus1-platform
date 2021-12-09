@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.search_tools.standard;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import de.ims.icarus.search_tools.SearchConstraint;
 
@@ -38,7 +38,7 @@ import de.ims.icarus.search_tools.SearchConstraint;
 public class ConstraintAdapter extends XmlAdapter<DefaultConstraint, SearchConstraint> {
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
 	public SearchConstraint unmarshal(DefaultConstraint v) throws Exception {
@@ -46,7 +46,7 @@ public class ConstraintAdapter extends XmlAdapter<DefaultConstraint, SearchConst
 	}
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
 	public DefaultConstraint marshal(SearchConstraint v) throws Exception {

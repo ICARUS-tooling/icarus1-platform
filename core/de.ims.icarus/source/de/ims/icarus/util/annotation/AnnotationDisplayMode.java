@@ -26,7 +26,7 @@
 package de.ims.icarus.util.annotation;
 
 import javax.swing.Icon;
-import javax.xml.bind.annotation.XmlEnum;
+import jakarta.xml.bind.annotation.XmlEnum;
 
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;

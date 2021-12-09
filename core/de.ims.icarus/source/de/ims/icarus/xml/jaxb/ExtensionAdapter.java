@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.xml.jaxb;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import org.java.plugin.registry.Extension;
 

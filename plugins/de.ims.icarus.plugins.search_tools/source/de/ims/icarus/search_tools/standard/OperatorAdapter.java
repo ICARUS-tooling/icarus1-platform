@@ -25,7 +25,7 @@
  */
 package de.ims.icarus.search_tools.standard;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import de.ims.icarus.search_tools.SearchOperator;
 
@@ -38,7 +38,7 @@ import de.ims.icarus.search_tools.SearchOperator;
 public class OperatorAdapter extends XmlAdapter<String, SearchOperator> {
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
 	 */
 	@Override
 	public SearchOperator unmarshal(String v) throws Exception {
@@ -46,7 +46,7 @@ public class OperatorAdapter extends XmlAdapter<String, SearchOperator> {
 	}
 
 	/**
-	 * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+	 * @see jakarta.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
 	 */
 	@Override
 	public String marshal(SearchOperator v) throws Exception {
