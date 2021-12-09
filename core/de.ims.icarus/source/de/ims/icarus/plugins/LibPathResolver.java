@@ -41,12 +41,31 @@ public class LibPathResolver extends StandardPathResolver {
 	public LibPathResolver() {
 		// no-op
 	}
+	
+//	@Override
+//	public URL resolvePath(Identity identity, String path) {
+//		URL url = super.resolvePath(identity, path);
+//		if(identity instanceof Library) {
+//			String newUrl = stripJarContext(url.toExternalForm());
+//			try {
+//				url = new URL(newUrl);
+//			} catch (MalformedURLException e) {
+//	            log.error("can't create URL: " + newUrl); //$NON-NLS-1$
+//	            throw new IllegalArgumentException("path " + path //$NON-NLS-1$
+//	                    + " in context of " + identity //$NON-NLS-1$
+//	                    + " cause creation of malformed URL"); //$NON-NLS-1$
+//			}
+//		}
+//		
+//		return url;
+//	}
 
 	@Override
 	protected URL resolvePath(URL baseUrl, String path) {
 		String context = baseUrl.toExternalForm();
 		if(path.startsWith("lib/") && context.endsWith("!/")) {  //$NON-NLS-1$//$NON-NLS-2$
 			context = stripJarContext(context);
+			@SuppressWarnings("resource")
 			int offset = context.lastIndexOf(FileSystems.getDefault().getSeparator());
 			if(offset==-1) {
 				offset = context.lastIndexOf('/');
@@ -60,11 +79,27 @@ public class LibPathResolver extends StandardPathResolver {
 				e.printStackTrace();
 			}
 		}
+		
+//        try {
+//        	baseUrl = new URL(stripJarContext(baseUrl.toExternalForm()));
+//        	
+//            if ("".equals(path) || "/".equals(path)) { //$NON-NLS-1$ //$NON-NLS-2$
+//                return baseUrl;
+//            }
+//            return new URL(baseUrl, path);
+//        } catch (MalformedURLException mue) {
+//            log.error("can't create URL in context of " + baseUrl //$NON-NLS-1$
+//                    + " and path " + path, mue); //$NON-NLS-1$
+//            throw new IllegalArgumentException("path " + path //$NON-NLS-1$
+//                    + " in context of " + baseUrl //$NON-NLS-1$
+//                    + " cause creation of malformed URL"); //$NON-NLS-1$
+//        }
 
 		return super.resolvePath(baseUrl, path);
 	}
 
 	protected String stripJarContext(String context) {
+//		context = context.replace("!/", "/");  //$NON-NLS-1$//$NON-NLS-2$
 		int beginIndex = context.startsWith("jar:") ? 4 : 0; //$NON-NLS-1$
 		int endIndex = context.length();
 		if(context.endsWith("!/")) { //$NON-NLS-1$
