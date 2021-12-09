@@ -25,11 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody.annotation;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +45,10 @@ import de.ims.icarus.search_tools.tree.DummyGroupConstraint;
 import de.ims.icarus.search_tools.tree.Matcher;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.data.ContentType;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 
 
 /**

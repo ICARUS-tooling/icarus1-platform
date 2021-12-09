@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.ui.helper;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 
@@ -37,6 +34,8 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 import de.ims.icarus.util.Filter;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 
 /**

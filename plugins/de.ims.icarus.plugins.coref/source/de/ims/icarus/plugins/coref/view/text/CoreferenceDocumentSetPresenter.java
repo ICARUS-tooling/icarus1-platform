@@ -42,9 +42,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.DocumentSet;
-import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.text.CoreferenceDocument;
 import de.ims.icarus.logging.LoggerFactory;
 import de.ims.icarus.plugins.coref.view.DocumentListCellRenderer;

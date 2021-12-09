@@ -25,12 +25,11 @@
  */
 package de.ims.icarus.util;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.util.Collection;
 
 import de.ims.icarus.util.collections.CollectionUtils;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * @author Markus Gärtner

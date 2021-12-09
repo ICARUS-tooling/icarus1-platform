@@ -25,12 +25,12 @@
  */
 package de.ims.icarus.util;
 
+import java.awt.Color;
+
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-
-import java.awt.Color;
 
 /**
  *

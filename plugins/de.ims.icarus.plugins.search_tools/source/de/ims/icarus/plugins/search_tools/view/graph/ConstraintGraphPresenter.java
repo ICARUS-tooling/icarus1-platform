@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.search_tools.view.graph;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -89,6 +86,8 @@ import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.data.DataConversionException;
 import de.ims.icarus.util.data.DataConverter;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * @author Markus Gärtner

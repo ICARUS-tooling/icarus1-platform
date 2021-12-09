@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.ui.dialog;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -55,6 +52,8 @@ import de.ims.icarus.util.KeyValuePair;
 import de.ims.icarus.util.MutablePrimitives.MutableBoolean;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.strings.StringUtil;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 
 /**

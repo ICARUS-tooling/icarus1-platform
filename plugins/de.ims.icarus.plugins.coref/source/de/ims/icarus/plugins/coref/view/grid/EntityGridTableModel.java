@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.coref.view.grid;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,6 +54,8 @@ import de.ims.icarus.language.coref.annotation.CoreferenceDocumentHighlighting;
 import de.ims.icarus.util.Installable;
 import de.ims.icarus.util.annotation.AnnotationController;
 import de.ims.icarus.util.annotation.AnnotationManager;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * @author Markus Gärtner

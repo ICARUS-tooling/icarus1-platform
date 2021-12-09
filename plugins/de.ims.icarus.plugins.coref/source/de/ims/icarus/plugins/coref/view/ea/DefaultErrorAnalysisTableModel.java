@@ -34,10 +34,10 @@ import java.util.Set;
 
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
-import de.ims.icarus.language.coref.DocumentData;
-import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.DefaultCoreferenceData;
 import de.ims.icarus.language.coref.DefaultCoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.Edge;
 import de.ims.icarus.language.coref.EdgeSet;
 import de.ims.icarus.language.coref.Span;

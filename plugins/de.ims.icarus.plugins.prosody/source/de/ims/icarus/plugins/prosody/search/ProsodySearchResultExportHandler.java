@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody.search;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -109,6 +106,8 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.ToolException;
 import de.ims.icarus.util.strings.StringUtil;
 import de.ims.icarus.util.strings.pattern.TextSource;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * @author Markus Gärtner

@@ -26,8 +26,8 @@
 package de.ims.icarus.language.coref.annotation;
 
 import de.ims.icarus.language.LanguageConstants;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.search_tools.result.ResultEntry;
 import de.ims.icarus.search_tools.tree.AbstractTreeResultAnnotator;

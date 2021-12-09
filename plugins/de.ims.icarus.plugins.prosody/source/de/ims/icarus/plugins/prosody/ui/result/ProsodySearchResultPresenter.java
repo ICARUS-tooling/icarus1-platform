@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody.ui.result;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -92,6 +89,8 @@ import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.id.Identity;
 import de.ims.icarus.util.strings.StringUtil;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * @author Markus Gärtner

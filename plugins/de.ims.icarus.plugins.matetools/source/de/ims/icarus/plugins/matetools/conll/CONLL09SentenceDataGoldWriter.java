@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.matetools.conll;
 
-import is2.data.SentenceData09;
-import is2.io.CONLLWriter09;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.logging.Level;
@@ -44,6 +41,8 @@ import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
+import is2.data.SentenceData09;
+import is2.io.CONLLWriter09;
 
 
 /**

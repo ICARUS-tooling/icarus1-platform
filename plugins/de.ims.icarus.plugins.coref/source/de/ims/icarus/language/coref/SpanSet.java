@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.language.coref;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,6 +36,8 @@ import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * @author Markus Gärtner

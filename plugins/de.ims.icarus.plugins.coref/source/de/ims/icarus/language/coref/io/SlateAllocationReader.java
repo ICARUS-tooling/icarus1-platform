@@ -25,11 +25,6 @@
  */
 package de.ims.icarus.language.coref.io;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TCustomHashSet;
-import gnu.trove.strategy.IdentityHashingStrategy;
-
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +53,10 @@ import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.strings.StringUtil;
 import de.ims.icarus.xml.ContentHandler;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TCustomHashSet;
+import gnu.trove.strategy.IdentityHashingStrategy;
 
 /**
  * @author Markus Gärtner

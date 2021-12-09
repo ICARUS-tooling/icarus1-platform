@@ -34,8 +34,8 @@ import java.util.logging.Level;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.language.coref.CoreferenceAllocation;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.language.coref.SpanSet;
 import de.ims.icarus.language.coref.annotation.AnnotatedCoreferenceDocumentData;

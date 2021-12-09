@@ -25,8 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody.ui.result;
 
-import gnu.trove.list.TIntList;
-
 import java.awt.Component;
 
 import javax.swing.JPanel;
@@ -36,6 +34,7 @@ import de.ims.icarus.ui.view.AWTPresenter;
 import de.ims.icarus.ui.view.UnsupportedPresentationDataException;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.data.ContentType;
+import gnu.trove.list.TIntList;
 
 /**
  * @author Markus Gärtner

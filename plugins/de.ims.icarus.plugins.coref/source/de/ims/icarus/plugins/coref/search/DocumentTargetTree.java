@@ -25,10 +25,6 @@
  */
 package de.ims.icarus.plugins.coref.search;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import de.ims.icarus.language.LanguageConstants;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
 import de.ims.icarus.language.coref.CoreferenceData;
@@ -43,6 +39,10 @@ import de.ims.icarus.search_tools.tree.AbstractTargetTree;
 import de.ims.icarus.search_tools.tree.CompactTree;
 import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.Options;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * @author Markus Gärtner

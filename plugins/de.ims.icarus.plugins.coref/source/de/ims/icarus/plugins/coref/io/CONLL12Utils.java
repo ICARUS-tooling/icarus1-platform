@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.coref.io;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -52,6 +49,8 @@ import de.ims.icarus.util.strings.CharTableBuffer.RowAction;
 import de.ims.icarus.util.strings.CharTableBuffer.RowFilter;
 import de.ims.icarus.util.strings.StringPrimitives;
 import de.ims.icarus.util.strings.StringUtil;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 
 /**

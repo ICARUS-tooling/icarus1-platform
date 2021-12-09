@@ -30,8 +30,8 @@ import javax.swing.JComponent;
 import com.mxgraph.model.mxIGraphModel;
 
 import de.ims.icarus.language.LanguageUtils;
-import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.DependencyNodeData;
+import de.ims.icarus.language.dependency.DependencySentenceData;
 import de.ims.icarus.language.dependency.MutableDependencyData;
 import de.ims.icarus.language.dependency.MutableDependencyData.DependencyDataEntry;
 import de.ims.icarus.plugins.jgraph.view.HeavyWeightCellEditor;

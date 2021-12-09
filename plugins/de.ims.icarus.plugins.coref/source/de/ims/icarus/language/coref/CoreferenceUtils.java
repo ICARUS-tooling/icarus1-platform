@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.language.coref;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,6 +68,8 @@ import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.location.Location;
 import de.ims.icarus.util.location.UnsupportedLocationException;
 import de.ims.icarus.util.strings.StringUtil;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 
 /**

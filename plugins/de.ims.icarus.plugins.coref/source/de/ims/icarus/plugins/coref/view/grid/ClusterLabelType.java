@@ -29,8 +29,8 @@ import javax.swing.Icon;
 import javax.xml.bind.annotation.XmlEnum;
 
 import de.ims.icarus.language.coref.Cluster;
-import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.CoreferenceUtils;
+import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.Span;
 import de.ims.icarus.resources.ResourceManager;
 import de.ims.icarus.ui.IconRegistry;

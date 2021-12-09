@@ -25,10 +25,6 @@
  */
 package de.ims.icarus.search_tools.standard;
 
-import gnu.trove.TIntCollection;
-import gnu.trove.impl.sync.TSynchronizedIntSet;
-import gnu.trove.set.hash.TIntHashSet;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -71,6 +67,9 @@ import de.ims.icarus.util.Orientation;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.ContentTypeRegistry;
 import de.ims.icarus.util.data.DataList;
+import gnu.trove.TIntCollection;
+import gnu.trove.impl.sync.TSynchronizedIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * @author Markus Gärtner

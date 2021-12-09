@@ -25,8 +25,6 @@
  */
 package de.ims.icarus.ui.table;
 
-import gnu.trove.map.hash.THashMap;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +34,7 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import de.ims.icarus.resources.ResourceManager;
+import gnu.trove.map.hash.THashMap;
 
 
 /**

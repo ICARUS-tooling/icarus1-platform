@@ -26,7 +26,6 @@
 package de.ims.icarus.search_tools.result;
 
 import static de.ims.icarus.search_tools.util.SearchUtils.checkResultEntry;
-import gnu.trove.set.hash.THashSet;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ import de.ims.icarus.search_tools.standard.GroupCache;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.data.ContentType;
 import de.ims.icarus.util.data.DataList;
+import gnu.trove.set.hash.THashSet;
 
 /**
  * @author Markus Gärtner

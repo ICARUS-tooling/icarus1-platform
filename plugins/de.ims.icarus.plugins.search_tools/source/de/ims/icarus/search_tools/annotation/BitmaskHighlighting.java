@@ -25,11 +25,6 @@
  */
 package de.ims.icarus.search_tools.annotation;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +38,10 @@ import java.util.regex.Pattern;
 import de.ims.icarus.search_tools.Grouping;
 import de.ims.icarus.search_tools.SearchConstraint;
 import de.ims.icarus.search_tools.SearchManager;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.TObjectLongMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 
 /**
  * @author Markus Gärtner

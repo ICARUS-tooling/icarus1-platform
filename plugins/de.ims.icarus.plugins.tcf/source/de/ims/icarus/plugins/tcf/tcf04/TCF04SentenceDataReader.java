@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.plugins.tcf.tcf04;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,6 +53,8 @@ import de.tuebingen.uni.sfs.wlf1.tc.api.Feature;
 import de.tuebingen.uni.sfs.wlf1.tc.api.Sentence;
 import de.tuebingen.uni.sfs.wlf1.tc.api.Token;
 import de.tuebingen.uni.sfs.wlf1.tc.xb.TextCorpusLayerTag;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 
 

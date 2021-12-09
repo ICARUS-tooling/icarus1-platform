@@ -25,13 +25,12 @@
  */
 package de.ims.icarus.language.treebank;
 
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import de.ims.icarus.language.SentenceData;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 
 
 /**

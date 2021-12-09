@@ -25,11 +25,6 @@
  */
 package de.ims.icarus.search_tools.tree;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
-
 import java.util.List;
 
 import de.ims.icarus.language.LanguageUtils;
@@ -40,6 +35,10 @@ import de.ims.icarus.search_tools.annotation.BitmaskHighlighting;
 import de.ims.icarus.search_tools.result.Hit;
 import de.ims.icarus.search_tools.util.SearchUtils;
 import de.ims.icarus.util.CorruptedStateException;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 
 
 /**

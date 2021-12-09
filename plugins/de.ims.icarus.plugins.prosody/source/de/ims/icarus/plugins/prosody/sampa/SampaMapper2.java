@@ -25,13 +25,6 @@
  */
 package de.ims.icarus.plugins.prosody.sampa;
 
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.set.TCharSet;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TCharHashSet;
-import gnu.trove.set.hash.TLongHashSet;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +35,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.ims.icarus.io.IOUtil;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.TCharSet;
+import gnu.trove.set.TLongSet;
+import gnu.trove.set.hash.TCharHashSet;
+import gnu.trove.set.hash.TLongHashSet;
 
 /**
  * @author Markus Gärtner

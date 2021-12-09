@@ -25,8 +25,6 @@
  */
 package de.ims.icarus.util.collections;
 
-import gnu.trove.TLongCollection;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -58,6 +56,7 @@ import java.util.WeakHashMap;
 
 import de.ims.icarus.util.Exceptions;
 import de.ims.icarus.util.Filter;
+import gnu.trove.TLongCollection;
 
 /**
  * @author Markus Gärtner

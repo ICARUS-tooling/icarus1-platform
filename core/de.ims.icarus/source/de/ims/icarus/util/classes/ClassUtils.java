@@ -16,9 +16,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,7 +31,6 @@ import java.util.WeakHashMap;
 import org.java.plugin.registry.Extension;
 
 import de.ims.icarus.plugins.PluginUtil;
-import de.ims.icarus.util.CorruptedStateException;
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.collections.IdentityHashSet;
 

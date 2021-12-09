@@ -27,9 +27,9 @@ package de.ims.icarus.language.coref.io;
 
 import de.ims.icarus.io.Reader;
 import de.ims.icarus.language.coref.CoreferenceAllocation;
+import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.language.coref.DocumentData;
 import de.ims.icarus.language.coref.DocumentSet;
-import de.ims.icarus.language.coref.CoreferenceUtils;
 import de.ims.icarus.plugins.coref.io.CONLL12DocumentReader;
 import de.ims.icarus.util.Options;
 import de.ims.icarus.util.location.Location;

@@ -27,8 +27,8 @@ package de.ims.icarus.plugins.prosody;
 
 import de.ims.icarus.language.AvailabilityObserver;
 import de.ims.icarus.language.DataType;
-import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.language.coref.DefaultCoreferenceDocumentData;
+import de.ims.icarus.language.coref.DocumentSet;
 import de.ims.icarus.util.data.ContentType;
 
 /**

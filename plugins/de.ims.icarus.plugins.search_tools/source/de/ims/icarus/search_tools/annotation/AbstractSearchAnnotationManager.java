@@ -25,11 +25,11 @@
  */
 package de.ims.icarus.search_tools.annotation;
 
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import de.ims.icarus.util.annotation.Annotation;
 import de.ims.icarus.util.annotation.AnnotationDisplayMode;
 import de.ims.icarus.util.annotation.AnnotationManager;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * @author Markus Gärtner

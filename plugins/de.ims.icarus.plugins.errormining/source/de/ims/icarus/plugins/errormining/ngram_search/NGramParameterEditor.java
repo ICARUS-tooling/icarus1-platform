@@ -27,8 +27,6 @@ package de.ims.icarus.plugins.errormining.ngram_search;
 
 import java.awt.Component;
 
-import javax.swing.SpinnerNumberModel;
-
 import de.ims.icarus.plugins.errormining.ngram_tools.NGramParameters;
 import de.ims.icarus.ui.NumberDocument;
 import de.ims.icarus.ui.dialog.FormBuilder;

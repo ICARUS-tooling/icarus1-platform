@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.util.collections;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -38,6 +35,8 @@ import java.util.NoSuchElementException;
 import de.ims.icarus.util.mem.HeapMember;
 import de.ims.icarus.util.mem.Link;
 import de.ims.icarus.util.mem.Primitive;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * @author Markus Gärtner

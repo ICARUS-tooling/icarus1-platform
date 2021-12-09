@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.language;
 
-import gnu.trove.map.TMap;
-import gnu.trove.map.hash.THashMap;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -37,6 +34,8 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import de.ims.icarus.util.CompactProperties;
 import de.ims.icarus.util.mem.Link;
+import gnu.trove.map.TMap;
+import gnu.trove.map.hash.THashMap;
 
 /**
  * @author Markus Gärtner

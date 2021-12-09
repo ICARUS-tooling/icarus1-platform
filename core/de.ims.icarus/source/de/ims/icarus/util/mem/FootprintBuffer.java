@@ -25,9 +25,6 @@
  */
 package de.ims.icarus.util.mem;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
-
 import java.lang.reflect.Array;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,6 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.ims.icarus.util.collections.CollectionUtils;
 import de.ims.icarus.util.strings.StringUtil;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * @author Markus Gärtner
