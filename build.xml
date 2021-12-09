@@ -34,6 +34,8 @@
 	<property name="plugins.build" value="${build.home}/plugins" />
 	<property name="plugins.source" value="${source.home}/plugins" />
 	<property name="plugins.docs" value="${docs.home}/plugins" />
+
+	<property name="nodoc" value="true" />
 	
 	<!--================= COMPILER OPTIONS =================-->
 	<property name="compile.debug"       value="true"/>
@@ -219,7 +221,7 @@ dist-ims - same as 'dist' but with same additions as 'build-ims'
 		</switch>
 	</target>
 	
-	<target name="-docs" unless="nodoc">		
+	<target name="-docs" unless="${nodoc}">		
 		<ant dir="launcher/de.ims.icarus" target="docs" inheritrefs="true" />
 		<ant dir="core/de.ims.icarus" target="docs" inheritrefs="true" />
 
